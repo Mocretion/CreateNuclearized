@@ -1,0 +1,8 @@
+{
+	"parent": "create:block/encased_chain_drive/end_vertical",
+	"textures": {
+		"2": "createnuclearized:block/reactor_encased_chain_drive_end",
+		"particle": "createnuclearized:block/reactor_encased_chain_drive",
+		"side": "createnuclearized:block/reactor_encased_chain_drive"
+	}
+}

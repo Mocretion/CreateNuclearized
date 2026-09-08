@@ -1,0 +1,73 @@
+{
+  "variants": {
+    "facing=down,state=idle": {
+      "model": "createnuclearized:block/reactor_controller_idle",
+      "x": 90
+    },
+    "facing=down,state=running": {
+      "model": "createnuclearized:block/reactor_controller_running",
+      "x": 90
+    },
+    "facing=down,state=stopped": {
+      "model": "createnuclearized:block/reactor_controller",
+      "x": 90
+    },
+    "facing=east,state=idle": {
+      "model": "createnuclearized:block/reactor_controller_idle",
+      "y": 90
+    },
+    "facing=east,state=running": {
+      "model": "createnuclearized:block/reactor_controller_running",
+      "y": 90
+    },
+    "facing=east,state=stopped": {
+      "model": "createnuclearized:block/reactor_controller",
+      "y": 90
+    },
+    "facing=north,state=idle": {
+      "model": "createnuclearized:block/reactor_controller_idle"
+    },
+    "facing=north,state=running": {
+      "model": "createnuclearized:block/reactor_controller_running"
+    },
+    "facing=north,state=stopped": {
+      "model": "createnuclearized:block/reactor_controller"
+    },
+    "facing=south,state=idle": {
+      "model": "createnuclearized:block/reactor_controller_idle",
+      "y": 180
+    },
+    "facing=south,state=running": {
+      "model": "createnuclearized:block/reactor_controller_running",
+      "y": 180
+    },
+    "facing=south,state=stopped": {
+      "model": "createnuclearized:block/reactor_controller",
+      "y": 180
+    },
+    "facing=up,state=idle": {
+      "model": "createnuclearized:block/reactor_controller_idle",
+      "x": 270
+    },
+    "facing=up,state=running": {
+      "model": "createnuclearized:block/reactor_controller_running",
+      "x": 270
+    },
+    "facing=up,state=stopped": {
+      "model": "createnuclearized:block/reactor_controller",
+      "x": 270
+    },
+    "facing=west,state=idle": {
+      "model": "createnuclearized:block/reactor_controller_idle",
+      "y": 270
+    },
+    "facing=west,state=running": {
+      "model": "createnuclearized:block/reactor_controller_running",
+      "y": 270
+    },
+    "facing=west,state=stopped": {
+      "model": "createnuclearized:block/reactor_controller",
+      "y": 270
+    }
+  }
+}

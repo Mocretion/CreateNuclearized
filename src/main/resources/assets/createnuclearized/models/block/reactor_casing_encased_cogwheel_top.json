@@ -1,0 +1,11 @@
+{
+  "parent": "create:block/encased_cogwheel/block_top",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "casing": "createnuclearized:block/reactor_casing",
+    "particle": "createnuclearized:block/reactor_casing",
+    "side": "createnuclearized:block/reactor_encased_cogwheel_side",
+    "4": "createnuclearized:block/reactor_gearbox",
+    "1": "createnuclearized:block/reactor_casing"
+  }
+}

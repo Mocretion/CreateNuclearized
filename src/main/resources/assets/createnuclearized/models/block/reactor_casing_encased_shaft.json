@@ -1,0 +1,7 @@
+{
+  "parent": "create:block/encased_shaft/block",
+  "textures": {
+    "casing": "createnuclearized:block/reactor_casing",
+    "opening": "createnuclearized:block/reactor_gearbox"
+  }
+}

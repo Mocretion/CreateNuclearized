@@ -1,0 +1,8 @@
+{
+	"parent": "create:block/encased_chain_drive/single",
+	"textures": {
+		"1": "createnuclearized:block/reactor_gearbox",
+		"particle": "createnuclearized:block/reactor_encased_chain_drive",
+		"side": "createnuclearized:block/reactor_encased_chain_drive"
+	}
+}
