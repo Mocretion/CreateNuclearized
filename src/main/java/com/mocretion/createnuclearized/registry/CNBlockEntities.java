@@ -2,11 +2,20 @@ package com.mocretion.createnuclearized.registry;
 
 import static com.mocretion.createnuclearized.registry.CNRegistrate.REGISTRATE;
 
+import com.mocretion.createnuclearized.content.boiler.ContainedBlazeBurnerBlockEntity;
+import com.mocretion.createnuclearized.content.boiler.ContainedBlazeBurnerRenderer;
+import com.mocretion.createnuclearized.content.boiler.ExhaustHoodBlockEntity;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodBlockEntity;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodRenderer;
 import com.mocretion.createnuclearized.content.reactor.ReactorControllerBlockEntity;
 import com.mocretion.createnuclearized.content.reactor.ReactorFluidValveBlockEntity;
 import com.mocretion.createnuclearized.content.reactor.ReactorMonitorBlockEntity;
+import com.mocretion.createnuclearized.content.turbine.SteamInputValveBlockEntity;
+import com.mocretion.createnuclearized.content.turbine.TurbineControllerBlockEntity;
+import com.mocretion.createnuclearized.content.turbine.TurbineGeneratorBlockEntity;
+import com.mocretion.createnuclearized.content.turbine.TurbineRotorBlockEntity;
+import com.mocretion.createnuclearized.content.turbine.TurbineRotorRenderer;
+import com.mocretion.createnuclearized.content.turbine.TurbineRotorVisual;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.base.ShaftRenderer;
@@ -67,6 +76,42 @@ public final class CNBlockEntities {
             .visual(() -> SingleAxisRotatingVisual.of(AllPartialModels.SHAFT))
             .validBlock(CNBlocks.REACTOR_ENCASED_CHAIN_DRIVE)
             .renderer(() -> ShaftRenderer::new)
+            .register();
+
+    public static final BlockEntityEntry<TurbineControllerBlockEntity> TURBINE_CONTROLLER = REGISTRATE
+            .blockEntity("turbine_controller", TurbineControllerBlockEntity::new)
+            .validBlock(CNBlocks.TURBINE_CONTROLLER)
+            .register();
+
+    public static final BlockEntityEntry<SteamInputValveBlockEntity> STEAM_INPUT_VALVE = REGISTRATE
+            .blockEntity("steam_input_valve", SteamInputValveBlockEntity::new)
+            .validBlock(CNBlocks.STEAM_INPUT_VALVE)
+            .register();
+
+    public static final BlockEntityEntry<TurbineGeneratorBlockEntity> TURBINE_GENERATOR = REGISTRATE
+            .blockEntity("turbine_generator", TurbineGeneratorBlockEntity::new)
+            .validBlock(CNBlocks.TURBINE_GENERATOR)
+            .register();
+
+    // One type for all three rotor sizes; a Flywheel visual spins the OBJ around the axis (the renderer is the no Flywheel fallback)
+    // .visual has to be chained before .validBlocks; only the disc spins, the nacelle is drawn static (see TurbineRotorVisual)
+    public static final BlockEntityEntry<TurbineRotorBlockEntity> TURBINE_ROTOR = REGISTRATE
+            .blockEntity("turbine_rotor", TurbineRotorBlockEntity::new)
+            .visual(() -> TurbineRotorVisual::new)
+            .validBlocks(CNBlocks.TURBINE_ROTOR, CNBlocks.MEDIUM_TURBINE_ROTOR, CNBlocks.LARGE_TURBINE_ROTOR)
+            .renderer(() -> TurbineRotorRenderer::new)
+            .register();
+
+    public static final BlockEntityEntry<ContainedBlazeBurnerBlockEntity> CONTAINED_BLAZE_BURNER = REGISTRATE
+            .blockEntity("contained_blaze_burner", ContainedBlazeBurnerBlockEntity::new)
+            .validBlock(CNBlocks.CONTAINED_BLAZE_BURNER)
+            // Draws the blaze wearing the helmet (client only lambda body)
+            .renderer(() -> ContainedBlazeBurnerRenderer::new)
+            .register();
+
+    public static final BlockEntityEntry<ExhaustHoodBlockEntity> EXHAUST_HOOD = REGISTRATE
+            .blockEntity("exhaust_hood", ExhaustHoodBlockEntity::new)
+            .validBlock(CNBlocks.EXHAUST_HOOD)
             .register();
 
     private CNBlockEntities() {}

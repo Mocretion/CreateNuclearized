@@ -2,6 +2,8 @@ package com.mocretion.createnuclearized;
 
 import org.slf4j.Logger;
 
+import com.mocretion.createnuclearized.content.fluid.DepletedSaltBucketWrapper;
+import com.mocretion.createnuclearized.content.reactor.ReactorFuel;
 import com.mocretion.createnuclearized.registry.CNBlockEntities;
 import com.mocretion.createnuclearized.registry.CNBlocks;
 import com.mocretion.createnuclearized.registry.CNDataComponents;
@@ -17,14 +19,17 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -97,6 +102,8 @@ public class CreateNuclearized {
 
         // Fluid handlers on the valves, so Create pipes/pumps can move salt through them
         modEventBus.addListener(this::registerCapabilities);
+        // Give the creative depleted salt buckets their fuels base stats
+        modEventBus.addListener(this::buildCreativeTabContents);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
@@ -108,5 +115,40 @@ public class CreateNuclearized {
                 Capabilities.FluidHandler.BLOCK,
                 CNBlockEntities.REACTOR_FLUID_VALVE.get(),
                 (be, side) -> be.getFluidHandler());
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                CNBlockEntities.STEAM_INPUT_VALVE.get(),
+                (be, side) -> be.getFluidHandler());
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                CNBlockEntities.CONTAINED_BLAZE_BURNER.get(),
+                (be, side) -> be.getFluidHandler());
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                CNBlockEntities.EXHAUST_HOOD.get(),
+                (be, side) -> be.getFluidHandler());
+        // Component aware bucket handler on the depleted salt buckets, so filling/emptying carries the SaltStats
+        event.registerItem(
+                Capabilities.FluidHandler.ITEM,
+                (stack, ctx) -> new DepletedSaltBucketWrapper(stack),
+                CNFluids.depletedUraniumSalt().getBucket(),
+                CNFluids.depletedPlutoniumSalt().getBucket(),
+                CNFluids.depletedThoriumUraniumSalt().getBucket());
+    }
+
+    // The depleted salt buckets are kept out of the default tab (in CNFluids) and re added here stamped with their fuels base composition
+    private void buildCreativeTabContents(BuildCreativeModeTabContentsEvent event) {
+        if (!event.getTabKey().equals(MAIN_TAB_KEY)) return;
+        acceptWithBaseStats(event, CNFluids.depletedUraniumSalt());
+        acceptWithBaseStats(event, CNFluids.depletedPlutoniumSalt());
+        acceptWithBaseStats(event, CNFluids.depletedThoriumUraniumSalt());
+    }
+
+    private static void acceptWithBaseStats(BuildCreativeModeTabContentsEvent event, Fluid depleted) {
+        ItemStack bucket = new ItemStack(depleted.getBucket());
+        ReactorFuel fuel = ReactorFuel.forOutput(depleted);
+        if (fuel != null)
+            bucket.set(CNDataComponents.SALT_STATS.get(), fuel.baseComposition());
+        event.accept(bucket);
     }
 }

@@ -2,8 +2,11 @@ package com.mocretion.createnuclearized.registry;
 
 import static com.mocretion.createnuclearized.registry.CNRegistrate.REGISTRATE;
 
-import com.mocretion.createnuclearized.content.fluid.SteamFluid;
-import com.mocretion.createnuclearized.content.fluid.SteamLiquidBlock;
+import com.mocretion.createnuclearized.CreateNuclearized;
+import com.mocretion.createnuclearized.content.fluid.DepletedSaltBucketItem;
+import com.mocretion.createnuclearized.content.fluid.DepletedSaltFluidType;
+import com.mocretion.createnuclearized.content.fluid.PressurizedSteamFluid;
+import com.mocretion.createnuclearized.content.fluid.PressurizedSteamLiquidBlock;
 import com.tterrag.registrate.util.entry.FluidEntry;
 
 import net.minecraft.resources.ResourceLocation;
@@ -35,16 +38,19 @@ public final class CNFluids {
             .register();
 
     // Hot spent salt a running reactor produces from uranium salt Placeholder lava textures
+    // Custom fluid type + bucket so a filled/spouted bucket keeps the salts SaltStats (see DepletedSaltFluidType/DepletedSaltBucketItem)
+    // Bucket is kept out of the default tab; CreateNuclearized re adds it with base stats
     public static final FluidEntry<BaseFlowingFluid.Flowing> DEPLETED_URANIUM_SALT = REGISTRATE
-            .fluid("depleted_uranium_salt", LAVA_STILL, LAVA_FLOW)
+            .fluid("depleted_uranium_salt", LAVA_STILL, LAVA_FLOW, DepletedSaltFluidType::new)
             .lang("Depleted Uranium Salt")
             .source(BaseFlowingFluid.Source::new)
             .block()
                 .lang("Depleted Uranium Salt")
                 .build()
-            .bucket()
+            .bucket(DepletedSaltBucketItem::new)
                 .lang("Depleted Uranium Salt Bucket")
                 .model((c, p) -> p.generated(c, LAVA_BUCKET))
+                .removeTab(CreateNuclearized.MAIN_TAB_KEY)
                 .build()
             .register();
 
@@ -64,15 +70,16 @@ public final class CNFluids {
 
     // Hot spent salt a running reactor produces from plutonium salt Placeholder lava textures
     public static final FluidEntry<BaseFlowingFluid.Flowing> DEPLETED_PLUTONIUM_SALT = REGISTRATE
-            .fluid("depleted_plutonium_salt", LAVA_STILL, LAVA_FLOW)
+            .fluid("depleted_plutonium_salt", LAVA_STILL, LAVA_FLOW, DepletedSaltFluidType::new)
             .lang("Depleted Plutonium Salt")
             .source(BaseFlowingFluid.Source::new)
             .block()
                 .lang("Depleted Plutonium Salt")
                 .build()
-            .bucket()
+            .bucket(DepletedSaltBucketItem::new)
                 .lang("Depleted Plutonium Salt Bucket")
                 .model((c, p) -> p.generated(c, LAVA_BUCKET))
+                .removeTab(CreateNuclearized.MAIN_TAB_KEY)
                 .build()
             .register();
 
@@ -92,15 +99,16 @@ public final class CNFluids {
 
     // Hot spent salt a running reactor produces from thorium uranium salt Placeholder lava
     public static final FluidEntry<BaseFlowingFluid.Flowing> DEPLETED_THORIUM_URANIUM_SALT = REGISTRATE
-            .fluid("depleted_thorium_uranium_salt", LAVA_STILL, LAVA_FLOW)
+            .fluid("depleted_thorium_uranium_salt", LAVA_STILL, LAVA_FLOW, DepletedSaltFluidType::new)
             .lang("Depleted Thorium-Uranium Salt")
             .source(BaseFlowingFluid.Source::new)
             .block()
                 .lang("Depleted Thorium-Uranium Salt")
                 .build()
-            .bucket()
+            .bucket(DepletedSaltBucketItem::new)
                 .lang("Depleted Thorium-Uranium Salt Bucket")
                 .model((c, p) -> p.generated(c, LAVA_BUCKET))
+                .removeTab(CreateNuclearized.MAIN_TAB_KEY)
                 .build()
             .register();
 
@@ -132,12 +140,12 @@ public final class CNFluids {
                 .build()
             .register();
 
-    public static final FluidEntry<SteamFluid.Flowing> STEAM = REGISTRATE
-            .fluid("steam",
+    public static final FluidEntry<PressurizedSteamFluid.Flowing> PRESSURIZED_STEAM = REGISTRATE
+            .fluid("pressurized_steam",
                     ResourceLocation.withDefaultNamespace("block/water_still"),
                     ResourceLocation.withDefaultNamespace("block/water_flow"),
-                    SteamFluid.Flowing::new)
-            .lang("Steam")
+                    PressurizedSteamFluid.Flowing::new)
+            .lang("Pressurized Steam")
             // Gas: rises, and entities pass right through it (no swim/drown/push)
             .properties(p -> p.density(-500).temperature(400).viscosity(200)
                     .canSwim(false)
@@ -145,9 +153,9 @@ public final class CNFluids {
                     .canPushEntity(false)
                     .motionScale(0.0))
             // Rising gas source; must exist before bucket()
-            .source(SteamFluid.Source::new)
+            .source(PressurizedSteamFluid.Source::new)
             // Liquid block whose source self removes after ~2 seconds
-            .block(SteamLiquidBlock::new)
+            .block(PressurizedSteamLiquidBlock::new)
                 .build()
             // Bucket with a placeholder water bucket texture
             .bucket()
@@ -183,8 +191,8 @@ public final class CNFluids {
         return DEPLETED_THORIUM_URANIUM_SALT.getSource();
     }
 
-    public static Fluid steam() {
-        return STEAM.getSource();
+    public static Fluid pressurizedSteam() {
+        return PRESSURIZED_STEAM.getSource();
     }
 
     /** No op that forces this class to load so the fields above initialize */

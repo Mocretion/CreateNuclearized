@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "createnuclearized:reactor_casing_encased_shaft"
+          "name": "create:shaft"
         }
       ],
       "rolls": 1.0

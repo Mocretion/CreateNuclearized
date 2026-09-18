@@ -91,10 +91,6 @@ public class ControlRodBlockEntity extends KineticBlockEntity {
         return Mth.lerp(partialTicks, prevOffset, offset);
     }
 
-    public float getExtension() {
-        return offset;
-    }
-
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);

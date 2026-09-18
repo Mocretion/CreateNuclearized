@@ -1,0 +1,6 @@
+{
+	"parent": "createnuclearized:block/turbines/turbine_5/textures",
+	"loader": "neoforge:obj",
+	"flip_v": true,
+	"model": "createnuclearized:models/block/turbines/turbine_5/turbine_5_rotor.obj"
+}

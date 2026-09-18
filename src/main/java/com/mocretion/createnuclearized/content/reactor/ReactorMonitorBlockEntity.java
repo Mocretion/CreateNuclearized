@@ -14,8 +14,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvider {
 
+    // Re resolve the controller at most this often while the cache is empty
+    private static final int RESOLVE_INTERVAL = 20;
+
     @Nullable
     private BlockPos controllerCache;
+    private long lastResolveTick = Long.MIN_VALUE;
 
     public ReactorMonitorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -30,6 +34,13 @@ public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvid
         }
         controllerCache = null;
 
+        // Resolving is a full structure validation. Each open menu pulls a dozen synced values per tick, so throttle it while unresolved,
+        // otherwise every one of those would kick off its own scan (written as an add, not a subtract, so the Long.MIN_VALUE sentinel cant
+        // overflow)
+        long now = level.getGameTime();
+        if (now < lastResolveTick + RESOLVE_INTERVAL) return null;
+        lastResolveTick = now;
+
         ReactorMultiblock.Result result = ReactorMultiblock.validate(level, worldPosition);
         if (!result.valid()) return null;
         BlockPos controllerPos = ReactorMultiblock.findController(level, result.min(), result.max());
@@ -39,11 +50,6 @@ public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvid
             return controller;
         }
         return null;
-    }
-
-    public int getMoltenBuffered() {
-        ReactorControllerBlockEntity controller = getController();
-        return controller == null ? 0 : controller.getMoltenBuffered();
     }
 
     public int getHeatedBuffered() {
@@ -64,11 +70,6 @@ public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvid
     public int getDepletedCapacity() {
         ReactorControllerBlockEntity controller = getController();
         return controller == null ? 0 : controller.getDepletedCapacity();
-    }
-
-    public int getFlowPerTick() {
-        ReactorControllerBlockEntity controller = getController();
-        return controller == null ? 0 : controller.getFlowPerTick();
     }
 
     public int getRunSeconds() {

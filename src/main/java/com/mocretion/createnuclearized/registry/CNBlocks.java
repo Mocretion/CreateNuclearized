@@ -2,6 +2,8 @@ package com.mocretion.createnuclearized.registry;
 
 import static com.mocretion.createnuclearized.registry.CNRegistrate.REGISTRATE;
 
+import com.mocretion.createnuclearized.content.boiler.ContainedBlazeBurnerBlock;
+import com.mocretion.createnuclearized.content.boiler.ExhaustHoodBlock;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodBlock;
 import com.mocretion.createnuclearized.content.kinetics.ReactorEncasedChainDriveBlock;
 import com.mocretion.createnuclearized.content.kinetics.ReactorEncasedCogwheelBlock;
@@ -10,6 +12,12 @@ import com.mocretion.createnuclearized.content.reactor.ReactorControllerBlock;
 import com.mocretion.createnuclearized.content.reactor.ReactorFluidValveBlock;
 import com.mocretion.createnuclearized.content.reactor.ReactorMonitorBlock;
 import com.mocretion.createnuclearized.content.reactor.ReactorState;
+import com.mocretion.createnuclearized.content.turbine.SteamInputValveBlock;
+import com.mocretion.createnuclearized.content.turbine.TurbineControllerBlock;
+import com.mocretion.createnuclearized.content.turbine.TurbineRotorBlock;
+import com.mocretion.createnuclearized.content.turbine.TurbineRotorBlockItem;
+import com.mocretion.createnuclearized.content.turbine.TurbineRotorStructuralBlock;
+import com.mocretion.createnuclearized.content.turbine.TurbineGeneratorBlock;
 import com.mocretion.createnuclearized.CreateNuclearized;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.api.stress.BlockStressValues;
@@ -21,8 +29,10 @@ import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.util.entry.BlockEntry;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -38,8 +48,12 @@ public final class CNBlocks {
     // Stress the control rod draws per RPM, deployer tier Also what its tooltip shows
     private static final double CONTROL_ROD_IMPACT = 4.0;
 
+    // RPM shown in the generators tooltip. Real capacity scales with blade count in the block entity Provisional
+    private static final int GENERATOR_RPM = 160;
+
     public static final BlockEntry<ReactorControllerBlock> REACTOR_CONTROLLER = REGISTRATE
             .block("reactor_controller", ReactorControllerBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.IRON_BLOCK)
             .properties(p -> p.mapColor(MapColor.COLOR_GRAY)
                     .sound(SoundType.NETHERITE_BLOCK)
@@ -68,6 +82,7 @@ public final class CNBlocks {
     // Solid casing, the bulk of the walls Connected texture
     public static final BlockEntry<Block> REACTOR_CASING = REGISTRATE
             .block("reactor_casing", Block::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.IRON_BLOCK)
             .properties(p -> p.mapColor(MapColor.METAL)
                     .sound(SoundType.NETHERITE_BLOCK)
@@ -83,6 +98,7 @@ public final class CNBlocks {
     // Has to be TransparentBlock (the vanilla glass class), not a plain Block, or it dims skylight instead of passing it through
     public static final BlockEntry<TransparentBlock> REACTOR_GLASS = REGISTRATE
             .block("reactor_glass", TransparentBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.GLASS)
             .properties(p -> p.mapColor(MapColor.NONE)
                     .sound(SoundType.GLASS)
@@ -98,6 +114,7 @@ public final class CNBlocks {
     // Shell port: cold molten salt gets pumped in here Magma placeholder texture
     public static final BlockEntry<ReactorFluidValveBlock> MOLTEN_SALT_INPUT_VALVE = REGISTRATE
             .block("molten_salt_input_valve", p -> new ReactorFluidValveBlock(p, true))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .lang("Fissile Salt Input Valve")
             .initialProperties(() -> Blocks.IRON_BLOCK)
             .properties(p -> p.mapColor(MapColor.COLOR_ORANGE)
@@ -111,6 +128,7 @@ public final class CNBlocks {
     // Shell port in the floor: hot spent salt drains out here Redstone block placeholder texture
     public static final BlockEntry<ReactorFluidValveBlock> HEATED_SALT_OUTPUT_VALVE = REGISTRATE
             .block("heated_salt_output_valve", p -> new ReactorFluidValveBlock(p, false))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .lang("Depleted Salt Output Valve")
             .initialProperties(() -> Blocks.IRON_BLOCK)
             .properties(p -> p.mapColor(MapColor.COLOR_RED)
@@ -126,6 +144,7 @@ public final class CNBlocks {
     // Counts as a shell member and carries rotation through the wall
     public static final BlockEntry<ReactorEncasedShaftBlock> REACTOR_CASING_ENCASED_SHAFT = REGISTRATE
             .block("reactor_casing_encased_shaft", p -> new ReactorEncasedShaftBlock(p, REACTOR_CASING::get))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.IRON_BLOCK)
             // noOcclusion, or the interior samples no light and the shaft renders black
             .properties(p -> p.mapColor(MapColor.METAL)
@@ -143,12 +162,15 @@ public final class CNBlocks {
             // Only obtainable by encasing a shaft, so keep it out of the creative inventory
             .removeTab(CreateNuclearized.MAIN_TAB_KEY)
             .build()
+            // Drop the plain shaft back like Create's own encased shaft, not the never craftable encased item
+            .loot((lt, b) -> lt.dropOther(b, AllBlocks.SHAFT.get()))
             .transform(EncasingRegistry.addVariantTo(AllBlocks.SHAFT))
             .register();
 
     // Same idea as the encased shaft, but a cogwheel: encase a Create cogwheel with reactor casing Meshes rotation through the wall
     public static final BlockEntry<ReactorEncasedCogwheelBlock> REACTOR_CASING_ENCASED_COGWHEEL = REGISTRATE
             .block("reactor_casing_encased_cogwheel", p -> new ReactorEncasedCogwheelBlock(p, false, REACTOR_CASING::get))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.IRON_BLOCK)
             // noOcclusion, or the cog renders black (interior samples no light)
             .properties(p -> p.mapColor(MapColor.METAL)
@@ -175,6 +197,8 @@ public final class CNBlocks {
             // Only obtainable by encasing a cogwheel, so keep it out of the creative inventory
             .removeTab(CreateNuclearized.MAIN_TAB_KEY)
             .build()
+            // Drop the plain cogwheel back like Create's own encased cogwheel, not the never craftable encased item
+            .loot((lt, b) -> lt.dropOther(b, AllBlocks.COGWHEEL.get()))
             .transform(EncasingRegistry.addVariantTo(AllBlocks.COGWHEEL))
             .register();
 
@@ -183,6 +207,7 @@ public final class CNBlocks {
     // Blockstate uses Create's ChainDriveGenerator pointed at our hand authored models; item model is hand authored
     public static final BlockEntry<ReactorEncasedChainDriveBlock> REACTOR_ENCASED_CHAIN_DRIVE = REGISTRATE
             .block("reactor_encased_chain_drive", ReactorEncasedChainDriveBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.IRON_BLOCK)
             // noOcclusion, or the shaft ends render black
             .properties(p -> p.mapColor(MapColor.METAL)
@@ -203,6 +228,7 @@ public final class CNBlocks {
     // Shell is the hand authored block/control_rod model; the cog, shaft nub, and sliding rod come from ControlRodRenderer
     public static final BlockEntry<ControlRodBlock> CONTROL_ROD = REGISTRATE
             .block("control_rod", ControlRodBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.IRON_BLOCK)
             // noOcclusion, or the cog and shaft render black
             .properties(p -> p.mapColor(MapColor.COLOR_BLACK)
@@ -222,6 +248,7 @@ public final class CNBlocks {
     // Sea lantern placeholder texture
     public static final BlockEntry<ReactorMonitorBlock> REACTOR_MONITOR = REGISTRATE
             .block("reactor_monitor", ReactorMonitorBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.IRON_BLOCK)
             .properties(p -> p.mapColor(MapColor.COLOR_LIGHT_BLUE)
                     .sound(SoundType.NETHERITE_BLOCK)
@@ -235,6 +262,7 @@ public final class CNBlocks {
     // Valid interior block
     public static final BlockEntry<Block> GRAPHITE_BLOCK = REGISTRATE
             .block("graphite_block", Block::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.COAL_BLOCK)
             .properties(p -> p.mapColor(MapColor.COLOR_BLACK)
                     .sound(SoundType.STONE)
@@ -247,6 +275,7 @@ public final class CNBlocks {
     // Beryllium moderator (end stone bricks placeholder) Stronger than graphite (ReactorModerator.BERYLLIUM_RATE mB/tick)
     public static final BlockEntry<Block> BERYLLIUM_BLOCK = REGISTRATE
             .block("beryllium_block", Block::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.END_STONE_BRICKS)
             .properties(p -> p.mapColor(MapColor.SAND)
                     .sound(SoundType.STONE)
@@ -260,6 +289,7 @@ public final class CNBlocks {
     // A rate cooler: on a moderators face it adds mB/tick to the channels that moderator bridges (see ReactorModifier)
     public static final BlockEntry<Block> XENON_BLOCK = REGISTRATE
             .block("xenon_block", Block::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .initialProperties(() -> Blocks.QUARTZ_BLOCK)
             .properties(p -> p.mapColor(MapColor.QUARTZ)
                     .sound(SoundType.STONE)
@@ -268,6 +298,195 @@ public final class CNBlocks {
                     p.models().cubeAll(c.getName(), ResourceLocation.withDefaultNamespace("block/quartz_block_side"))))
             .simpleItem()
             .register();
+
+    // Turbine multiblock (steam turbine) All placeholder textures for now, real art and connected textures come later
+
+    public static final BlockEntry<TurbineControllerBlock> TURBINE_CONTROLLER = REGISTRATE
+            .block("turbine_controller", TurbineControllerBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops())
+            .blockstate((c, p) -> p.simpleBlock(c.getEntry(),
+                    p.models().cubeAll(c.getName(), ResourceLocation.withDefaultNamespace("block/chiseled_stone_bricks"))))
+            .simpleItem()
+            .register();
+
+    // Rotation source: sits in the center of a square end wall and drives the shaft and rotors on the turbine axis
+    public static final BlockEntry<TurbineGeneratorBlock> TURBINE_GENERATOR = REGISTRATE
+            .block("turbine_generator", TurbineGeneratorBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops())
+            .blockstate((c, p) -> p.simpleBlock(c.getEntry(),
+                    p.models().cubeAll(c.getName(), ResourceLocation.withDefaultNamespace("block/copper_block"))))
+            // Kinetic generator: speed and stress capacity both come from the blades (see the block entity)
+            .onRegister(BlockStressValues.setGeneratorSpeed(GENERATOR_RPM, true))
+            .simpleItem()
+            .register();
+
+    public static final BlockEntry<Block> TURBINE_CASING = REGISTRATE
+            .block("turbine_casing", Block::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.METAL)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops())
+            .blockstate((c, p) -> p.simpleBlock(c.getEntry(),
+                    p.models().cubeAll(c.getName(), ResourceLocation.withDefaultNamespace("block/iron_block"))))
+            .simpleItem()
+            .register();
+
+    // Windowed casing Same light gotcha as reactor_glass, so TransparentBlock not a plain Block
+    public static final BlockEntry<TransparentBlock> TURBINE_GLASS = REGISTRATE
+            .block("turbine_glass", TransparentBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .initialProperties(() -> Blocks.GLASS)
+            .properties(p -> p.mapColor(MapColor.NONE)
+                    .sound(SoundType.GLASS)
+                    .noOcclusion())
+            .blockstate((c, p) -> p.simpleBlock(c.getEntry(),
+                    p.models().cubeAll(c.getName(), ResourceLocation.withDefaultNamespace("block/glass"))
+                            .renderType("cutout")))
+            .simpleItem()
+            .register();
+
+    // Steam input valve: the player pipes pressurized steam in here, the running turbine drains it
+    public static final BlockEntry<SteamInputValveBlock> STEAM_INPUT_VALVE = REGISTRATE
+            .block("steam_input_valve", SteamInputValveBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops())
+            .blockstate((c, p) -> p.simpleBlock(c.getEntry(),
+                    p.models().cubeAll(c.getName(), ResourceLocation.withDefaultNamespace("block/light_blue_concrete"))))
+            .simpleItem()
+            .register();
+
+    // Water wheel style rotors that replace the blade square: one placed block claims an NxN plane with structural fillers
+    // Passive (just rotates, the generator drives it); the center carries the built in shaft on the axis
+    // Small uses Create's water wheel model, medium its large water wheel, large the player authored turbine_large model
+
+    public static final BlockEntry<TurbineRotorBlock> TURBINE_ROTOR = REGISTRATE
+            .block("turbine_rotor", p -> new TurbineRotorBlock(p, 1, 0))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .lang("Turbine Rotor")
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion())
+            .blockstate((c, p) -> p.getVariantBuilder(c.getEntry()).forAllStates(s ->
+                    axisModel(new ModelFile.UncheckedModelFile(cn("block/turbines/turbine_3/block")), s, false)))
+            .item((b, p) -> new TurbineRotorBlockItem(b, p))
+            .model((c, p) -> {}) // hand authored item model
+            .build()
+            .register();
+
+    public static final BlockEntry<TurbineRotorBlock> MEDIUM_TURBINE_ROTOR = REGISTRATE
+            .block("medium_turbine_rotor", p -> new TurbineRotorBlock(p, 2, 0))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .lang("Medium Turbine Rotor")
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion())
+            .blockstate((c, p) -> p.getVariantBuilder(c.getEntry()).forAllStates(s ->
+                    axisModel(new ModelFile.UncheckedModelFile(cn("block/turbines/turbine_5/block")), s, false)))
+            .item((b, p) -> new TurbineRotorBlockItem(b, p))
+            .model((c, p) -> {}) // hand authored item model
+            .build()
+            .register();
+
+    public static final BlockEntry<TurbineRotorBlock> LARGE_TURBINE_ROTOR = REGISTRATE
+            .block("large_turbine_rotor", p -> new TurbineRotorBlock(p, 3, 1))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .lang("Large Turbine Rotor")
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion())
+            .blockstate((c, p) -> p.getVariantBuilder(c.getEntry()).forAllStates(s ->
+                    axisModel(new ModelFile.UncheckedModelFile(cn("block/turbines/turbine_7/block")), s, false)))
+            .item((b, p) -> new TurbineRotorBlockItem(b, p))
+            .model((c, p) -> {}) // hand authored item model
+            .build()
+            .register();
+
+    // Invisible solid filler that gives the large rotor its 3x3 hitbox; no item, drops nothing (breaking one breaks the whole rotor)
+    // Only the large rotor uses fillers, so name it after that rotor for JADE and pick block
+    public static final BlockEntry<TurbineRotorStructuralBlock> TURBINE_ROTOR_STRUCTURAL = REGISTRATE
+            .block("turbine_rotor_structural", TurbineRotorStructuralBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .lang("Large Turbine Rotor")
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion())
+            .blockstate((c, p) -> p.simpleBlock(c.getEntry(), p.models().getBuilder(c.getName())))
+            // Empty table; breaking a filler breaks the whole rotor, which drops the rotor item (survival only)
+            .loot((lt, b) -> lt.add(b, net.minecraft.world.level.storage.loot.LootTable.lootTable()))
+            .register();
+
+    // Static diaphragm, the other stage half; steam passes through it onto the next blades
+    public static final BlockEntry<Block> TURBINE_DIAPHRAGM = REGISTRATE
+            .block("turbine_diaphragm", Block::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops())
+            .blockstate((c, p) -> p.simpleBlock(c.getEntry(),
+                    p.models().cubeAll(c.getName(), ResourceLocation.withDefaultNamespace("block/gray_concrete"))))
+            .simpleItem()
+            .register();
+
+    // Steam plant: a blaze burner wearing a hazmat helmet, cooling reactor salt to boil water into steam
+
+    // Made by right clicking a lit blaze burner with a hazmat helmet Reuses Create's brazier model; the blaze + helmet come from the BER
+    public static final BlockEntry<ContainedBlazeBurnerBlock> CONTAINED_BLAZE_BURNER = REGISTRATE
+            .block("contained_blaze_burner", ContainedBlazeBurnerBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            // noOcclusion + glow like a lit blaze burner (the brazier isnt a full cube)
+            .properties(p -> p.mapColor(MapColor.COLOR_ORANGE)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .lightLevel(s -> 13)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion())
+            // Same as Create's blaze burner, or the cage gaps render solid black
+            .addLayer(() -> RenderType::cutoutMipped)
+            .blockstate((c, p) -> p.simpleBlock(c.getEntry(), new ModelFile.UncheckedModelFile(
+                    ResourceLocation.fromNamespaceAndPath("create", "block/blaze_burner/block"))))
+            .item()
+            .model((c, p) -> {}) // hand authored item model
+            .build()
+            .register();
+
+    // Sits a couple blocks above the basin and catches the rising steam into a small pumpable buffer Copper block placeholder
+    public static final BlockEntry<ExhaustHoodBlock> EXHAUST_HOOD = REGISTRATE
+            .block("exhaust_hood", ExhaustHoodBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops())
+            .blockstate((c, p) -> p.simpleBlock(c.getEntry(),
+                    p.models().cubeAll(c.getName(), ResourceLocation.withDefaultNamespace("block/copper_block"))))
+            .simpleItem()
+            .register();
+
+    /** Any of the three turbine rotor sizes */
+    public static boolean isTurbineRotor(BlockState state) {
+        return state.is(TURBINE_ROTOR.get()) || state.is(MEDIUM_TURBINE_ROTOR.get()) || state.is(LARGE_TURBINE_ROTOR.get());
+    }
 
     private CNBlocks() {}
 

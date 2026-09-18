@@ -1,0 +1,29 @@
+# Blender 5.0.1 MTL File: 'turbine_5.blend'
+# www.blender.org
+
+newmtl axis
+map_Kd #axis
+
+newmtl axis_top
+map_Kd #axis_top
+
+newmtl turbine_blade
+map_Kd #turbine_blade
+
+newmtl turbine_blade_edge
+map_Kd #turbine_blade_edge
+
+newmtl turbine_bolt
+map_Kd #turbine_bolt
+
+newmtl turbine_hub
+map_Kd #turbine_hub
+
+newmtl turbine_hub_trim
+map_Kd #turbine_hub_trim
+
+newmtl turbine_tip
+map_Kd #turbine_tip
+
+newmtl turbine_top_bottom
+map_Kd #turbine_top_bottom

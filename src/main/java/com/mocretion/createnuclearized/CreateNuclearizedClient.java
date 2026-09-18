@@ -1,8 +1,11 @@
 package com.mocretion.createnuclearized;
 
+import com.mocretion.createnuclearized.content.boiler.ContainedBlazeBurnerPartials;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodPartials;
+import com.mocretion.createnuclearized.content.turbine.TurbineRotorPartials;
 import com.mocretion.createnuclearized.content.reactor.ReactorControllerScreen;
 import com.mocretion.createnuclearized.content.reactor.ReactorMonitorScreen;
+import com.mocretion.createnuclearized.content.turbine.TurbineControllerScreen;
 import com.mocretion.createnuclearized.registry.CNMenuTypes;
 
 import net.neoforged.api.distmarker.Dist;
@@ -25,8 +28,10 @@ public class CreateNuclearizedClient {
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
-        // Touch the partial model holder so Flywheel registers it before models bake
+        // Touch the partial model holders so Flywheel registers them before models bake
         ControlRodPartials.init();
+        ContainedBlazeBurnerPartials.init();
+        TurbineRotorPartials.init();
         CreateNuclearized.LOGGER.info("Create: Nuclearized client setup");
     }
 
@@ -34,5 +39,6 @@ public class CreateNuclearizedClient {
     static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
         event.register(CNMenuTypes.REACTOR_CONTROLLER.get(), ReactorControllerScreen::new);
         event.register(CNMenuTypes.REACTOR_MONITOR.get(), ReactorMonitorScreen::new);
+        event.register(CNMenuTypes.TURBINE_CONTROLLER.get(), TurbineControllerScreen::new);
     }
 }

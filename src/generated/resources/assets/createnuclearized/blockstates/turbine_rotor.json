@@ -1,0 +1,17 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "createnuclearized:block/turbines/turbine_3/block",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "createnuclearized:block/turbines/turbine_3/block"
+    },
+    "axis=z": {
+      "model": "createnuclearized:block/turbines/turbine_3/block",
+      "x": 90,
+      "y": 180
+    }
+  }
+}

@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "createnuclearized:reactor_casing_encased_cogwheel"
+          "name": "create:cogwheel"
         }
       ],
       "rolls": 1.0

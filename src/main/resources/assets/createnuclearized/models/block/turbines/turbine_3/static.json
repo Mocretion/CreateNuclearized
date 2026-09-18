@@ -1,0 +1,6 @@
+{
+	"parent": "createnuclearized:block/turbines/turbine_3/textures",
+	"loader": "neoforge:obj",
+	"flip_v": true,
+	"model": "createnuclearized:models/block/turbines/turbine_3/turbine_3_static.obj"
+}

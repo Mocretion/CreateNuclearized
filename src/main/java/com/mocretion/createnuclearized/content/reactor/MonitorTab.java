@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 
 public enum MonitorTab {
 
-    /** Live operation: whats buffered and flowing right now */
+    // Live operation: whats buffered and flowing right now
     INFO("Reactor Info") {
         @Override
         public void renderContent(GuiGraphics g, Font font, ReactorMonitorMenu menu, int x, int y) {
@@ -24,7 +24,7 @@ public enum MonitorTab {
         }
     },
 
-    /** The composition this build makes */
+    // The composition this build makes
     STATS("Output Stats") {
         @Override
         public void renderContent(GuiGraphics g, Font font, ReactorMonitorMenu menu, int x, int y) {

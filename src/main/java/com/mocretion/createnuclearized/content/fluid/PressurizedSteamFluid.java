@@ -14,12 +14,12 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 
-public abstract class SteamFluid extends BaseFlowingFluid {
+public abstract class PressurizedSteamFluid extends BaseFlowingFluid {
 
     // Ticks between flow updates (min 1; water is 5) Governs both spread and drain speed
     private static final int FLOW_SPEED = 1;
 
-    protected SteamFluid(Properties properties) {
+    protected PressurizedSteamFluid(Properties properties) {
         super(properties);
     }
 
@@ -120,7 +120,7 @@ public abstract class SteamFluid extends BaseFlowingFluid {
         return !Shapes.mergedFaceOccludes(shape, spreadShape, dir);
     }
 
-    public static class Flowing extends SteamFluid {
+    public static class Flowing extends PressurizedSteamFluid {
         public Flowing(Properties properties) {
             super(properties);
             registerDefaultState(getStateDefinition().any().setValue(LEVEL, 7));
@@ -143,7 +143,7 @@ public abstract class SteamFluid extends BaseFlowingFluid {
         }
     }
 
-    public static class Source extends SteamFluid {
+    public static class Source extends PressurizedSteamFluid {
         public Source(Properties properties) {
             super(properties);
         }

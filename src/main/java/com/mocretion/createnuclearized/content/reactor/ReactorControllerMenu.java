@@ -63,8 +63,9 @@ public class ReactorControllerMenu extends AbstractContainerMenu {
         });
 
         // Sync the reactors buffer capacities and channel count (fixed values, not live levels)
-        addDataSlot(syncedInt(be::getFissileCapacity, v -> fissileCapacity = v));
-        addDataSlot(syncedInt(be::getDepletedCapacity, v -> depletedCapacity = v));
+        // Capacities can pass a signed short with enough valves, so send them wide (two slots)
+        addWideInt(be::getFissileCapacity, v -> fissileCapacity = v);
+        addWideInt(be::getDepletedCapacity, v -> depletedCapacity = v);
         addDataSlot(syncedInt(be::getTotalChannels, v -> totalChannels = v));
 
         // Sync the status (stopped / idle / running)
@@ -87,6 +88,35 @@ public class ReactorControllerMenu extends AbstractContainerMenu {
                 setter.accept(value);
             }
         };
+    }
+
+    // A DataSlot only carries a signed short over the wire, so split values that can exceed ~32k across two slots (low + high 16 bits)
+    private void addWideInt(java.util.function.IntSupplier getter, java.util.function.IntConsumer setter) {
+        int[] parts = new int[2];
+        addDataSlot(new DataSlot() {
+            @Override
+            public int get() {
+                return getter.getAsInt() & 0xFFFF;
+            }
+
+            @Override
+            public void set(int value) {
+                parts[0] = value & 0xFFFF;
+                setter.accept(parts[1] << 16 | parts[0]);
+            }
+        });
+        addDataSlot(new DataSlot() {
+            @Override
+            public int get() {
+                return getter.getAsInt() >>> 16 & 0xFFFF;
+            }
+
+            @Override
+            public void set(int value) {
+                parts[1] = value & 0xFFFF;
+                setter.accept(parts[1] << 16 | parts[0]);
+            }
+        });
     }
 
     public boolean isRunning() {

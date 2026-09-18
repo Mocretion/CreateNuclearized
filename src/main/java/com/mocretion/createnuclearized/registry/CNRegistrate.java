@@ -27,10 +27,6 @@ public final class CNRegistrate {
                 "Create: Nuclearized Configs");
         REGISTRATE.addRawLang("createnuclearized.configuration.section.createnuclearized.common.toml.title",
                 "Create: Nuclearized Configs");
-        REGISTRATE.addRawLang("createnuclearized.configuration.items", "Item List");
-        REGISTRATE.addRawLang("createnuclearized.configuration.logDirtBlock", "Log Dirt Block");
-        REGISTRATE.addRawLang("createnuclearized.configuration.magicNumberIntroduction", "Magic Number Text");
-        REGISTRATE.addRawLang("createnuclearized.configuration.magicNumber", "Magic Number");
 
         // Goggle overlay: heated salt composition (see ReactorFluidValveBlockEntity#addToGoggleTooltip)
         REGISTRATE.addRawLang("createnuclearized.gui.goggles.salt_stats", "Heated Salt Composition");
@@ -78,5 +74,8 @@ public final class CNRegistrate {
 
         // Creative tab holding the reactors moderator and modifier blocks
         REGISTRATE.addRawLang("itemGroup.createnuclearized.components", "Create: Nuclearized Components");
+
+        // Shown on the action bar when a turbine rotor cant fit its hitbox
+        REGISTRATE.addRawLang("createnuclearized.turbine_rotor.no_space", "Clear the highlighted blocks to place the rotor");
     }
 }

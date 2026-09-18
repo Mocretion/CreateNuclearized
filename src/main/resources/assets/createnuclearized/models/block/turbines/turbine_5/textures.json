@@ -1,0 +1,17 @@
+{
+  "parent": "block/block",
+  "render_type": "minecraft:cutout",
+  "ambientocclusion": false,
+  "textures": {
+    "axis": "create:block/axis",
+    "axis_top": "create:block/axis_top",
+    "turbine_blade": "createnuclearized:block/turbine/turbine_blade",
+    "turbine_blade_edge": "createnuclearized:block/turbine/turbine_blade_edge",
+    "turbine_tip": "createnuclearized:block/turbine/turbine_tip",
+    "turbine_hub": "createnuclearized:block/turbine/turbine_hub",
+    "turbine_hub_trim": "createnuclearized:block/turbine/turbine_hub_trim",
+    "turbine_bolt": "createnuclearized:block/turbine/turbine_bolt",
+    "turbine_top_bottom": "createnuclearized:block/turbine/turbine_top_bottom",
+    "particle": "#turbine_top_bottom"
+  }
+}

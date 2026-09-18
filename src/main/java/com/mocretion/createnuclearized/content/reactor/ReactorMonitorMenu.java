@@ -59,15 +59,16 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
             addSlot(new Slot(playerInventory, col, INV_X + col * 18, INV_Y + 58));
         }
 
-        addDataSlot(syncedInt(be::getFissileBuffered, v -> fissileBuffered = v));
-        addDataSlot(syncedInt(be::getFissileCapacity, v -> fissileCapacity = v));
-        addDataSlot(syncedInt(be::getHeatedBuffered, v -> depletedBuffered = v));
-        addDataSlot(syncedInt(be::getDepletedCapacity, v -> depletedCapacity = v));
-        addDataSlot(syncedInt(be::getRunSeconds, v -> runSeconds = v));
+        // Buffers, capacities, runtime seconds and the milli rate can all pass a signed short, so send them wide (two slots each)
+        addWideInt(be::getFissileBuffered, v -> fissileBuffered = v);
+        addWideInt(be::getFissileCapacity, v -> fissileCapacity = v);
+        addWideInt(be::getHeatedBuffered, v -> depletedBuffered = v);
+        addWideInt(be::getDepletedCapacity, v -> depletedCapacity = v);
+        addWideInt(be::getRunSeconds, v -> runSeconds = v);
         addDataSlot(syncedInt(be::getReactorStateOrdinal, v -> stateOrdinal = v));
         addDataSlot(syncedInt(be::getActiveChannels, v -> activeChannels = v));
         addDataSlot(syncedInt(be::getTotalChannels, v -> totalChannels = v));
-        addDataSlot(syncedInt(be::getTotalRateMilli, v -> totalRateMilli = v));
+        addWideInt(be::getTotalRateMilli, v -> totalRateMilli = v);
         addDataSlot(syncedInt(() -> be.getOutputStats().heat(), v -> statHeat = v));
         addDataSlot(syncedInt(() -> be.getOutputStats().uranium(), v -> statUranium = v));
         addDataSlot(syncedInt(() -> be.getOutputStats().plutonium(), v -> statPlutonium = v));
@@ -87,6 +88,35 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
                 setter.accept(value);
             }
         };
+    }
+
+    // A DataSlot only carries a signed short over the wire, so split values that can exceed ~32k across two slots (low + high 16 bits)
+    private void addWideInt(java.util.function.IntSupplier getter, java.util.function.IntConsumer setter) {
+        int[] parts = new int[2];
+        addDataSlot(new DataSlot() {
+            @Override
+            public int get() {
+                return getter.getAsInt() & 0xFFFF;
+            }
+
+            @Override
+            public void set(int value) {
+                parts[0] = value & 0xFFFF;
+                setter.accept(parts[1] << 16 | parts[0]);
+            }
+        });
+        addDataSlot(new DataSlot() {
+            @Override
+            public int get() {
+                return getter.getAsInt() >>> 16 & 0xFFFF;
+            }
+
+            @Override
+            public void set(int value) {
+                parts[1] = value & 0xFFFF;
+                setter.accept(parts[1] << 16 | parts[0]);
+            }
+        });
     }
 
     public int getFissileBuffered() {

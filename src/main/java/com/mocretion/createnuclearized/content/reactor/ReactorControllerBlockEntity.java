@@ -43,7 +43,9 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
     private BlockPos max;
 
     private boolean running; // whether Start has been pressed
-    private int timer;
+    // Starts at the full interval so the first server tick revalidates and recomputes outputStats right away, otherwise a reactor loaded
+    // mid run would stamp the placeholder BASE stats for up to a second
+    private int timer = TICKS_PER_SECOND;
     private ReactorState state = ReactorState.STOPPED;
 
     private int flowPerTick;    // heated salt made last tick, summed over the output valves
@@ -316,24 +318,28 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
             if (!molten.isEmpty() && ReactorFuel.isInput(molten.getFluid())) {
                 // Each channel converts its own input salt into the matching depleted output
                 ReactorFuel valveFuel = ReactorFuel.forInput(molten.getFluid());
-                FluidStack buffered = heatedTank.getFluid();
-                boolean outputMatches = buffered.isEmpty()
-                        || buffered.getFluid() == valveFuel.outputFluid();
-                int room = heatedTank.getCapacity() - heatedTank.getFluidAmount();
-                int convert = Math.min(output.pendingWholeMb(), Math.min(moltenTank.getFluidAmount(), room));
-                if (outputMatches && convert > 0) {
-                    moltenTank.drain(convert, FluidAction.EXECUTE);
-                    FluidStack heated = new FluidStack(valveFuel.outputFluid().builtInRegistryHolder(), convert);
-                    heated.set(CNDataComponents.SALT_STATS.get(), outputStats);
-                    heatedTank.fill(heated, FluidAction.EXECUTE);
-                    output.consumePending(convert);
-                    output.notifyContentsChanged();
-                    flow += convert;
+                int want = Math.min(output.pendingWholeMb(), moltenTank.getFluidAmount());
+                FluidStack heated = new FluidStack(valveFuel.outputFluid().builtInRegistryHolder(), Math.max(1, want));
+                heated.set(CNDataComponents.SALT_STATS.get(), outputStats);
+                // Simulate the fill first: it returns 0 when the buffered heated salt is a different fuel or carries different SaltStats
+                // (two FluidStacks only stack with matching components), so draining before checking would silently void the molten salt
+                if (want > 0) {
+                    int converted = heatedTank.fill(heated, FluidAction.SIMULATE);
+                    if (converted > 0) {
+                        heated.setAmount(converted);
+                        moltenTank.drain(converted, FluidAction.EXECUTE);
+                        heatedTank.fill(heated, FluidAction.EXECUTE);
+                        output.consumePending(converted);
+                        output.notifyContentsChanged();
+                        flow += converted;
+                    }
                 }
+                // Active means actually converting: it has a rate, molten to draw from, and the heated tank can still take its output
+                // (so a full or mismatched buffer reads as idle, per the status contract)
+                heated.setAmount(1);
+                if (output.getRate() > 0 && heatedTank.fill(heated, FluidAction.SIMULATE) > 0)
+                    active++;
             }
-            // Counts as working: has a rate and is actually being fed
-            if (output.getRate() > 0 && moltenTank.getFluidAmount() > 0)
-                active++;
         }
         flowPerTick = flow;
         activeChannels = active;

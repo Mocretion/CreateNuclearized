@@ -10,12 +10,12 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 
-public class SteamLiquidBlock extends LiquidBlock {
+public class PressurizedSteamLiquidBlock extends LiquidBlock {
 
     // A placed steam source removes itself after this many ticks (1 second)
     private static final int SOURCE_LIFETIME_TICKS = 20;
 
-    public SteamLiquidBlock(FlowingFluid fluid, Properties properties) {
+    public PressurizedSteamLiquidBlock(FlowingFluid fluid, Properties properties) {
         super(fluid, properties);
     }
 

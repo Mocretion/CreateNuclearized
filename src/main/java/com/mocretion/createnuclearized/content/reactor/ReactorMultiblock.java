@@ -179,9 +179,17 @@ public final class ReactorMultiblock {
         BlockPos min = new BlockPos(minX, minY, minZ);
         BlockPos max = new BlockPos(maxX, maxY, maxZ);
 
-        // The flood set has to be exactly the shell: full outer minus hollow inner
+        // The surface members have to be exactly the shell: full outer minus hollow inner
+        // Count only positions on the box surface: an encased shaft/cog, chain drive or control rod sitting just inside the wall is a valid
+        // interior block, but the flood fill still grabs it (it counts as a shell member), so it mustnt count against the shell total
         long expectedShell = (long) dx * dy * dz - (long) (dx - 2) * (dy - 2) * (dz - 2);
-        if (shell.size() != expectedShell) return Result.fail("Shell is incomplete or has extra blocks attached.");
+        long surfaceMembers = 0;
+        for (BlockPos p : shell) {
+            if (p.getX() == minX || p.getX() == maxX || p.getY() == minY || p.getY() == maxY
+                    || p.getZ() == minZ || p.getZ() == maxZ)
+                surfaceMembers++;
+        }
+        if (surfaceMembers != expectedShell) return Result.fail("Shell is incomplete or has extra blocks attached.");
 
         // Walk every surface cell, confirm its a shell member, and tally controller/valves
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();

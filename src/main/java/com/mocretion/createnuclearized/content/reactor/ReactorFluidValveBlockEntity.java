@@ -170,7 +170,8 @@ public class ReactorFluidValveBlockEntity extends BlockEntity implements IHaveGo
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
             FluidTank tank = isInput() ? moltenTank : heatedTank;
-            if (resource.getFluid() != tank.getFluid().getFluid()) return FluidStack.EMPTY;
+            // Match components too: heated salt carries SaltStats, so a request for one batch must not hand back a differently stamped one
+            if (!FluidStack.isSameFluidSameComponents(resource, tank.getFluid())) return FluidStack.EMPTY;
             return doDrain(tank, resource.getAmount(), action);
         }
 

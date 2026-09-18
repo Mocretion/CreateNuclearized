@@ -1,0 +1,146 @@
+{
+	"parent": "createnuclearized:block/turbines/turbine_7/textures",
+	"loader": "neoforge:obj",
+	"flip_v": true,
+	"model": "createnuclearized:models/block/turbines/turbine_7/turbine_7.obj",
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [
+				69,
+				0,
+				0
+			],
+			"translation": [
+				0,
+				2,
+				-0.75
+			],
+			"scale": [
+				0.1,
+				0.1,
+				0.1
+			]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [
+				69,
+				0,
+				0
+			],
+			"translation": [
+				0,
+				2,
+				-0.75
+			],
+			"scale": [
+				0.1,
+				0.1,
+				0.1
+			]
+		},
+		"firstperson_righthand": {
+			"rotation": [
+				0,
+				45,
+				0
+			],
+			"translation": [
+				0,
+				0,
+				-1
+			],
+			"scale": [
+				0.15,
+				0.15,
+				0.15
+			]
+		},
+		"firstperson_lefthand": {
+			"rotation": [
+				0,
+				45,
+				0
+			],
+			"translation": [
+				0,
+				0,
+				-1
+			],
+			"scale": [
+				0.15,
+				0.15,
+				0.15
+			]
+		},
+		"ground": {
+			"translation": [
+				0,
+				1.25,
+				0
+			],
+			"scale": [
+				0.2,
+				0.2,
+				0.2
+			]
+		},
+		"gui": {
+			"rotation": [
+				30,
+				-180,
+				0
+			],
+			"scale": [
+				0.178,
+				0.178,
+				0.178
+			]
+		},
+		"head": {
+			"translation": [
+				0,
+				8.75,
+				0
+			],
+			"scale": [
+				0.35,
+				0.35,
+				0.35
+			]
+		},
+		"fixed": {
+			"rotation": [
+				-90,
+				0,
+				0
+			],
+			"translation": [
+				0,
+				0,
+				-0.75
+			],
+			"scale": [
+				0.16,
+				0.16,
+				0.16
+			]
+		},
+		"on_shelf": {
+			"rotation": [
+				-90,
+				0,
+				0
+			],
+			"translation": [
+				0,
+				0,
+				-1.5
+			],
+			"scale": [
+				0.15,
+				0.15,
+				0.15
+			]
+		}
+	}
+}
