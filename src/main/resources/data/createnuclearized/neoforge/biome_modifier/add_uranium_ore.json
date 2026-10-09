@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "minecraft:deep_dark",
+  "features": "createnuclearized:ore_uranium",
+  "step": "top_layer_modification"
+}

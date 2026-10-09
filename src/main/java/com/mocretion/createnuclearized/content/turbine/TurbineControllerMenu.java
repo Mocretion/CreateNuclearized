@@ -23,21 +23,19 @@ public class TurbineControllerMenu extends AbstractContainerMenu {
     private final Block block;
     private final TurbineControllerBlockEntity be;
 
-    // Client synced telemetry
     private int stages;
     private int bladeCells;
     private int steamBuffered;
     private int steamCapacity;
     private int steamUse;
+    private int outputPercent;
     private int generatedRpm;
 
-    /** Client side: resolve the BE from the synced position */
     public TurbineControllerMenu(int containerId, Inventory playerInventory, BlockPos pos) {
         this(containerId, playerInventory,
                 (TurbineControllerBlockEntity) playerInventory.player.level().getBlockEntity(pos));
     }
 
-    /** Server side */
     public TurbineControllerMenu(int containerId, Inventory playerInventory, TurbineControllerBlockEntity be) {
         super(CNMenuTypes.TURBINE_CONTROLLER.get(), containerId);
         this.be = be;
@@ -69,10 +67,10 @@ public class TurbineControllerMenu extends AbstractContainerMenu {
         addDataSlot(syncedInt(be::getStateOrdinal, be::setStateFromNetwork));
         addDataSlot(syncedInt(be::getStages, v -> stages = v));
         addDataSlot(syncedInt(be::getBladeCells, v -> bladeCells = v));
-        // Steam buffer and capacity can pass a signed short with enough valves, so send them wide (two slots)
         addWideInt(be::getSteamBuffered, v -> steamBuffered = v);
         addWideInt(be::getSteamCapacity, v -> steamCapacity = v);
         addDataSlot(syncedInt(be::getSteamUse, v -> steamUse = v));
+        addDataSlot(syncedInt(be::getOutputPercent, v -> outputPercent = v));
         addDataSlot(syncedInt(be::getGeneratedRpm, v -> generatedRpm = v));
     }
 
@@ -90,7 +88,7 @@ public class TurbineControllerMenu extends AbstractContainerMenu {
         };
     }
 
-    // A DataSlot only carries a signed short over the wire, so split values that can exceed ~32k across two slots (low + high 16 bits)
+    /** A DataSlot only carries a signed short, so values past ~32k go across two slots */
     private void addWideInt(IntSupplier getter, IntConsumer setter) {
         int[] parts = new int[2];
         addDataSlot(new DataSlot() {
@@ -145,6 +143,10 @@ public class TurbineControllerMenu extends AbstractContainerMenu {
 
     public int getSteamUse() {
         return steamUse;
+    }
+
+    public int getOutputPercent() {
+        return outputPercent;
     }
 
     public int getGeneratedRpm() {

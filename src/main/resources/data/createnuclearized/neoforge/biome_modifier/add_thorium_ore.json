@@ -1,0 +1,9 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "features": [
+    "createnuclearized:ore_thorium",
+    "createnuclearized:ore_thorium_lower"
+  ],
+  "step": "underground_ores"
+}

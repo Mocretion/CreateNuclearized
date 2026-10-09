@@ -84,18 +84,15 @@ public class ReactorMonitorScreen extends AbstractContainerScreen<ReactorMonitor
         super.render(graphics, mouseX, mouseY, partialTick);
         this.renderTooltip(graphics, mouseX, mouseY);
 
-        // Name the hovered tab
         int tab = tabAt(mouseX, mouseY);
         if (tab >= 0)
             graphics.renderTooltip(this.font, MonitorTab.values()[tab].title(), mouseX, mouseY);
     }
 
-    /** The on screen x (relative to the window left) of tab slot index */
     private static int tabSlotX(int index) {
         return TAB_STRIP_X + index * TAB_WIDTH;
     }
 
-    /** The tab index under the given absolute mouse coordinates, or -1 if none */
     private int tabAt(double mouseX, double mouseY) {
         int relX = (int) (mouseX - this.leftPos) - TAB_STRIP_X;
         int relY = (int) (mouseY - this.topPos);
@@ -104,7 +101,6 @@ public class ReactorMonitorScreen extends AbstractContainerScreen<ReactorMonitor
         return index < MonitorTab.values().length ? index : -1;
     }
 
-    /** Format a duration in seconds as "Dd Hh Mm Ss" */
     static String formatDuration(int totalSeconds) {
         int days = totalSeconds / 86400;
         int hours = (totalSeconds % 86400) / 3600;

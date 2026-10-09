@@ -19,8 +19,8 @@ public class ReactorControllerScreen extends AbstractContainerScreen<ReactorCont
 
     private static final int BUTTON_X = 114;
     private static final int BUTTON_Y = 51;
-    private static final int BUTTON_W = 55; // 169 - 114
-    private static final int BUTTON_H = 19; // 70 - 51
+    private static final int BUTTON_W = 55;
+    private static final int BUTTON_H = 19;
 
     public ReactorControllerScreen(ReactorControllerMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -49,7 +49,7 @@ public class ReactorControllerScreen extends AbstractContainerScreen<ReactorCont
                 "Fissile Buffer: " + menu.getFissileCapacity() + " mB",
                 8, 20, 0x404040, false);
         graphics.drawString(this.font,
-                "Depleted Buffer: " + menu.getDepletedCapacity() + " mB",
+                "Spent Buffer: " + menu.getSpentCapacity() + " mB",
                 8, 32, 0x404040, false);
         graphics.drawString(this.font,
                 "Channels: " + menu.getTotalChannels(),
@@ -83,7 +83,7 @@ public class ReactorControllerScreen extends AbstractContainerScreen<ReactorCont
         @Override
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             boolean running = menu.isRunning();
-            boolean hovered = isHovered(); // mouse over only; not focus (which sticks after a click)
+            boolean hovered = isHovered();
 
             int u;
             int v;

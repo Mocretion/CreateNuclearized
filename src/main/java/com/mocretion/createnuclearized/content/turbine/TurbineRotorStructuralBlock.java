@@ -3,11 +3,14 @@ package com.mocretion.createnuclearized.content.turbine;
 import java.util.function.Consumer;
 
 import com.mocretion.createnuclearized.registry.CNBlocks;
+import com.mojang.serialization.MapCodec;
 
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -26,6 +29,8 @@ import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 
 public class TurbineRotorStructuralBlock extends DirectionalBlock {
 
+    private static final int MAX_CHAIN_LENGTH = 8;
+
     public TurbineRotorStructuralBlock(Properties properties) {
         super(properties);
     }
@@ -40,7 +45,6 @@ public class TurbineRotorStructuralBlock extends DirectionalBlock {
         return RenderShape.INVISIBLE;
     }
 
-    // Solid for collision but fully transparent to light, so the invisible hitbox cells dont cast shadows into the rotor
     @Override
     protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
         return true;
@@ -58,13 +62,13 @@ public class TurbineRotorStructuralBlock extends DirectionalBlock {
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+        if (!stillValid(level, pos, state)) return ItemStack.EMPTY;
         BlockPos master = getMaster(level, pos, state);
         return level.getBlockState(master).getBlock().getCloneItemStack(level, master, level.getBlockState(master));
     }
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        // Break the whole rotor when a hitbox cell goes, but drop it only in survival (creative shouldnt spit out the item)
         if (!movedByPiston && !state.is(newState.getBlock()) && stillValid(level, pos, state))
             level.destroyBlock(getMaster(level, pos, state), true);
         super.onRemove(state, level, pos, newState, movedByPiston);
@@ -72,7 +76,6 @@ public class TurbineRotorStructuralBlock extends DirectionalBlock {
 
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        // Punching a hitbox cell removes the rotor; suppress the item in creative like Create's water wheel does
         if (stillValid(level, pos, state)) {
             BlockPos master = getMaster(level, pos, state);
             if (!level.isClientSide() && player.isCreative())
@@ -96,37 +99,36 @@ public class TurbineRotorStructuralBlock extends DirectionalBlock {
             level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
     }
 
-    // Walk FACING until it lands on the rotor block, that pos is the master
     public static BlockPos getMaster(BlockGetter level, BlockPos pos, BlockState state) {
-        Direction dir = state.getValue(FACING);
-        BlockPos next = pos.relative(dir);
+        return getMaster(level, pos, state, MAX_CHAIN_LENGTH);
+    }
+
+    private static BlockPos getMaster(BlockGetter level, BlockPos pos, BlockState state, int hopsLeft) {
+        BlockPos next = pos.relative(state.getValue(FACING));
         BlockState nextState = level.getBlockState(next);
-        if (nextState.getBlock() instanceof TurbineRotorStructuralBlock)
-            return getMaster(level, next, nextState);
+        if (hopsLeft > 0 && nextState.getBlock() instanceof TurbineRotorStructuralBlock)
+            return getMaster(level, next, nextState, hopsLeft - 1);
         return next;
     }
 
-    // The FACING chain has to reach a rotor whose axis is perpendicular to this filler plane
     public static boolean stillValid(BlockGetter level, BlockPos pos, BlockState state) {
-        if (!(state.getBlock() instanceof TurbineRotorStructuralBlock)) return false;
+        return stillValid(level, pos, state, MAX_CHAIN_LENGTH);
+    }
+
+    private static boolean stillValid(BlockGetter level, BlockPos pos, BlockState state, int hopsLeft) {
+        if (hopsLeft < 0 || !(state.getBlock() instanceof TurbineRotorStructuralBlock)) return false;
         Direction dir = state.getValue(FACING);
         BlockPos next = pos.relative(dir);
         BlockState nextState = level.getBlockState(next);
         if (nextState.getBlock() instanceof TurbineRotorStructuralBlock)
-            return stillValid(level, next, nextState);
+            return stillValid(level, next, nextState, hopsLeft - 1);
         return CNBlocks.isTurbineRotor(nextState)
                 && nextState.getValue(TurbineRotorBlock.AXIS) != dir.getAxis();
     }
 
     @Override
-    public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        return false;
-    }
-
-    // Invisible, so kill the fallback (missing texture) landing particles
-    @Override
     public boolean addLandingEffects(BlockState state, ServerLevel level, BlockPos pos, BlockState state2,
-                                     net.minecraft.world.entity.LivingEntity entity, int numberOfParticles) {
+                                     LivingEntity entity, int numberOfParticles) {
         return true;
     }
 
@@ -134,21 +136,19 @@ public class TurbineRotorStructuralBlock extends DirectionalBlock {
     public void initializeClient(Consumer<IClientBlockExtensions> consumer) {
         consumer.accept(new IClientBlockExtensions() {
             @Override
-            public boolean addHitEffects(BlockState state, Level level, HitResult target,
-                                         net.minecraft.client.particle.ParticleEngine manager) {
+            public boolean addHitEffects(BlockState state, Level level, HitResult target, ParticleEngine manager) {
                 return true;
             }
 
             @Override
-            public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos,
-                                             net.minecraft.client.particle.ParticleEngine manager) {
+            public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
                 return true;
             }
         });
     }
 
     @Override
-    protected com.mojang.serialization.MapCodec<? extends DirectionalBlock> codec() {
+    protected MapCodec<? extends DirectionalBlock> codec() {
         return simpleCodec(TurbineRotorStructuralBlock::new);
     }
 }

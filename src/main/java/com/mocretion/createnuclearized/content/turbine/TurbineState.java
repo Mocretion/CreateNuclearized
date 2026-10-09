@@ -1,12 +1,8 @@
 package com.mocretion.createnuclearized.content.turbine;
 
-import java.util.Locale;
+public enum TurbineState {
 
-import net.minecraft.util.StringRepresentable;
-
-public enum TurbineState implements StringRepresentable {
-
-    STOPPED("Stopped", 0xC0392B),
+    STOPPED("Stopped", 0xC0392B),  // Color used in UI
     IDLE("Idle", 0xB8860B),
     RUNNING("Running", 0x2E8B57);
 
@@ -16,11 +12,6 @@ public enum TurbineState implements StringRepresentable {
     TurbineState(String label, int color) {
         this.label = label;
         this.color = color;
-    }
-
-    @Override
-    public String getSerializedName() {
-        return name().toLowerCase(Locale.ROOT);
     }
 
     public String label() {

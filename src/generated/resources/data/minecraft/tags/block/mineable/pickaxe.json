@@ -7,8 +7,10 @@
     "createnuclearized:heated_salt_output_valve",
     "createnuclearized:reactor_casing_encased_shaft",
     "createnuclearized:reactor_casing_encased_cogwheel",
+    "createnuclearized:reactor_casing_encased_large_cogwheel",
     "createnuclearized:reactor_encased_chain_drive",
     "createnuclearized:control_rod",
+    "createnuclearized:precision_unmixer",
     "createnuclearized:reactor_monitor",
     "createnuclearized:graphite_block",
     "createnuclearized:beryllium_block",
@@ -24,6 +26,10 @@
     "createnuclearized:turbine_rotor_structural",
     "createnuclearized:turbine_diaphragm",
     "createnuclearized:contained_blaze_burner",
-    "createnuclearized:exhaust_hood"
+    "createnuclearized:evaporation_basin",
+    "createnuclearized:exhaust_hood",
+    "createnuclearized:thorium_ore",
+    "createnuclearized:deepslate_thorium_ore",
+    "createnuclearized:sculk_uranium_ore"
   ]
 }

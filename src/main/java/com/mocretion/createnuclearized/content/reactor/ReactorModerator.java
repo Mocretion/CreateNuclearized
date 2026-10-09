@@ -11,7 +11,6 @@ public final class ReactorModerator {
 
     private ReactorModerator() {}
 
-    /** mB/tick a bridging instance of this block adds, or 0 if it isnt a moderator */
     public static double rate(BlockState state) {
         if (state.is(CNBlocks.GRAPHITE_BLOCK.get())) return GRAPHITE_RATE;
         if (state.is(CNBlocks.BERYLLIUM_BLOCK.get())) return BERYLLIUM_RATE;

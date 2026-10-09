@@ -31,7 +31,6 @@ public class TurbineRotorVisual extends KineticBlockEntityVisual<TurbineRotorBlo
                 .setPosition(getVisualPosition());
         rotor.setChanged();
 
-        // Same base orientation as the disc, but left at speed 0 (and no rotation offset) so it never turns
         casing = instancerProvider().instancer(AllInstanceTypes.ROTATING, Models.partial(TurbineRotorPartials.forRadiusStatic(radius)))
                 .createInstance()
                 .rotateToFace(Direction.UP, axis)
@@ -42,7 +41,6 @@ public class TurbineRotorVisual extends KineticBlockEntityVisual<TurbineRotorBlo
 
     @Override
     public void update(float pt) {
-        // Re run setup so the disc picks up speed changes; the casing never needs it
         rotor.setup(blockEntity).setChanged();
     }
 

@@ -27,8 +27,6 @@ public class TurbineRotorRenderer extends KineticBlockEntityRenderer<TurbineRoto
         super(context);
     }
 
-    // Draw the stationary nacelle first, then let the base kinetic renderer spin the disc via getRotatedModel. Skipped when Flywheel is
-    // drawing instead (TurbineRotorVisual handles both parts there), matching the same guard in the base renderSafe
     @Override
     protected void renderSafe(TurbineRotorBlockEntity be, float partialTicks, PoseStack ms,
                               MultiBufferSource buffer, int light, int overlay) {
@@ -53,7 +51,6 @@ public class TurbineRotorRenderer extends KineticBlockEntityRenderer<TurbineRoto
                 () -> buildOriented(TurbineRotorPartials.forRadiusStatic(radius).get(), axis));
     }
 
-    // The wheel is authored facing up (disc in XZ), so turn it to face along the block axis
     private static SuperByteBuffer buildOriented(BakedModel model, Axis axis) {
         Direction dir = Direction.fromAxisAndDirection(axis, AxisDirection.POSITIVE);
         PoseStack transform = CachedBuffers.rotateToFaceVertical(dir).get();

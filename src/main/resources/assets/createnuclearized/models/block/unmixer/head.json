@@ -1,0 +1,323 @@
+{
+	"format_version": "26.3",
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"ambientocclusion": false,
+	"render_type": "minecraft:cutout",
+	"textures": {
+		"1": "createnuclearized:block/unmixer_surface",
+		"6": "create:block/mixer_head",
+		"particle": "createnuclearized:block/unmixer_surface"
+	},
+	"elements": [
+		{
+			"name": "MixerCenter",
+			"from": [
+				7,
+				-4,
+				7
+			],
+			"to": [
+				9,
+				8,
+				9
+			],
+			"rotation": {
+				"angle": 0,
+				"axis": "y",
+				"origin": [
+					8,
+					7,
+					8
+				]
+			},
+			"faces": {
+				"north": {
+					"uv": [
+						12,
+						0,
+						14,
+						12
+					],
+					"texture": "#6"
+				},
+				"east": {
+					"uv": [
+						12,
+						0,
+						14,
+						12
+					],
+					"texture": "#6"
+				},
+				"south": {
+					"uv": [
+						12,
+						0,
+						14,
+						12
+					],
+					"texture": "#6"
+				},
+				"west": {
+					"uv": [
+						12,
+						0,
+						14,
+						12
+					],
+					"texture": "#6"
+				},
+				"down": {
+					"uv": [
+						12,
+						14,
+						14,
+						16
+					],
+					"texture": "#6"
+				}
+			}
+		},
+		{
+			"name": "MixerSurface3",
+			"from": [
+				3,
+				-4,
+				3
+			],
+			"to": [
+				13,
+				-4,
+				13
+			],
+			"rotation": {
+				"angle": 0,
+				"axis": "z",
+				"origin": [
+					8,
+					-4,
+					8
+				]
+			},
+			"faces": {
+				"north": {
+					"uv": [
+						1.5,
+						6,
+						6.5,
+						6.5
+					],
+					"texture": "#1"
+				},
+				"east": {
+					"uv": [
+						1.5,
+						1.5,
+						2,
+						6.5
+					],
+					"rotation": 90,
+					"texture": "#1"
+				},
+				"south": {
+					"uv": [
+						1.5,
+						1.5,
+						6.5,
+						2
+					],
+					"texture": "#1"
+				},
+				"west": {
+					"uv": [
+						6,
+						1.5,
+						6.5,
+						6.5
+					],
+					"rotation": 270,
+					"texture": "#1"
+				},
+				"up": {
+					"uv": [
+						1.5,
+						1.5,
+						6.5,
+						6.5
+					],
+					"texture": "#1"
+				},
+				"down": {
+					"uv": [
+						1.5,
+						1.5,
+						6.5,
+						6.5
+					],
+					"texture": "#1"
+				}
+			}
+		},
+		{
+			"name": "MixerSurface2",
+			"from": [
+				4,
+				-1,
+				4
+			],
+			"to": [
+				12,
+				-1,
+				12
+			],
+			"rotation": {
+				"angle": 22.5,
+				"axis": "z",
+				"origin": [
+					8,
+					-1,
+					8
+				]
+			},
+			"faces": {
+				"north": {
+					"uv": [
+						10,
+						5.5,
+						14,
+						6
+					],
+					"texture": "#1"
+				},
+				"east": {
+					"uv": [
+						10,
+						2,
+						10.5,
+						6
+					],
+					"rotation": 90,
+					"texture": "#1"
+				},
+				"south": {
+					"uv": [
+						10,
+						2,
+						14,
+						2.5
+					],
+					"texture": "#1"
+				},
+				"west": {
+					"uv": [
+						13.5,
+						2,
+						14,
+						6
+					],
+					"rotation": 270,
+					"texture": "#1"
+				},
+				"up": {
+					"uv": [
+						10,
+						2,
+						14,
+						6
+					],
+					"texture": "#1"
+				},
+				"down": {
+					"uv": [
+						10,
+						2,
+						14,
+						6
+					],
+					"texture": "#1"
+				}
+			}
+		},
+		{
+			"name": "MixerSurface1",
+			"from": [
+				3,
+				4,
+				3
+			],
+			"to": [
+				13,
+				4,
+				13
+			],
+			"rotation": {
+				"angle": -22.5,
+				"axis": "z",
+				"origin": [
+					8,
+					4,
+					8
+				]
+			},
+			"faces": {
+				"north": {
+					"uv": [
+						1.5,
+						6,
+						6.5,
+						6.5
+					],
+					"texture": "#1"
+				},
+				"east": {
+					"uv": [
+						1.5,
+						1.5,
+						2,
+						6.5
+					],
+					"rotation": 90,
+					"texture": "#1"
+				},
+				"south": {
+					"uv": [
+						1.5,
+						1.5,
+						6.5,
+						2
+					],
+					"texture": "#1"
+				},
+				"west": {
+					"uv": [
+						6,
+						1.5,
+						6.5,
+						6.5
+					],
+					"rotation": 270,
+					"texture": "#1"
+				},
+				"up": {
+					"uv": [
+						1.5,
+						1.5,
+						6.5,
+						6.5
+					],
+					"texture": "#1"
+				},
+				"down": {
+					"uv": [
+						1.5,
+						1.5,
+						6.5,
+						6.5
+					],
+					"texture": "#1"
+				}
+			}
+		}
+	]
+}

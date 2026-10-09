@@ -1,0 +1,10 @@
+{
+  "values": [
+    "createnuclearized:flowing_spent_uranium_salt",
+    "createnuclearized:spent_uranium_salt",
+    "createnuclearized:flowing_spent_plutonium_salt",
+    "createnuclearized:spent_plutonium_salt",
+    "createnuclearized:flowing_spent_thorium_uranium_salt",
+    "createnuclearized:spent_thorium_uranium_salt"
+  ]
+}

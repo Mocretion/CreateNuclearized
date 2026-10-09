@@ -1,0 +1,10 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    { "type": "neoforge:single", "amount": 900, "fluid": "createnuclearized:liquid_thorium" },
+    { "type": "neoforge:single", "amount": 100, "fluid": "createnuclearized:enriched_liquid_uranium" }
+  ],
+  "results": [
+    { "amount": 1000, "id": "createnuclearized:liquid_thorium_uranium" }
+  ]
+}

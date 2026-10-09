@@ -2,6 +2,8 @@ package com.mocretion.createnuclearized.content.reactor;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.mocretion.createnuclearized.registry.CNDataComponents;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 
@@ -23,10 +25,7 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
 public class ReactorFluidValveBlockEntity extends BlockEntity implements IHaveGoggleInformation {
 
-    // Tank size (mB) on an input valve
     public static final int CAPACITY = 2000;
-    // An output valve only holds the sliver of molten its about to convert, so its molten buffer is tiny; heatedTank is the one the player
-    // drains
     public static final int OUTPUT_MOLTEN_CAPACITY = 100;
     public static final int OUTPUT_HEATED_CAPACITY = 500;
 
@@ -34,17 +33,14 @@ public class ReactorFluidValveBlockEntity extends BlockEntity implements IHaveGo
     private final FluidTank heatedTank;
     private final IFluidHandler fluidHandler = new ValveFluidHandler();
 
-    // Last tick we sent a client sync, so many changes in one tick collapse to one packet
     private long lastSyncTick = Long.MIN_VALUE;
 
-    // Cap on the fractional mB backlog, so a starved channel cant burst convert when salt returns
     private static final double RATE_ACCUM_CAP = 10.0;
 
-    // Per channel stats the controller computes from the layout (output valves only)
-    private int burn;    // fraction of fuel that reacts; drives heat and leftover
-    private int purity;  // share of burned material that becomes generated vs byproducts
-    private double rate; // conversion rate in mB/tick (fractional; 0 with no moderators)
-    private double rateAccumulator; // fractional mB backlog for rate; not persisted
+    private int burn;
+    private int purity;
+    private double rate;
+    private double rateAccumulator;
 
     public ReactorFluidValveBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -79,9 +75,6 @@ public class ReactorFluidValveBlockEntity extends BlockEntity implements IHaveGo
         return heatedTank.getFluidAmount();
     }
 
-    // Per channel stats, set by the controller from the reactor layout
-
-    /** Store this channels burn/purity/rate; syncs to clients on a change */
     public void setStats(int burn, int purity, double rate) {
         boolean changed = this.burn != burn || this.purity != purity || this.rate != rate;
         this.burn = burn;
@@ -91,42 +84,31 @@ public class ReactorFluidValveBlockEntity extends BlockEntity implements IHaveGo
             notifyContentsChanged();
     }
 
-    public int getBurn() {
-        return burn;
-    }
-
-    public int getPurity() {
-        return purity;
+    public void clearStats() {
+        rateAccumulator = 0;
+        setStats(0, 0, 0);
     }
 
     public double getRate() {
         return rate;
     }
 
-    /** True once the controller has assigned stats, i.e. this is a formed reactors channel */
     public boolean hasStats() {
         return burn != 0 || purity != 0 || rate != 0;
     }
 
-    /** Advance the backlog by one ticks rate (capped) */
     public void advanceRate() {
         rateAccumulator = Math.min(RATE_ACCUM_CAP, rateAccumulator + rate);
     }
 
-    /** Whole mB available to convert from the backlog */
     public int pendingWholeMb() {
         return (int) rateAccumulator;
     }
 
-    /** Drop mb from the backlog once converted */
     public void consumePending(int mb) {
         rateAccumulator = Math.max(0, rateAccumulator - mb);
     }
 
-    /**
-     * A plain BlockEntity doesnt sync on setChanged() alone, so mark dirty and push the tank NBT to tracking clients (the goggle overlay
-     * reads heatedTanks SaltStats there). Deduped per tick so the pump fill, player drain, and conversion in one tick send a single packet
-     */
     public void notifyContentsChanged() {
         setChanged();
         if (level == null || level.isClientSide) return;
@@ -170,7 +152,6 @@ public class ReactorFluidValveBlockEntity extends BlockEntity implements IHaveGo
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
             FluidTank tank = isInput() ? moltenTank : heatedTank;
-            // Match components too: heated salt carries SaltStats, so a request for one batch must not hand back a differently stamped one
             if (!FluidStack.isSameFluidSameComponents(resource, tank.getFluid())) return FluidStack.EMPTY;
             return doDrain(tank, resource.getAmount(), action);
         }
@@ -188,10 +169,6 @@ public class ReactorFluidValveBlockEntity extends BlockEntity implements IHaveGo
         }
     }
 
-    /**
-     * Goggle overlay: Create's standard tank readout, plus the buffered heated salts SaltStats when present
-     * Only output valves hold heated salt, so the stats block just doesnt show on inputs
-     */
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         containedFluidTooltip(tooltip, isPlayerSneaking, fluidHandler);
@@ -200,27 +177,21 @@ public class ReactorFluidValveBlockEntity extends BlockEntity implements IHaveGo
         SaltStats stats = heatedTank.getFluid().get(CNDataComponents.SALT_STATS.get());
         if (stats != null)
             SaltStatsTooltip.append(tooltip, stats, fuel);
-        // Output valves also show this channels own burn/purity/rate
         if (!isInput() && hasStats())
             SaltStatsTooltip.appendChannel(tooltip, burn, purity, rate, fuel);
         return true;
     }
 
-    /** The fuel this valve is handling, read from its heated (output) or molten (input) salt, or null */
-    private ReactorFuel displayFuel() {
-        FluidStack heated = heatedTank.getFluid();
-        if (!heated.isEmpty()) {
-            ReactorFuel out = ReactorFuel.forOutput(heated.getFluid());
-            if (out != null) return out;
-        }
-        FluidStack molten = moltenTank.getFluid();
-        if (!molten.isEmpty() && ReactorFuel.isInput(molten.getFluid())) return ReactorFuel.forInput(molten.getFluid());
-        return null;
+    @Nullable
+    ReactorFuel displayFuel() {
+        ReactorFuel spent = ReactorFuel.forOutput(heatedTank.getFluid().getFluid());
+        return spent != null ? spent : moltenFuel();
     }
 
-    // Client sync
-    // A plain BlockEntity doesnt sync on setChanged(), so push the tank NBT (which carries the heated salts SaltStats) to clients for the
-    // goggle overlay
+    @Nullable
+    ReactorFuel moltenFuel() {
+        return ReactorFuel.forInput(moltenTank.getFluid().getFluid());
+    }
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {

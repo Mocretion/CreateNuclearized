@@ -23,7 +23,6 @@ public class HazmatHelmetItem extends ArmorItem {
         super(ArmorMaterials.GOLD, ArmorItem.Type.HELMET, properties);
     }
 
-    // Right clicking a lit blaze burner caps the blaze with the helmet, turning it into a contained blaze burner
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
@@ -31,7 +30,6 @@ public class HazmatHelmetItem extends ArmorItem {
         BlockState state = level.getBlockState(pos);
 
         if (!state.is(AllBlocks.BLAZE_BURNER.get())) return InteractionResult.PASS;
-        // Needs an actual blaze in there to wear it
         if (state.getValue(BlazeBurnerBlock.HEAT_LEVEL) == HeatLevel.NONE) return InteractionResult.PASS;
 
         if (level.isClientSide) return InteractionResult.SUCCESS;

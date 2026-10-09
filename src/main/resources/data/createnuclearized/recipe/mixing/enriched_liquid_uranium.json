@@ -1,0 +1,12 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "heated",
+  "ingredients": [
+    { "type": "neoforge:single", "amount": 250, "fluid": "createnuclearized:liquid_uranium" },
+    { "item": "minecraft:glowstone_dust" },
+    { "item": "minecraft:glowstone_dust" }
+  ],
+  "results": [
+    { "amount": 250, "id": "createnuclearized:enriched_liquid_uranium" }
+  ]
+}

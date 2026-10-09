@@ -15,28 +15,28 @@ public final class SaltStatsTooltip {
 
     private SaltStatsTooltip() {}
 
-    /** Append the "Heated Salt Composition" header and a line per non trivial stat */
     public static void append(List<Component> tooltip, SaltStats stats, @Nullable ReactorFuel fuel) {
-        lang("gui.goggles.salt_stats").style(ChatFormatting.WHITE).forGoggles(tooltip);
-        statLine(tooltip, "gui.goggles.salt_heat", stats.heat(), "°", null);
-        statLineIfNonzero(tooltip, "gui.goggles.salt_uranium", stats.uranium(), "%",
-                role(fuel, ReactorFuel.Element.URANIUM));
-        statLineIfNonzero(tooltip, "gui.goggles.salt_plutonium", stats.plutonium(), "%",
-                role(fuel, ReactorFuel.Element.PLUTONIUM));
-        statLineIfNonzero(tooltip, "gui.goggles.salt_thorium", stats.thorium(), "%",
-                role(fuel, ReactorFuel.Element.THORIUM));
-        statLineIfNonzero(tooltip, "gui.goggles.salt_byproducts", stats.byproducts(), "%", null);
+        append(tooltip, stats, fuel, "gui.goggles.salt_stats");
     }
 
-    /**
-     * Append an output valves own per channel knobs (burn and purity, what the player tunes with moderators/coolers), the heat that burn
-     * makes, and its rate. Purity is skipped for a fuel that generates nothing, where it does nothing
-     */
+    public static void append(List<Component> tooltip, SaltStats stats, @Nullable ReactorFuel fuel, String headerKey) {
+        lang(headerKey).style(ChatFormatting.WHITE).forGoggles(tooltip);
+        statLine(tooltip, "gui.goggles.salt_heat", stats.heat(), "°", null);
+        if (fuel != null) {
+            elementLine(tooltip, stats, fuel.unconsumed(), fuel);
+            elementLine(tooltip, stats, fuel.bred(), fuel);
+        } else {
+            for (ReactorFuel.Element element : ReactorFuel.Element.values())
+                statLineIfNonzero(tooltip, elementKey(element), stats.amount(element), "%", null);
+        }
+        statLineIfNonzero(tooltip, "gui.goggles.salt_off_gas", stats.offGas(), "%", null);
+    }
+
     public static void appendChannel(List<Component> tooltip, int burn, int purity, double rate,
             @Nullable ReactorFuel fuel) {
         lang("gui.goggles.salt_channel").style(ChatFormatting.WHITE).forGoggles(tooltip);
         statLine(tooltip, "gui.goggles.salt_burn", burn, "%", null);
-        if (fuel == null || fuel.generated() != null)
+        if (fuel == null || fuel.bred() != null)
             statLine(tooltip, "gui.goggles.salt_purity", purity, "%", null);
         if (fuel != null)
             statLine(tooltip, "gui.goggles.salt_heat", fuel.heatFor(burn), "°", null);
@@ -47,12 +47,16 @@ public final class SaltStatsTooltip {
                 .forGoggles(tooltip, 1);
     }
 
-    @Nullable
-    private static String role(@Nullable ReactorFuel fuel, ReactorFuel.Element element) {
-        return fuel == null ? null : fuel.role(element);
+    private static void elementLine(List<Component> tooltip, SaltStats stats, @Nullable ReactorFuel.Element element,
+            ReactorFuel fuel) {
+        if (element == null) return;
+        statLineIfNonzero(tooltip, elementKey(element), stats.amount(element), "%", fuel.role(element));
     }
 
-    /** Trim a rate to at most 4 decimals with no trailing zeros, e.g. 0.05 or 0.0075 */
+    private static String elementKey(ReactorFuel.Element element) {
+        return "gui.goggles.salt_" + element.name().toLowerCase(java.util.Locale.ROOT);
+    }
+
     private static String formatRate(double rate) {
         String s = String.format(java.util.Locale.ROOT, "%.4f", rate);
         if (s.contains("."))

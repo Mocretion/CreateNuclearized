@@ -24,13 +24,11 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
 public class SteamInputValveBlockEntity extends BlockEntity implements IHaveGoggleInformation {
 
-    // Steam buffer (mB) the player pipes into; the running turbine drains it
     public static final int CAPACITY = 4000;
 
     private final FluidTank steamTank = new FluidTank(CAPACITY, s -> s.getFluid() == CNFluids.pressurizedSteam());
     private final IFluidHandler fluidHandler = new SteamFluidHandler();
 
-    // Last tick we pushed a client sync, so many changes in one tick collapse to one packet
     private long lastSyncTick = Long.MIN_VALUE;
 
     public SteamInputValveBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -49,7 +47,6 @@ public class SteamInputValveBlockEntity extends BlockEntity implements IHaveGogg
         return steamTank.getFluidAmount();
     }
 
-    /** Drain up to max mB of steam for the turbine to use; returns what it actually got */
     public int consume(int max) {
         FluidStack drained = steamTank.drain(max, FluidAction.EXECUTE);
         if (!drained.isEmpty())
@@ -57,8 +54,6 @@ public class SteamInputValveBlockEntity extends BlockEntity implements IHaveGogg
         return drained.getAmount();
     }
 
-    // A plain BlockEntity doesnt sync on setChanged() alone, so mark dirty and push the tank NBT to tracking clients
-    // (the goggle overlay reads it). Deduped per tick so a fill and a drain in one tick send a single packet
     public void notifyContentsChanged() {
         setChanged();
         if (level == null || level.isClientSide) return;
@@ -123,8 +118,6 @@ public class SteamInputValveBlockEntity extends BlockEntity implements IHaveGogg
         containedFluidTooltip(tooltip, isPlayerSneaking, fluidHandler);
         return true;
     }
-
-    // Client sync: push the tank NBT to clients for the goggle overlay
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {

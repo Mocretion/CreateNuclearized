@@ -7,25 +7,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class TurbineGeneratorBlockEntity extends GeneratingKineticBlockEntity {
 
-    // Output speed while running Provisional, tuned later
     private static final float SPEED_RPM = 160f;
-    // Stress capacity per rotor cell, so a bigger/longer turbine supplies more SU Provisional
-    private static final float CAPACITY_PER_BLADE_CELL = 2f;
+    private static final int DRIVE_TIMEOUT = 10;
 
-    // Rotor cells across the turbine, drives stress capacity
-    private int bladeCells;
-    // Started by the controller
-    private boolean running;
-    // Whether steam is being fed this moment; gates the speed without changing the network topology
-    private boolean hasSteam;
-    // Counts lazy ticks (every 10 game ticks) so the structure self check runs roughly every 3-4 seconds as a fallback
-    private int shellCheckTimer;
+    private float stressCapacity;
+    private int driveTimer = DRIVE_TIMEOUT;
 
     public TurbineGeneratorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -33,82 +25,51 @@ public class TurbineGeneratorBlockEntity extends GeneratingKineticBlockEntity {
 
     @Override
     public float getGeneratedSpeed() {
-        if (!running || !hasSteam)
-            return 0;
-        return SPEED_RPM;
+        return stressCapacity > 0 ? SPEED_RPM : 0;
     }
 
     @Override
     public float calculateAddedStressCapacity() {
-        float capacity = bladeCells * CAPACITY_PER_BLADE_CELL;
-        this.lastCapacityProvided = capacity;
-        return capacity;
+        this.lastCapacityProvided = stressCapacity;
+        return stressCapacity;
     }
 
-    // Controller hooks
+    public void drive(float stressCapacity) {
+        driveTimer = DRIVE_TIMEOUT;
+        setStressCapacity(stressCapacity);
+    }
 
-    /** Start generating. Aligns the generator axis down the turbine and reads the rotor count. Called by the controller on start */
-    public void startTurbine() {
-        if (running || level == null)
-            return;
-        TurbineMultiblock.Result result = TurbineMultiblock.validate(level, worldPosition);
-        if (!result.valid())
-            return;
-        // Face the axis down the shaft so the internal shaft and rotors are on our network
-        Axis axis = result.depthAxis();
+    public void alignTo(Axis axis) {
         BlockState state = getBlockState();
         if (state.getValue(RotatedPillarKineticBlock.AXIS) != axis)
-            level.setBlock(worldPosition, state.setValue(RotatedPillarKineticBlock.AXIS, axis), Block.UPDATE_ALL);
-        bladeCells = result.bladeCells();
-        running = true;
-        setChanged();
-        updateGeneratedRotation();
+            switchToBlockState(level, worldPosition, state.setValue(RotatedPillarKineticBlock.AXIS, axis));
     }
 
-    /** Stop generating. Called by the controller on stop or when the shape breaks */
-    public void stopTurbine() {
-        if (!running)
-            return;
-        running = false;
-        setChanged();
-        updateGeneratedRotation();
-    }
-
-    /** Gate the speed on steam. Only re resolves the network on a change */
-    public void setHasSteam(boolean hasSteam) {
-        if (this.hasSteam == hasSteam)
-            return;
-        this.hasSteam = hasSteam;
-        if (running)
-            updateGeneratedRotation();
-    }
-
-    // Self guard: stop if the turbine breaks (e.g. the controller is gone and cant tell us to stop)
     @Override
-    public void lazyTick() {
-        super.lazyTick();
-        if (level == null || level.isClientSide || !running)
-            return;
-        if (++shellCheckTimer < 7)
-            return;
-        shellCheckTimer = 0;
-        if (!TurbineMultiblock.validate(level, worldPosition).valid())
-            stopTurbine();
+    public void tick() {
+        super.tick();
+        if (level == null || level.isClientSide) return;
+        if (driveTimer > 0)
+            driveTimer--;
+        else
+            setStressCapacity(0);
+    }
+
+    private void setStressCapacity(float stressCapacity) {
+        if (Mth.equal(this.stressCapacity, stressCapacity)) return;
+        this.stressCapacity = stressCapacity;
+        updateGeneratedRotation();
     }
 
     @Override
     public void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        compound.putInt("BladeCells", bladeCells);
-        compound.putBoolean("Running", running);
-        compound.putBoolean("HasSteam", hasSteam);
+        compound.putFloat("StressCapacity", stressCapacity);
         super.write(compound, registries, clientPacket);
     }
 
     @Override
     protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        bladeCells = compound.getInt("BladeCells");
-        running = compound.getBoolean("Running");
-        hasSteam = compound.getBoolean("HasSteam");
+        stressCapacity = compound.getFloat("StressCapacity");
         super.read(compound, registries, clientPacket);
     }
 }

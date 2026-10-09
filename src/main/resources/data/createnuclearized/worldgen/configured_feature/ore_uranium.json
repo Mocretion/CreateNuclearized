@@ -1,0 +1,8 @@
+{
+  "type": "createnuclearized:ore_clump",
+  "config": {
+    "target": { "predicate_type": "minecraft:block_match", "block": "minecraft:sculk" },
+    "state": { "Name": "createnuclearized:sculk_uranium_ore" },
+    "size": { "type": "minecraft:uniform", "min_inclusive": 1, "max_inclusive": 3 }
+  }
+}

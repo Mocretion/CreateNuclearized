@@ -17,6 +17,6 @@ public class ReactorEncasedCogwheelBlock extends EncasedCogwheelBlock {
 
     @Override
     public BlockEntityType<? extends SimpleKineticBlockEntity> getBlockEntityType() {
-        return CNBlockEntities.REACTOR_ENCASED_COGWHEEL.get();
+        return isLarge ? CNBlockEntities.REACTOR_ENCASED_LARGE_COGWHEEL.get() : CNBlockEntities.REACTOR_ENCASED_COGWHEEL.get();
     }
 }

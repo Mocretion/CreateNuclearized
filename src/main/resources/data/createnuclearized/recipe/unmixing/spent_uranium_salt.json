@@ -1,0 +1,5 @@
+{
+  "type": "createnuclearized:unmixing",
+  "input": { "fluid": "createnuclearized:spent_uranium_salt" },
+  "amount": 1000
+}

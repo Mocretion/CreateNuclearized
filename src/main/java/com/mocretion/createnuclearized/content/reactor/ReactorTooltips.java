@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Locale;
 
 import com.mocretion.createnuclearized.CreateNuclearized;
+import com.mocretion.createnuclearized.registry.CNBlocks;
+import com.mocretion.createnuclearized.registry.CNDataComponents;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
@@ -27,7 +29,18 @@ public final class ReactorTooltips {
         ItemStack stack = event.getItemStack();
         List<Component> lines = event.getToolTip();
 
-        // Fuel salt buckets show that fuels baseline stats
+        if (stack.getItem() == CNBlocks.PRECISION_UNMIXER.get().asItem()) {
+            lines.add(Component.translatable("createnuclearized.tooltip.precision_unmixer.flavor")
+                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            return;
+        }
+
+        SaltStats stats = stack.get(CNDataComponents.SALT_STATS.get());
+        if (stats != null) {
+            SaltStatsTooltip.append(lines, stats, spentBucketFuel(stack));
+            return;
+        }
+
         for (ReactorFuel fuel : ReactorFuel.values()) {
             if (stack.getItem() == fuel.inputFluid().getBucket()) {
                 appendFuelBase(lines, fuel);
@@ -48,9 +61,15 @@ public final class ReactorTooltips {
                 return;
             }
         }
-        // The water bucket represents the water source modifier (no placeable water block item)
         if (stack.is(Items.WATER_BUCKET))
             appendModifier(lines, ReactorModifier.WATER_SOURCE);
+    }
+
+    private static ReactorFuel spentBucketFuel(ItemStack stack) {
+        for (ReactorFuel fuel : ReactorFuel.values()) {
+            if (stack.getItem() == fuel.outputFluid().getBucket()) return fuel;
+        }
+        return null;
     }
 
     private static void appendModerator(List<Component> lines, double rate) {
@@ -83,19 +102,15 @@ public final class ReactorTooltips {
                 .withStyle(ChatFormatting.GRAY));
         lines.add(Component.translatable("createnuclearized.tooltip.fuel.burn", fuel.baseBurn())
                 .withStyle(ChatFormatting.GRAY));
-        if (fuel.generated() != null) {
+        if (fuel.bred() != null) {
             lines.add(Component.translatable("createnuclearized.tooltip.fuel.purity", fuel.basePurity())
                     .withStyle(ChatFormatting.GRAY));
         }
-        addRoleElement(lines, "leftover", fuel.leftover());
-        addRoleElement(lines, "generated", fuel.generated());
+        addRoleElement(lines, "unconsumed", fuel.unconsumed());
+        addRoleElement(lines, "bred", fuel.bred());
         appendBurnPurityHelp(lines);
     }
 
-    /**
-     * Explains burn and purity, on every item that shows those numbers
-     * Collapsed to a "hold Shift" prompt until Shift is down, so it doesnt clutter the tooltip
-     */
     private static void appendBurnPurityHelp(List<Component> lines) {
         if (Screen.hasShiftDown()) {
             lines.add(Component.translatable("createnuclearized.tooltip.help.burn")
@@ -112,7 +127,6 @@ public final class ReactorTooltips {
         }
     }
 
-    /** A "Leftover: Uranium" / "Generated: Plutonium" line, skipped if the fuel has no such element */
     private static void addRoleElement(List<Component> lines, String roleKey, ReactorFuel.Element element) {
         if (element == null) return;
         lines.add(Component.translatable("createnuclearized.tooltip.fuel." + roleKey,
@@ -130,7 +144,6 @@ public final class ReactorTooltips {
         return (value > 0 ? "+" : "") + value;
     }
 
-    /** Signed, trailing zero trimmed rate, e.g. "+0.05" or "+0.0075" */
     private static String signed(double value) {
         String s = String.format(Locale.ROOT, "%.4f", value);
         if (s.contains("."))

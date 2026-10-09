@@ -4,7 +4,7 @@
   "textures": {
     "casing": "createnuclearized:block/reactor_casing",
     "particle": "createnuclearized:block/reactor_casing",
-    "side": "createnuclearized:block/reactor_encased_cogwheel_side",
+    "side": "create:block/andesite_encased_cogwheel_side",
     "4": "createnuclearized:block/reactor_gearbox",
     "1": "createnuclearized:block/reactor_casing"
   }

@@ -1,0 +1,18 @@
+{
+  "type": "createnuclearized:boiling",
+  "input": { "fluid": "minecraft:water" },
+  "gas": "createnuclearized:pressurized_steam",
+  "heater": { "tag": "createnuclearized:spent_salts" },
+  "min_heat": 1,
+  "heat_per_mb": 1000,
+  "max_rate": 5,
+  "heater_result": "cooled",
+  "damage": { "type": "createnuclearized:steam", "amount": 1 },
+  "ignite": 0,
+  "particles": {
+    "particle": { "type": "minecraft:cloud" },
+    "count": 1,
+    "spread": 0.4,
+    "speed": 0.03
+  }
+}

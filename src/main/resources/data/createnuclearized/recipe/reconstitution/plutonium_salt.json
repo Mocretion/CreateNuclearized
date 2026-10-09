@@ -1,0 +1,8 @@
+{
+  "type": "createnuclearized:reconstitution",
+  "input": { "fluid": "createnuclearized:spent_plutonium_salt" },
+  "element": "plutonium",
+  "liquid": "createnuclearized:liquid_plutonium",
+  "result": "createnuclearized:plutonium_salt",
+  "amount": 1000
+}

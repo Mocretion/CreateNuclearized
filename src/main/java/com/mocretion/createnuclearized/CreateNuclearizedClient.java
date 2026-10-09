@@ -3,6 +3,7 @@ package com.mocretion.createnuclearized;
 import com.mocretion.createnuclearized.content.boiler.ContainedBlazeBurnerPartials;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodPartials;
 import com.mocretion.createnuclearized.content.turbine.TurbineRotorPartials;
+import com.mocretion.createnuclearized.content.unmixer.UnmixerPartials;
 import com.mocretion.createnuclearized.content.reactor.ReactorControllerScreen;
 import com.mocretion.createnuclearized.content.reactor.ReactorMonitorScreen;
 import com.mocretion.createnuclearized.content.turbine.TurbineControllerScreen;
@@ -22,16 +23,15 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 @EventBusSubscriber(modid = CreateNuclearized.MODID, value = Dist.CLIENT)
 public class CreateNuclearizedClient {
     public CreateNuclearizedClient(ModContainer container) {
-        // Wire up the built in config screen (Mods screen > this mod > Config)
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
-        // Touch the partial model holders so Flywheel registers them before models bake
         ControlRodPartials.init();
         ContainedBlazeBurnerPartials.init();
         TurbineRotorPartials.init();
+        UnmixerPartials.init();
         CreateNuclearized.LOGGER.info("Create: Nuclearized client setup");
     }
 

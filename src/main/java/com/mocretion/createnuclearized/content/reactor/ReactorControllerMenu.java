@@ -20,18 +20,15 @@ public class ReactorControllerMenu extends AbstractContainerMenu {
     private final Block block;
     private final ReactorControllerBlockEntity be;
 
-    // Client synced display values (static capacities/counts only; no live amounts)
     private int fissileCapacity;
-    private int depletedCapacity;
+    private int spentCapacity;
     private int totalChannels;
 
-    /** Client side: resolve the BE from the synced position */
     public ReactorControllerMenu(int containerId, Inventory playerInventory, BlockPos pos) {
         this(containerId, playerInventory,
                 (ReactorControllerBlockEntity) playerInventory.player.level().getBlockEntity(pos));
     }
 
-    /** Server side */
     public ReactorControllerMenu(int containerId, Inventory playerInventory, ReactorControllerBlockEntity be) {
         super(CNMenuTypes.REACTOR_CONTROLLER.get(), containerId);
         this.be = be;
@@ -49,7 +46,6 @@ public class ReactorControllerMenu extends AbstractContainerMenu {
             addSlot(new Slot(playerInventory, col, invX + col * 18, invY + 58));
         }
 
-        // Sync the running flag to the client so the button can show start/stop
         addDataSlot(new DataSlot() {
             @Override
             public int get() {
@@ -62,13 +58,10 @@ public class ReactorControllerMenu extends AbstractContainerMenu {
             }
         });
 
-        // Sync the reactors buffer capacities and channel count (fixed values, not live levels)
-        // Capacities can pass a signed short with enough valves, so send them wide (two slots)
         addWideInt(be::getFissileCapacity, v -> fissileCapacity = v);
-        addWideInt(be::getDepletedCapacity, v -> depletedCapacity = v);
+        addWideInt(be::getSpentCapacity, v -> spentCapacity = v);
         addDataSlot(syncedInt(be::getTotalChannels, v -> totalChannels = v));
 
-        // Sync the status (stopped / idle / running)
         addDataSlot(syncedInt(be::getStateOrdinal, be::setStateFromNetwork));
     }
 
@@ -90,7 +83,7 @@ public class ReactorControllerMenu extends AbstractContainerMenu {
         };
     }
 
-    // A DataSlot only carries a signed short over the wire, so split values that can exceed ~32k across two slots (low + high 16 bits)
+    /** A DataSlot only carries a signed short, so values past ~32k go across two slots */
     private void addWideInt(java.util.function.IntSupplier getter, java.util.function.IntConsumer setter) {
         int[] parts = new int[2];
         addDataSlot(new DataSlot() {
@@ -127,8 +120,8 @@ public class ReactorControllerMenu extends AbstractContainerMenu {
         return fissileCapacity;
     }
 
-    public int getDepletedCapacity() {
-        return depletedCapacity;
+    public int getSpentCapacity() {
+        return spentCapacity;
     }
 
     public int getTotalChannels() {
@@ -146,7 +139,6 @@ public class ReactorControllerMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        // No machine slots to move into/out of
         return ItemStack.EMPTY;
     }
 

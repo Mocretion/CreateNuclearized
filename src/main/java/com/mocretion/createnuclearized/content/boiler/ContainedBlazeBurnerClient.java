@@ -13,8 +13,6 @@ final class ContainedBlazeBurnerClient {
 
     private ContainedBlazeBurnerClient() {}
 
-    // The angle the blaze should look towards to watch the local player, or NaN when theres no one to watch
-    // Kept here so the common block entity never references Minecraft/LocalPlayer
     static float lookAngle(BlockPos pos) {
         Player player = Minecraft.getInstance().player;
         if (player == null || player.isInvisible())

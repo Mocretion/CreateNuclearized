@@ -14,7 +14,6 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class TurbineControllerScreen extends AbstractContainerScreen<TurbineControllerMenu> {
 
-    // Reuse the reactor controllers window art for now
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             CreateNuclearized.MODID, "textures/gui/reactor_controller.png");
 
@@ -22,6 +21,11 @@ public class TurbineControllerScreen extends AbstractContainerScreen<TurbineCont
     private static final int BUTTON_Y = 51;
     private static final int BUTTON_W = 55;
     private static final int BUTTON_H = 19;
+
+    private static final int LINE_X = 8;
+    private static final int FIRST_LINE_Y = 18;
+    private static final int LINE_HEIGHT = 10;
+    private static final int TEXT_COLOR = 0x404040;
 
     public TurbineControllerScreen(TurbineControllerMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -46,16 +50,18 @@ public class TurbineControllerScreen extends AbstractContainerScreen<TurbineCont
         TurbineState state = menu.getState();
         graphics.drawString(this.font, state.label(), this.titleLabelX, this.titleLabelY, state.color(), false);
 
-        graphics.drawString(this.font, "Stages: " + menu.getStages(), 8, 20, 0x404040, false);
-        graphics.drawString(this.font, "Blade Blocks: " + menu.getBladeCells(), 8, 32, 0x404040, false);
-        graphics.drawString(this.font,
-                "Steam: " + menu.getSteamBuffered() + " / " + menu.getSteamCapacity() + " mB",
-                8, 44, 0x404040, false);
-        graphics.drawString(this.font, "Steam Use: " + menu.getSteamUse() + " mB/t", 8, 56, 0x404040, false);
-        graphics.drawString(this.font, "Speed: " + menu.getGeneratedRpm() + " RPM", 8, 68, 0x404040, false);
+        drawLine(graphics, 0, "Steam: " + menu.getSteamBuffered() + " / " + menu.getSteamCapacity() + " mB");
+        drawLine(graphics, 1, "Steam Use: " + menu.getSteamUse() + " mB/t");
+        drawLine(graphics, 2, "Stages: " + menu.getStages() + ", Blade Blocks: " + menu.getBladeCells());
+        drawLine(graphics, 3, "Output: " + menu.getOutputPercent() + "%");
+        drawLine(graphics, 4, "Speed: " + menu.getGeneratedRpm() + " RPM");
 
         graphics.drawString(this.font, this.playerInventoryTitle,
-                this.inventoryLabelX, this.inventoryLabelY, 0x404040, false);
+                this.inventoryLabelX, this.inventoryLabelY, TEXT_COLOR, false);
+    }
+
+    private void drawLine(GuiGraphics graphics, int line, String text) {
+        graphics.drawString(this.font, text, LINE_X, FIRST_LINE_Y + line * LINE_HEIGHT, TEXT_COLOR, false);
     }
 
     @Override

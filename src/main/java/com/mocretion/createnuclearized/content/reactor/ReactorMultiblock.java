@@ -1,7 +1,9 @@
 package com.mocretion.createnuclearized.content.reactor;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -27,24 +29,26 @@ public final class ReactorMultiblock {
     public static final int MAX_HORIZONTAL = 11;
     public static final int MAX_HEIGHT = 7;
 
-    // Cap on shell blocks the flood fill will visit
-    // Volume of the biggest cuboid over counts its shell, so anything valid stays well under this; a runaway fill trips it instead of
-    // hanging
     private static final int MAX_SHELL_VISITED = MAX_HORIZONTAL * MAX_HORIZONTAL * MAX_HEIGHT;
 
     private ReactorMultiblock() {}
 
-    public record Result(boolean valid, String reason, int size, BlockPos min, BlockPos max) {
-        public static Result fail(String reason) {
-            return new Result(false, reason, 0, BlockPos.ZERO, BlockPos.ZERO);
+    public record Structure(BlockPos min, BlockPos max, BlockPos controller,
+            List<BlockPos> inputValves, List<BlockPos> outputValves, List<BlockPos> controlRods) {}
+
+    public record Result(@Nullable Structure structure, String reason) {
+        public boolean valid() {
+            return structure != null;
         }
 
-        public static Result ok(int size, BlockPos min, BlockPos max) {
-            return new Result(true, "", size, min, max);
+        public static Result fail(String reason) {
+            return new Result(null, reason);
+        }
+
+        public static Result ok(Structure structure) {
+            return new Result(structure, "");
         }
     }
-
-    // Shell predicates
 
     public static boolean isCasing(BlockState state) {
         return state.is(CNBlocks.REACTOR_CASING.get())
@@ -55,12 +59,10 @@ public final class ReactorMultiblock {
         return state.is(CNBlocks.REACTOR_CONTROLLER.get());
     }
 
-    /** Molten salt input valve. The highest ones y caps how far up the plumbing may reach */
     public static boolean isInputValve(BlockState state) {
         return state.is(CNBlocks.MOLTEN_SALT_INPUT_VALVE.get());
     }
 
-    /** Heated salt output valve. One per channel, and it has to sit in the floor */
     public static boolean isOutputValve(BlockState state) {
         return state.is(CNBlocks.HEATED_SALT_OUTPUT_VALVE.get());
     }
@@ -69,7 +71,6 @@ public final class ReactorMultiblock {
         return isInputValve(state) || isOutputValve(state);
     }
 
-    /** Control rods, only allowed in the top face */
     public static boolean isControlRod(BlockState state) {
         return state.is(CNBlocks.CONTROL_ROD.get());
     }
@@ -78,37 +79,35 @@ public final class ReactorMultiblock {
         return state.is(CNBlocks.REACTOR_MONITOR.get());
     }
 
-    /** Encased kinetics that carry rotation through the wall to the interior pump */
     public static boolean isEncasedKinetic(BlockState state) {
         return state.is(CNBlocks.REACTOR_CASING_ENCASED_SHAFT.get())
                 || state.is(CNBlocks.REACTOR_CASING_ENCASED_COGWHEEL.get())
+                || state.is(CNBlocks.REACTOR_CASING_ENCASED_LARGE_COGWHEEL.get())
                 || state.is(CNBlocks.REACTOR_ENCASED_CHAIN_DRIVE.get());
     }
 
-    /** Anything thats allowed to sit in a wall position */
     public static boolean isShellMember(BlockState state) {
         return isCasing(state) || isController(state) || isPort(state) || isControlRod(state)
                 || isMonitor(state) || isEncasedKinetic(state);
     }
 
-    // Interior predicates
-
-    /** Any Create pipe, the pump, or a fluid valve */
     public static boolean isFluidConduit(BlockState state) {
         return state.getBlock() instanceof FluidPipeBlock
                 || state.getBlock() instanceof EncasedPipeBlock
                 || state.getBlock() instanceof SmartFluidPipeBlock
-                || state.getBlock() instanceof AxisPipeBlock // includes the glass fluid pipe
+                || state.getBlock() instanceof AxisPipeBlock
                 || state.getBlock() instanceof FluidValveBlock
                 || state.getBlock() instanceof PumpBlock;
     }
 
-    /** At least one pump has to drive the loop */
+    public static boolean isRodPassable(BlockState state) {
+        return state.isAir() || isFluidConduit(state);
+    }
+
     public static boolean isPump(BlockState state) {
         return state.getBlock() instanceof PumpBlock;
     }
 
-    /** Any Create kinetic block: cogs, shafts, gearbox, pump, our encased variants, and so on */
     public static boolean isKinetic(BlockState state) {
         return state.getBlock() instanceof KineticBlock;
     }
@@ -121,19 +120,12 @@ public final class ReactorMultiblock {
         return ReactorModifier.isModifier(state);
     }
 
-    /** Whats allowed in the hollow interior. Everything else fails validation */
     private static boolean isAllowedInterior(BlockState state) {
         return state.isAir() || isFluidConduit(state) || isKinetic(state)
                 || isModerator(state) || isModifier(state) || state.is(Blocks.WATER);
     }
 
-    /**
-     * Validate the reactor that the shell block at seed belongs to
-     * The seed is usually the controller, but any shell block works: we flood fill out from it, take the bounding box, and check the box is
-     * a proper hollow cuboid with the right ports and a clean interior
-     */
     public static Result validate(LevelAccessor level, BlockPos seed) {
-        // Flood fill the connected shell
         Set<BlockPos> shell = new HashSet<>();
         ArrayDeque<BlockPos> queue = new ArrayDeque<>();
         shell.add(seed.immutable());
@@ -162,7 +154,6 @@ public final class ReactorMultiblock {
             }
         }
 
-        // Bounding box has to be a cuboid within the per axis ranges
         int dx = maxX - minX + 1;
         int dy = maxY - minY + 1;
         int dz = maxZ - minZ + 1;
@@ -174,169 +165,129 @@ public final class ReactorMultiblock {
             return Result.fail("Reactor height must be between " + MIN_SIZE + " and " + MAX_HEIGHT
                     + " (got " + dy + ").");
         }
-        int size = dx; // just a representative dimension; the reactor is a cuboid, not a cube
 
         BlockPos min = new BlockPos(minX, minY, minZ);
         BlockPos max = new BlockPos(maxX, maxY, maxZ);
 
-        // The surface members have to be exactly the shell: full outer minus hollow inner
-        // Count only positions on the box surface: an encased shaft/cog, chain drive or control rod sitting just inside the wall is a valid
-        // interior block, but the flood fill still grabs it (it counts as a shell member), so it mustnt count against the shell total
         long expectedShell = (long) dx * dy * dz - (long) (dx - 2) * (dy - 2) * (dz - 2);
-        long surfaceMembers = 0;
-        for (BlockPos p : shell) {
-            if (p.getX() == minX || p.getX() == maxX || p.getY() == minY || p.getY() == maxY
-                    || p.getZ() == minZ || p.getZ() == maxZ)
-                surfaceMembers++;
-        }
-        if (surfaceMembers != expectedShell) return Result.fail("Shell is incomplete or has extra blocks attached.");
+        long wallMembers = shell.stream().filter(pos -> !isInterior(pos, min, max)).count();
+        if (wallMembers != expectedShell) return Result.fail("Shell is incomplete or has extra blocks attached.");
 
-        // Walk every surface cell, confirm its a shell member, and tally controller/valves
-        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        BlockPos controller = null;
         int controllers = 0;
-        int inputValves = 0;
-        int maxInputLevel = Integer.MIN_VALUE; // top of the plumbing
+        List<BlockPos> inputValves = new ArrayList<>();
+        List<BlockPos> outputValves = new ArrayList<>();
+        List<BlockPos> controlRods = new ArrayList<>();
+        Set<Long> outputColumns = new HashSet<>();
+        int maxInputLevel = Integer.MIN_VALUE;
         boolean anyInputPlumbed = false;
-        Set<Long> outputColumns = new HashSet<>(); // (x,z) of each floor output valve
-        for (int x = minX; x <= maxX; x++) {
-            for (int y = minY; y <= maxY; y++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    boolean onSurface = x == minX || x == maxX
-                            || y == minY || y == maxY
-                            || z == minZ || z == maxZ;
-                    if (!onSurface) continue;
-                    cursor.set(x, y, z);
-                    BlockState state = level.getBlockState(cursor);
-                    if (!isShellMember(state)) return Result.fail("Reactor wall is not solid casing at " + cursor.toShortString() + ".");
-                    if (isControlRod(state) && y != maxY) {
-                        return Result.fail("Control rods must sit in the top face (at " + cursor.toShortString() + ").");
-                    }
-                    if (isController(state))
-                        controllers++;
-                    if (isInputValve(state)) {
-                        inputValves++;
-                        maxInputLevel = Math.max(maxInputLevel, y);
-                        if (isPlumbed(level, cursor.immutable(), min, max))
-                            anyInputPlumbed = true;
-                    }
-                    if (isOutputValve(state)) {
-                        if (y != minY) {
-                            return Result.fail("Depleted-salt output valves must sit in the reactor floor (at "
-                                    + cursor.toShortString() + ").");
-                        }
-                        outputColumns.add(packColumn(x, z));
-                    }
+        for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+            if (isInterior(pos, min, max)) continue;
+            BlockState state = level.getBlockState(pos);
+            if (!isShellMember(state)) return Result.fail("Reactor wall is not solid casing at " + pos.toShortString() + ".");
+            if (isController(state)) {
+                controllers++;
+                controller = pos.immutable();
+            }
+            if (isControlRod(state)) {
+                if (pos.getY() != maxY) return Result.fail("Control rods must sit in the top face (at " + pos.toShortString() + ").");
+                controlRods.add(pos.immutable());
+            }
+            if (isInputValve(state)) {
+                inputValves.add(pos.immutable());
+                maxInputLevel = Math.max(maxInputLevel, pos.getY());
+                if (isPlumbed(level, pos, min, max))
+                    anyInputPlumbed = true;
+            }
+            if (isOutputValve(state)) {
+                if (pos.getY() != minY) {
+                    return Result.fail("Spent-salt output valves must sit in the reactor floor (at "
+                            + pos.toShortString() + ").");
                 }
+                outputValves.add(pos.immutable());
+                outputColumns.add(column(pos));
             }
         }
 
         if (controllers != 1) return Result.fail("Reactor needs exactly one controller (found " + controllers + ").");
-        if (inputValves < 1) return Result.fail("Reactor needs at least one fissile-salt input valve.");
-        if (outputColumns.isEmpty()) return Result.fail("Reactor needs at least one depleted-salt output valve in the floor.");
+        if (inputValves.isEmpty()) return Result.fail("Reactor needs at least one fissile-salt input valve.");
+        if (outputValves.isEmpty()) return Result.fail("Reactor needs at least one spent-salt output valve in the floor.");
 
-        int inputLevel = maxInputLevel; // pipes may reach up to the highest input valve
-
-        // Scan the interior plumbing
         boolean hasPump = false;
         int conduitCount = 0;
-        int floorY = minY + 1; // interior floor, just above the shell floor
-        Set<Long> channelColumns = new HashSet<>(); // (x,z) of each conduit touching the floor
-        for (int x = minX + 1; x < maxX; x++) {
-            for (int y = minY + 1; y < maxY; y++) {
-                for (int z = minZ + 1; z < maxZ; z++) {
-                    cursor.set(x, y, z);
-                    BlockState state = level.getBlockState(cursor);
-                    if (!isAllowedInterior(state)) {
-                        return Result.fail("Reactor interior must be air, pipes, shafts, moderators or modifiers (blocked at "
-                                + cursor.toShortString() + ").");
-                    }
-                    if (isFluidConduit(state)) {
-                        if (y > inputLevel) {
-                            return Result.fail("No pipes allowed above the input valve (at "
-                                    + cursor.toShortString() + ").");
-                        }
-                        conduitCount++;
-                        if (y == floorY)
-                            channelColumns.add(packColumn(x, z));
-                    }
-                    if (isPump(state))
-                        hasPump = true;
-                }
+        int floorY = minY + 1;
+        Set<Long> channelColumns = new HashSet<>();
+        for (BlockPos pos : BlockPos.betweenClosed(min.offset(1, 1, 1), max.offset(-1, -1, -1))) {
+            BlockState state = level.getBlockState(pos);
+            if (!isAllowedInterior(state)) {
+                return Result.fail("Reactor interior must be air, pipes, shafts, moderators or modifiers (blocked at "
+                        + pos.toShortString() + ").");
             }
+            if (isFluidConduit(state)) {
+                if (pos.getY() > maxInputLevel) {
+                    return Result.fail("No pipes allowed above the input valve (at "
+                            + pos.toShortString() + ").");
+                }
+                conduitCount++;
+                if (pos.getY() == floorY)
+                    channelColumns.add(column(pos));
+            }
+            if (isPump(state))
+                hasPump = true;
         }
 
         if (conduitCount == 0) return Result.fail("Run Create fluid pipes down through the reactor interior.");
         if (!hasPump) return Result.fail("Add a Create mechanical pump to drive the salt loop.");
         if (!anyInputPlumbed) return Result.fail("Connect a pipe to the inside of a fissile-salt input valve.");
 
-        // Every floor touching channel needs an output valve beneath it, and vice versa
         for (long col : channelColumns) {
             if (!outputColumns.contains(col)) {
                 return Result.fail("The channel at " + describeColumn(col)
-                        + " needs a depleted-salt output valve in the floor directly beneath it.");
+                        + " needs a spent-salt output valve in the floor directly beneath it.");
             }
         }
         for (long col : outputColumns) {
             if (!channelColumns.contains(col)) {
-                return Result.fail("The depleted-salt output valve at " + describeColumn(col)
+                return Result.fail("The spent-salt output valve at " + describeColumn(col)
                         + " needs a channel reaching down onto it.");
             }
         }
+        for (BlockPos rod : controlRods) {
+            boolean overChannel = outputColumns.contains(column(rod));
+            if (overChannel && !isRodPassable(level.getBlockState(rod.below()))) {
+                return Result.fail("The control rod at " + rod.toShortString()
+                        + " needs air or a pipe directly beneath it.");
+            }
+        }
 
-        return Result.ok(size, min, max);
+        return Result.ok(new Structure(min, max, controller,
+                List.copyOf(inputValves), List.copyOf(outputValves), List.copyOf(controlRods)));
     }
 
-    private static long packColumn(int x, int z) {
-        return (((long) x) << 32) | (z & 0xffffffffL);
+    static long column(BlockPos pos) {
+        return (((long) pos.getX()) << 32) | (pos.getZ() & 0xffffffffL);
     }
 
     private static String describeColumn(long packed) {
         return "[x=" + (int) (packed >> 32) + ", z=" + (int) packed + "]";
     }
 
-    /** True if the valves interior facing neighbour is a pipe */
+    private static boolean isInterior(BlockPos pos, BlockPos min, BlockPos max) {
+        return pos.getX() > min.getX() && pos.getX() < max.getX()
+                && pos.getY() > min.getY() && pos.getY() < max.getY()
+                && pos.getZ() > min.getZ() && pos.getZ() < max.getZ();
+    }
+
     private static boolean isPlumbed(LevelAccessor level, BlockPos valve, BlockPos min, BlockPos max) {
         BlockPos inner = interiorNeighbor(valve, min, max);
         return inner != null && isFluidConduit(level.getBlockState(inner));
     }
 
-    /**
-     * The one neighbour of a face placed block that lies strictly inside the cube, or null if the block sits on an edge or corner (where
-     * theres no single interior neighbour)
-     */
     @Nullable
     private static BlockPos interiorNeighbor(BlockPos pos, BlockPos min, BlockPos max) {
-        BlockPos found = null;
         for (Direction dir : Direction.values()) {
-            BlockPos n = pos.relative(dir);
-            boolean interior = n.getX() > min.getX() && n.getX() < max.getX()
-                    && n.getY() > min.getY() && n.getY() < max.getY()
-                    && n.getZ() > min.getZ() && n.getZ() < max.getZ();
-            if (interior) {
-                if (found != null) {
-                    return null; // more than one, so not a clean face cell
-                }
-                found = n.immutable();
-            }
-        }
-        return found;
-    }
-
-    /** Find the controller on the surface of the given bounds, or null if there isnt one */
-    @Nullable
-    public static BlockPos findController(LevelAccessor level, BlockPos min, BlockPos max) {
-        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-        for (int x = min.getX(); x <= max.getX(); x++) {
-            for (int y = min.getY(); y <= max.getY(); y++) {
-                for (int z = min.getZ(); z <= max.getZ(); z++) {
-                    boolean onSurface = x == min.getX() || x == max.getX()
-                            || y == min.getY() || y == max.getY()
-                            || z == min.getZ() || z == max.getZ();
-                    if (!onSurface) continue;
-                    cursor.set(x, y, z);
-                    if (isController(level.getBlockState(cursor))) return cursor.immutable();
-                }
-            }
+            BlockPos neighbor = pos.relative(dir);
+            if (isInterior(neighbor, min, max)) return neighbor;
         }
         return null;
     }

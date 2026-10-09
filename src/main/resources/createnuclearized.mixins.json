@@ -3,6 +3,8 @@
   "package": "com.mocretion.createnuclearized.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "BasinGoggleMixin",
+    "BasinReconstitutionMixin",
     "FluidTankGoggleMixin"
   ],
   "injectors": {

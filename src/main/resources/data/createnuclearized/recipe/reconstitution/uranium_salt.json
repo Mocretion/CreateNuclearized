@@ -1,0 +1,8 @@
+{
+  "type": "createnuclearized:reconstitution",
+  "input": { "fluid": "createnuclearized:spent_uranium_salt" },
+  "element": "uranium",
+  "liquid": "createnuclearized:enriched_liquid_uranium",
+  "result": "createnuclearized:uranium_salt",
+  "amount": 1000
+}

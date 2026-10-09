@@ -14,8 +14,6 @@ public final class CNDataComponents {
     public static final DeferredRegister<DataComponentType<?>> TYPES =
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, CreateNuclearized.MODID);
 
-    // Stats carried by heated salt (see SaltStats)
-    // Persisted to NBT so it survives in valve tanks and the save, and network synced so the client can render it (goggle overlay)
     public static final Supplier<DataComponentType<SaltStats>> SALT_STATS =
             TYPES.register("salt_stats", () -> DataComponentType.<SaltStats>builder()
                     .persistent(SaltStats.CODEC)
@@ -24,6 +22,5 @@ public final class CNDataComponents {
 
     private CNDataComponents() {}
 
-    /** No op that forces this class to load so the field above initializes before the event fires */
     public static void register() {}
 }

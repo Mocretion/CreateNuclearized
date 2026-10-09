@@ -8,12 +8,10 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class TurbineRotorPartials {
 
-    // The spinning disc of each wheel (hub, sockets, root bolts, blades, shaft), indexed by rotor radius 1/2/3
     public static final PartialModel TURBINE_3 = block("turbines/turbine_3/rotor");
     public static final PartialModel TURBINE_5 = block("turbines/turbine_5/rotor");
     public static final PartialModel TURBINE_7 = block("turbines/turbine_7/rotor");
 
-    // The stationary nacelle of each wheel (bearings, collars, hub bolts), drawn but never rotated
     public static final PartialModel TURBINE_3_STATIC = block("turbines/turbine_3/static");
     public static final PartialModel TURBINE_5_STATIC = block("turbines/turbine_5/static");
     public static final PartialModel TURBINE_7_STATIC = block("turbines/turbine_7/static");
@@ -40,6 +38,5 @@ public final class TurbineRotorPartials {
 
     private TurbineRotorPartials() {}
 
-    /** No op that forces this class to load so the partials register before baking */
     public static void init() {}
 }

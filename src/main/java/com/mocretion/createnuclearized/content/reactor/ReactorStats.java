@@ -9,8 +9,8 @@ import java.util.Set;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 
 public final class ReactorStats {
 
@@ -19,102 +19,91 @@ public final class ReactorStats {
     private static final Direction[] HORIZONTAL =
             { Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST };
 
-    private static final class Column {
-        double burn;
-        double purity;
-        double rate = 0;
+    public record Channel(BlockPos valve, int burnShift, int purityShift, double rate) {
+        public int burn(ReactorFuel fuel) {
+            return Mth.clamp(fuel.baseBurn() + burnShift, 0, 100);
+        }
 
-        Column(ReactorFuel fuel) {
-            burn = fuel.baseBurn();
-            purity = fuel.basePurity();
+        public int purity(ReactorFuel fuel) {
+            return Mth.clamp(fuel.basePurity() + purityShift, 0, 100);
         }
     }
 
-    /** Compute each channels burn/purity/rate for the fuel, push them onto the output valves, and return the combined composition */
-    public static SaltStats compute(Level level, BlockPos min, BlockPos max,
-            List<ReactorFluidValveBlockEntity> outputValves, ReactorFuel fuel) {
-        Map<Long, Column> byColumn = new HashMap<>();
-        for (ReactorFluidValveBlockEntity valve : outputValves) {
-            byColumn.put(columnOf(valve.getBlockPos()), new Column(fuel));
-        }
+    private static final class Shifts {
+        int burn;
+        int purity;
+        double rate;
 
-        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-        for (int x = min.getX() + 1; x < max.getX(); x++) {
-            for (int y = min.getY() + 1; y < max.getY(); y++) {
-                for (int z = min.getZ() + 1; z < max.getZ(); z++) {
-                    cursor.set(x, y, z);
-                    double moderatorRate = ReactorModerator.rate(level.getBlockState(cursor));
-                    if (moderatorRate <= 0) continue;
-                    BlockPos modPos = cursor.immutable();
-
-                    // Channels this moderator bridges: horizontal neighbours that are a channels pipe
-                    Set<Long> connected = new HashSet<>();
-                    for (Direction dir : HORIZONTAL) {
-                        BlockPos n = modPos.relative(dir);
-                        long col = packColumn(n.getX(), n.getZ());
-                        if (byColumn.containsKey(col)
-                                && ReactorMultiblock.isFluidConduit(level.getBlockState(n))) {
-                            connected.add(col);
-                        }
-                    }
-                    if (connected.size() < 2) {
-                        continue; // must bridge at least two distinct channels
-                    }
-
-                    // Cooler effects: every face not occupied by a channel pipe (air counts)
-                    List<ReactorModifier.Effect> effects = new ArrayList<>();
-                    for (Direction dir : Direction.values()) {
-                        BlockPos n = modPos.relative(dir);
-                        BlockState ns = level.getBlockState(n);
-                        boolean channelPipe = byColumn.containsKey(packColumn(n.getX(), n.getZ()))
-                                && ReactorMultiblock.isFluidConduit(ns);
-                        if (channelPipe) continue;
-                        ReactorModifier.Effect e = ReactorModifier.effect(ns);
-                        if (e != null)
-                            effects.add(e);
-                    }
-
-                    for (long col : connected) {
-                        Column c = byColumn.get(col);
-                        c.rate += moderatorRate;
-                        for (ReactorModifier.Effect e : effects) {
-                            c.burn += e.dBurn();
-                            c.purity += e.dPurity();
-                            c.rate += e.dRate();
-                        }
-                    }
-                }
+        void addModerator(double moderatorRate, List<ReactorModifier.Effect> coolers) {
+            rate += moderatorRate;
+            for (ReactorModifier.Effect cooler : coolers) {
+                burn += cooler.dBurn();
+                purity += cooler.dPurity();
+                rate += cooler.dRate();
             }
         }
+    }
 
-        // Push per channel results onto the valves and accumulate the combined burn/purity
-        double sumBurn = 0;
-        double sumPurity = 0;
-        for (ReactorFluidValveBlockEntity valve : outputValves) {
-            Column c = byColumn.get(columnOf(valve.getBlockPos()));
-            int burn = clampPercent(c.burn);
-            int purity = clampPercent(c.purity);
-            valve.setStats(burn, purity, Math.max(0, c.rate));
-            sumBurn += burn;
-            sumPurity += purity;
+    public static List<Channel> channels(Level level, ReactorMultiblock.Structure structure) {
+        Map<Long, Shifts> byColumn = new HashMap<>();
+        for (BlockPos valve : structure.outputValves())
+            byColumn.put(ReactorMultiblock.column(valve), new Shifts());
+
+        BlockPos interiorMin = structure.min().offset(1, 1, 1);
+        BlockPos interiorMax = structure.max().offset(-1, -1, -1);
+        for (BlockPos pos : BlockPos.betweenClosed(interiorMin, interiorMax)) {
+            double moderatorRate = ReactorModerator.rate(level.getBlockState(pos));
+            if (moderatorRate <= 0) continue;
+            Set<Long> bridged = bridgedChannels(level, pos, byColumn.keySet());
+            if (bridged.size() < 2) continue;
+            List<ReactorModifier.Effect> coolers = coolers(level, pos, byColumn.keySet());
+            for (long column : bridged)
+                byColumn.get(column).addModerator(moderatorRate, coolers);
         }
 
-        int valves = outputValves.size();
-        if (valves == 0) return SaltStats.EMPTY;
-        int avgBurn = clampPercent(sumBurn / valves);
-        int avgPurity = clampPercent(sumPurity / valves);
-        return fuel.composition(avgBurn, avgPurity);
+        List<Channel> channels = new ArrayList<>();
+        for (BlockPos valve : structure.outputValves()) {
+            Shifts shifts = byColumn.get(ReactorMultiblock.column(valve));
+            channels.add(new Channel(valve, shifts.burn, shifts.purity, Math.max(0, shifts.rate)));
+        }
+        return channels;
     }
 
-    private static int clampPercent(double v) {
-        return (int) Math.max(0, Math.min(100, Math.round(v)));
+    public static SaltStats composition(List<Channel> channels, ReactorFuel fuel) {
+        if (channels.isEmpty()) return SaltStats.EMPTY;
+        double burn = 0;
+        double purity = 0;
+        for (Channel channel : channels) {
+            burn += channel.burn(fuel);
+            purity += channel.purity(fuel);
+        }
+        return fuel.composition((int) Math.round(burn / channels.size()), (int) Math.round(purity / channels.size()));
     }
 
-    private static long columnOf(BlockPos pos) {
-        return packColumn(pos.getX(), pos.getZ());
+    private static Set<Long> bridgedChannels(Level level, BlockPos moderator, Set<Long> channelColumns) {
+        Set<Long> bridged = new HashSet<>();
+        for (Direction dir : HORIZONTAL) {
+            BlockPos neighbor = moderator.relative(dir);
+            if (isChannelPipe(level, neighbor, channelColumns))
+                bridged.add(ReactorMultiblock.column(neighbor));
+        }
+        return bridged;
     }
 
-    private static long packColumn(int x, int z) {
-        return (((long) x) << 32) | (z & 0xffffffffL);
+    private static List<ReactorModifier.Effect> coolers(Level level, BlockPos moderator, Set<Long> channelColumns) {
+        List<ReactorModifier.Effect> coolers = new ArrayList<>();
+        for (Direction dir : Direction.values()) {
+            BlockPos neighbor = moderator.relative(dir);
+            if (isChannelPipe(level, neighbor, channelColumns)) continue;
+            ReactorModifier.Effect effect = ReactorModifier.effect(level.getBlockState(neighbor));
+            if (effect != null)
+                coolers.add(effect);
+        }
+        return coolers;
+    }
+
+    private static boolean isChannelPipe(Level level, BlockPos pos, Set<Long> channelColumns) {
+        return channelColumns.contains(ReactorMultiblock.column(pos))
+                && ReactorMultiblock.isFluidConduit(level.getBlockState(pos));
     }
 }

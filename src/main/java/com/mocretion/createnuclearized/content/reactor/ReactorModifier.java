@@ -18,20 +18,16 @@ public final class ReactorModifier {
     public static final Effect XENON = new Effect(0, 0, 0.05);
 
     private static final Map<net.minecraft.world.level.block.Block, Effect> BY_BLOCK = Map.of(
-            // Burn
             Blocks.SCULK, new Effect(-10, 0, 0),
             Blocks.SEA_LANTERN, new Effect(10, 0, 0),
             Blocks.GLOWSTONE, new Effect(5, 0, 0),
-            // Purity
             Blocks.SPONGE, new Effect(0, 15, 0),
             Blocks.AMETHYST_BLOCK, new Effect(0, 5, 0),
             Blocks.HONEY_BLOCK, new Effect(0, -15, 0),
-            // Rate
             Blocks.DIAMOND_BLOCK, new Effect(0, 0, 0.03));
 
     private ReactorModifier() {}
 
-    /** This blocks cooler effect, or null if it isnt a cooler */
     @Nullable
     public static Effect effect(BlockState state) {
         if (state.isAir()) return AIR;

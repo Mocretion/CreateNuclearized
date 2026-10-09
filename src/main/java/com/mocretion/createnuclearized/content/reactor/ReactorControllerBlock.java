@@ -26,9 +26,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public class ReactorControllerBlock extends Block implements EntityBlock {
 
-    // The face with the status panel; the other five are casing
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
-    // Status tile on the FACING face; written by the block entity
     public static final EnumProperty<ReactorState> STATE = EnumProperty.create("state", ReactorState.class);
 
     public ReactorControllerBlock(Properties properties) {
@@ -45,11 +43,9 @@ public class ReactorControllerBlock extends Block implements EntityBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        // Panel faces the player who placed it (like a dispensers front)
         return defaultBlockState().setValue(FACING, context.getNearestLookingDirection().getOpposite());
     }
 
-    // Keep the panel pointing the right way when the block is rotated or mirrored (schematics, structure blocks)
     @Override
     protected BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
@@ -67,6 +63,13 @@ public class ReactorControllerBlock extends Block implements EntityBlock {
         if (level.getBlockEntity(pos) instanceof ReactorControllerBlockEntity be)
             player.openMenu(be, buf -> buf.writeBlockPos(pos));
         return InteractionResult.CONSUME;
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof ReactorControllerBlockEntity controller)
+            controller.clearValveStats();
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Nullable

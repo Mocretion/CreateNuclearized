@@ -12,12 +12,20 @@ public final class CNSpriteShifts {
     public static final CTSpriteShiftEntry REACTOR_CASING = omni("reactor_casing");
     public static final CTSpriteShiftEntry REACTOR_GLASS = omni("reactor_glass");
 
+    public static final CTSpriteShiftEntry REACTOR_COGWHEEL_SIDE = cogSide(AllCTTypes.VERTICAL);
+    public static final CTSpriteShiftEntry REACTOR_COGWHEEL_OTHERSIDE = cogSide(AllCTTypes.HORIZONTAL);
+
     private CNSpriteShifts() {}
 
-    /** block/<name> -> block/<name>_connected, casing style omnidirectional */
     private static CTSpriteShiftEntry omni(String name) {
         return CTSpriteShifter.getCT(AllCTTypes.OMNIDIRECTIONAL,
                 ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "block/" + name),
                 ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "block/" + name + "_connected"));
+    }
+
+    private static CTSpriteShiftEntry cogSide(AllCTTypes type) {
+        return CTSpriteShifter.getCT(type,
+                ResourceLocation.fromNamespaceAndPath("create", "block/andesite_encased_cogwheel_side"),
+                ResourceLocation.fromNamespaceAndPath("create", "block/andesite_encased_cogwheel_side_connected"));
     }
 }

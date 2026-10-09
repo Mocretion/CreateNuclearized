@@ -24,14 +24,7 @@ public class ControlRodBlock extends KineticBlock implements IBE<ControlRodBlock
 
     @Override
     public boolean hasShaftTowards(LevelReader level, BlockPos pos, BlockState state, Direction face) {
-        // Driven from the top by a shaft; the sides mesh as a cog, the bottom slides the rod out
         return face == Direction.UP;
-    }
-
-    /** A small cog (default for ICogWheel): a vertical axis cogwheel adjacent to a side drives it */
-    @Override
-    public boolean isSmallCog() {
-        return true;
     }
 
     @Override

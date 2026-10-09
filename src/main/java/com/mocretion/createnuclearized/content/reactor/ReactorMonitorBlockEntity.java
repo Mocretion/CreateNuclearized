@@ -14,18 +14,16 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvider {
 
-    // Re resolve the controller at most this often while the cache is empty
     private static final int RESOLVE_INTERVAL = 20;
 
     @Nullable
     private BlockPos controllerCache;
-    private long lastResolveTick = Long.MIN_VALUE;
+    private long lastResolveTick = -RESOLVE_INTERVAL;
 
     public ReactorMonitorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
-    /** The controller of the reactor this monitor is part of, or null if it isnt in a valid one */
     @Nullable
     public ReactorControllerBlockEntity getController() {
         if (level == null) return null;
@@ -34,18 +32,14 @@ public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvid
         }
         controllerCache = null;
 
-        // Resolving is a full structure validation. Each open menu pulls a dozen synced values per tick, so throttle it while unresolved,
-        // otherwise every one of those would kick off its own scan (written as an add, not a subtract, so the Long.MIN_VALUE sentinel cant
-        // overflow)
         long now = level.getGameTime();
-        if (now < lastResolveTick + RESOLVE_INTERVAL) return null;
+        if (now - lastResolveTick < RESOLVE_INTERVAL) return null;
         lastResolveTick = now;
 
         ReactorMultiblock.Result result = ReactorMultiblock.validate(level, worldPosition);
         if (!result.valid()) return null;
-        BlockPos controllerPos = ReactorMultiblock.findController(level, result.min(), result.max());
-        if (controllerPos != null
-                && level.getBlockEntity(controllerPos) instanceof ReactorControllerBlockEntity controller) {
+        BlockPos controllerPos = result.structure().controller();
+        if (level.getBlockEntity(controllerPos) instanceof ReactorControllerBlockEntity controller) {
             controllerCache = controllerPos;
             return controller;
         }
@@ -67,9 +61,9 @@ public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvid
         return controller == null ? 0 : controller.getFissileCapacity();
     }
 
-    public int getDepletedCapacity() {
+    public int getSpentCapacity() {
         ReactorControllerBlockEntity controller = getController();
-        return controller == null ? 0 : controller.getDepletedCapacity();
+        return controller == null ? 0 : controller.getSpentCapacity();
     }
 
     public int getRunSeconds() {
@@ -100,6 +94,11 @@ public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvid
     public SaltStats getOutputStats() {
         ReactorControllerBlockEntity controller = getController();
         return controller == null ? SaltStats.EMPTY : controller.getOutputStats();
+    }
+
+    public int getFuelOrdinal() {
+        ReactorControllerBlockEntity controller = getController();
+        return controller == null ? ReactorFuel.URANIUM.ordinal() : controller.getFuel().ordinal();
     }
 
     @Override

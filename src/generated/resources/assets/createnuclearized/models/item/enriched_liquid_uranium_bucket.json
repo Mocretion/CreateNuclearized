@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "createnuclearized:item/enriched_liquid_uranium_bucket"
+  }
+}

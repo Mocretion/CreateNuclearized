@@ -12,7 +12,6 @@ import net.minecraft.world.level.material.FlowingFluid;
 
 public class PressurizedSteamLiquidBlock extends LiquidBlock {
 
-    // A placed steam source removes itself after this many ticks (1 second)
     private static final int SOURCE_LIFETIME_TICKS = 20;
 
     public PressurizedSteamLiquidBlock(FlowingFluid fluid, Properties properties) {
@@ -28,8 +27,6 @@ public class PressurizedSteamLiquidBlock extends LiquidBlock {
 
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        // Retire the source; rising steam drains on its own
-        // Must be setBlock(AIR), not removeBlock: removeBlock re places getFluidState(pos).createLegacyBlock(), i.e. the same source block
         if (state.getFluidState().isSource())
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
     }

@@ -27,42 +27,34 @@ public class ControlRodRenderer extends KineticBlockEntityRenderer<ControlRodBlo
                               MultiBufferSource buffer, int light, int overlay) {
         BlockState state = be.getBlockState();
 
-        // The block is non full but the interior is dim, so re sample light at the exposed neighbour above (like Create's pulley) instead
-        // of trusting the near zero value handed in
         Level level = be.getLevel();
         BlockPos pos = be.getBlockPos();
-        int neighbourLight = level != null ? LevelRenderer.getLightColor(level, pos.above()) : light;
+        int neighborLight = level != null ? LevelRenderer.getLightColor(level, pos.above()) : light;
 
         Axis axis = Axis.Y;
         float angle = KineticBlockEntityRenderer.getAngleForBe(be, pos, axis);
 
-        // Spinning cogwheel (create textured placeholder, matching the reactor encased cogwheel); cutout so the tooth gaps read through the
-        // casing side window
         SuperByteBuffer cog =
                 CachedBuffers.partialFacingVertical(AllPartialModels.SHAFTLESS_COGWHEEL, state, Direction.UP);
-        KineticBlockEntityRenderer.kineticRotationTransform(cog, be, axis, angle, neighbourLight);
+        KineticBlockEntityRenderer.kineticRotationTransform(cog, be, axis, angle, neighborLight);
         cog.renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
 
-        // Rotating shaft nub on top, driven by the kinetic network (SHAFT_HALF already sits in the upper half poking out the top face, like
-        // Create's encased cog, so no extra translate)
         SuperByteBuffer shaft = CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, state, Direction.UP);
-        KineticBlockEntityRenderer.kineticRotationTransform(shaft, be, axis, angle, neighbourLight);
+        KineticBlockEntityRenderer.kineticRotationTransform(shaft, be, axis, angle, neighborLight);
         shaft.renderInto(ms, buffer.getBuffer(RenderType.solid()));
 
-        // Rod sliding down into the core by the current extension
         float length = be.getRenderedExtension(partialTicks);
         if (length > 1f / 16f) {
             SuperByteBuffer rod = CachedBuffers.partial(ControlRodPartials.CONTROL_ROD_EXTENSION, state);
             rod.translate(0, -length, 0);
             rod.scale(1, length, 1);
-            rod.light(neighbourLight);
+            rod.light(neighborLight);
             rod.renderInto(ms, buffer.getBuffer(RenderType.solid()));
         }
     }
 
     @Override
     public boolean shouldRenderOffScreen(ControlRodBlockEntity be) {
-        // The rod hangs below the block; keep rendering it even when the anchor is off screen
         return true;
     }
 }

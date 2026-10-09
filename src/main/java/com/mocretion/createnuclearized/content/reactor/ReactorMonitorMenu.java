@@ -21,11 +21,10 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
     private final Block block;
     private final ReactorMonitorBlockEntity be;
 
-    // Client synced display values
     private int fissileBuffered;
     private int fissileCapacity;
-    private int depletedBuffered;
-    private int depletedCapacity;
+    private int spentBuffered;
+    private int spentCapacity;
     private int runSeconds;
     private int stateOrdinal;
     private int activeChannels;
@@ -35,15 +34,15 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
     private int statUranium;
     private int statPlutonium;
     private int statThorium;
-    private int statByproducts;
+    private int statAmericium;
+    private int statOffGas;
+    private int fuelOrdinal;
 
-    /** Client side: resolve the BE from the synced position */
     public ReactorMonitorMenu(int containerId, Inventory playerInventory, BlockPos pos) {
         this(containerId, playerInventory,
                 (ReactorMonitorBlockEntity) playerInventory.player.level().getBlockEntity(pos));
     }
 
-    /** Server side */
     public ReactorMonitorMenu(int containerId, Inventory playerInventory, ReactorMonitorBlockEntity be) {
         super(CNMenuTypes.REACTOR_MONITOR.get(), containerId);
         this.be = be;
@@ -59,11 +58,10 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
             addSlot(new Slot(playerInventory, col, INV_X + col * 18, INV_Y + 58));
         }
 
-        // Buffers, capacities, runtime seconds and the milli rate can all pass a signed short, so send them wide (two slots each)
         addWideInt(be::getFissileBuffered, v -> fissileBuffered = v);
         addWideInt(be::getFissileCapacity, v -> fissileCapacity = v);
-        addWideInt(be::getHeatedBuffered, v -> depletedBuffered = v);
-        addWideInt(be::getDepletedCapacity, v -> depletedCapacity = v);
+        addWideInt(be::getHeatedBuffered, v -> spentBuffered = v);
+        addWideInt(be::getSpentCapacity, v -> spentCapacity = v);
         addWideInt(be::getRunSeconds, v -> runSeconds = v);
         addDataSlot(syncedInt(be::getReactorStateOrdinal, v -> stateOrdinal = v));
         addDataSlot(syncedInt(be::getActiveChannels, v -> activeChannels = v));
@@ -73,7 +71,9 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
         addDataSlot(syncedInt(() -> be.getOutputStats().uranium(), v -> statUranium = v));
         addDataSlot(syncedInt(() -> be.getOutputStats().plutonium(), v -> statPlutonium = v));
         addDataSlot(syncedInt(() -> be.getOutputStats().thorium(), v -> statThorium = v));
-        addDataSlot(syncedInt(() -> be.getOutputStats().byproducts(), v -> statByproducts = v));
+        addDataSlot(syncedInt(() -> be.getOutputStats().americium(), v -> statAmericium = v));
+        addDataSlot(syncedInt(() -> be.getOutputStats().offGas(), v -> statOffGas = v));
+        addDataSlot(syncedInt(be::getFuelOrdinal, v -> fuelOrdinal = v));
     }
 
     private static DataSlot syncedInt(java.util.function.IntSupplier getter, java.util.function.IntConsumer setter) {
@@ -90,7 +90,7 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
         };
     }
 
-    // A DataSlot only carries a signed short over the wire, so split values that can exceed ~32k across two slots (low + high 16 bits)
+    /** A DataSlot only carries a signed short, so values past ~32k go across two slots */
     private void addWideInt(java.util.function.IntSupplier getter, java.util.function.IntConsumer setter) {
         int[] parts = new int[2];
         addDataSlot(new DataSlot() {
@@ -127,12 +127,12 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
         return fissileCapacity;
     }
 
-    public int getDepletedBuffered() {
-        return depletedBuffered;
+    public int getSpentBuffered() {
+        return spentBuffered;
     }
 
-    public int getDepletedCapacity() {
-        return depletedCapacity;
+    public int getSpentCapacity() {
+        return spentCapacity;
     }
 
     public int getRunSeconds() {
@@ -151,19 +151,20 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
         return totalChannels;
     }
 
-    /** Max flow across all channels, mB/tick */
     public double getTotalRate() {
         return totalRateMilli / 1000.0;
     }
 
-    /** Heated salt composition, rebuilt from the synced ints */
     public SaltStats getOutputStats() {
-        return new SaltStats(statHeat, statUranium, statPlutonium, statThorium, statByproducts);
+        return new SaltStats(statHeat, statUranium, statPlutonium, statThorium, statAmericium, statOffGas);
+    }
+
+    public ReactorFuel getFuel() {
+        return ReactorFuel.values()[fuelOrdinal];
     }
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        // Only player inventory slots exist; nowhere to quick move to
         return ItemStack.EMPTY;
     }
 

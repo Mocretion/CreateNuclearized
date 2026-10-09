@@ -2,6 +2,7 @@ package com.mocretion.createnuclearized.content.turbine;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,39 +18,33 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public final class TurbineMultiblock {
 
-    // Square cross section (width == height): only 5, 7 or 9
     public static final int MIN_SQUARE = 5;
     public static final int MAX_SQUARE = 9;
-    // Depth (along the shaft) is free, just bounded so a runaway fill cant hang
     public static final int MIN_DEPTH = 5;
     public static final int MAX_DEPTH = 32;
 
     private static final int MAX_SHELL_VISITED = MAX_SQUARE * MAX_SQUARE * MAX_DEPTH;
+    private static final String SQUARE_RANGE = squareLabel(MIN_SQUARE) + " to " + squareLabel(MAX_SQUARE);
 
     private TurbineMultiblock() {}
 
-    public record Result(boolean valid, String reason, BlockPos min, BlockPos max,
-                         Direction.Axis depthAxis, Direction inward, int square, int depth,
-                         int stages, int bladeCells) {
+    public record Result(boolean valid, String reason, Direction.Axis depthAxis, BlockPos generator,
+                         List<BlockPos> steamValves, int stages, int bladeCells) {
         public static Result fail(String reason) {
-            return new Result(false, reason, BlockPos.ZERO, BlockPos.ZERO,
-                    Direction.Axis.X, Direction.NORTH, 0, 0, 0, 0);
+            return new Result(false, reason, Direction.Axis.X, BlockPos.ZERO, List.of(), 0, 0);
         }
 
-        public static Result ok(BlockPos min, BlockPos max, Direction.Axis depthAxis, Direction inward,
-                                int square, int depth, int stages, int bladeCells) {
-            return new Result(true, "", min, max, depthAxis, inward, square, depth, stages, bladeCells);
+        public static Result ok(Direction.Axis depthAxis, BlockPos generator, List<BlockPos> steamValves,
+                                int stages, int bladeCells) {
+            return new Result(true, "", depthAxis, generator, List.copyOf(steamValves), stages, bladeCells);
         }
     }
 
     private enum SliceKind { EMPTY, ROTOR, DIAPHRAGM }
 
-    private record Slice(SliceKind kind, int side, int depthCoord, boolean shaftOnAxis) {}
+    private record Slice(SliceKind kind, int side, boolean shaftOnAxis) {}
 
-    // Either a read slice, or the reason the slice at this depth is invalid
     private record SliceReadout(Slice slice, String error) {}
-
-    // Shell predicates
 
     public static boolean isCasing(BlockState state) {
         return state.is(CNBlocks.TURBINE_CASING.get()) || state.is(CNBlocks.TURBINE_GLASS.get());
@@ -71,8 +66,6 @@ public final class TurbineMultiblock {
         return isCasing(state) || isController(state) || isGenerator(state) || isSteamInput(state);
     }
 
-    // Interior predicates
-
     public static boolean isRotor(BlockState state) {
         return CNBlocks.isTurbineRotor(state);
     }
@@ -85,16 +78,10 @@ public final class TurbineMultiblock {
         return state.is(CNBlocks.TURBINE_DIAPHRAGM.get());
     }
 
-    /** The center spine is Create's own shaft, not a block of ours */
     public static boolean isShaft(BlockState state) {
         return state.is(AllBlocks.SHAFT.get());
     }
 
-    /**
-     * Validate the whole turbine: the shell shape plus the interior shaft and alternating blades/diaphragm stages
-     * Same idea as the reactor: flood fill the shell, take the bounding box, confirm its a hollow cuboid with a square cross section, then
-     * walk the interior
-     */
     public static Result validate(LevelAccessor level, BlockPos seed) {
         Set<BlockPos> shell = new HashSet<>();
         ArrayDeque<BlockPos> queue = new ArrayDeque<>();
@@ -133,12 +120,10 @@ public final class TurbineMultiblock {
         long expectedShell = (long) dx * dy * dz - (long) (dx - 2) * (dy - 2) * (dz - 2);
         if (shell.size() != expectedShell) return Result.fail("Shell is incomplete or has extra blocks attached.");
 
-        // Walk the surface: every cell has to be a shell member, and tally the controller / generator / steam valves
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         int controllers = 0;
-        int generators = 0;
-        int steamValves = 0;
-        BlockPos generatorPos = null;
+        List<BlockPos> generators = new ArrayList<>();
+        List<BlockPos> steamValves = new ArrayList<>();
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
@@ -148,39 +133,41 @@ public final class TurbineMultiblock {
                     BlockState state = level.getBlockState(cursor);
                     if (!isShellMember(state))
                         return Result.fail("Turbine wall is not solid casing at " + cursor.toShortString() + ".");
-                    if (isController(state)) controllers++;
-                    if (isGenerator(state)) {
-                        generators++;
-                        generatorPos = cursor.immutable();
-                    }
-                    if (isSteamInput(state)) steamValves++;
+                    if (isController(state))
+                        controllers++;
+                    else if (isGenerator(state))
+                        generators.add(cursor.immutable());
+                    else if (isSteamInput(state))
+                        steamValves.add(cursor.immutable());
                 }
             }
         }
 
         if (controllers != 1) return Result.fail("Turbine needs exactly one controller (found " + controllers + ").");
-        if (generators != 1) return Result.fail("Turbine needs exactly one generator (found " + generators + ").");
-        if (steamValves < 1) return Result.fail("Turbine needs at least one steam input valve.");
+        if (generators.size() != 1) return Result.fail("Turbine needs exactly one generator (found " + generators.size() + ").");
+        if (steamValves.isEmpty()) return Result.fail("Turbine needs at least one steam input valve.");
 
-        // Generator centered on a square end wall; its axis is the shaft depth (X/Z horizontal, Y vertical)
-        Orientation o = deriveOrientation(generatorPos, min, max);
+        BlockPos generator = generators.get(0);
+        Orientation o = deriveOrientation(generator, min, max);
         if (o == null)
-            return Result.fail("The generator must sit centered on a square end wall (5x5, 7x7 or 9x9).");
-        if (o.square != 5 && o.square != 7 && o.square != 9)
-            return Result.fail("Turbine cross section must be a square: 5x5, 7x7 or 9x9 (got " + o.square + "x" + o.square + ").");
+            return Result.fail("The generator must sit centered on a square end wall with an odd side (" + SQUARE_RANGE + ").");
+        if (o.square < MIN_SQUARE || o.square > MAX_SQUARE)
+            return Result.fail("Turbine cross section must be a square from " + SQUARE_RANGE + " (got " + squareLabel(o.square) + ").");
         if (o.depth < MIN_DEPTH || o.depth > MAX_DEPTH)
             return Result.fail("Turbine depth must be between " + MIN_DEPTH + " and " + MAX_DEPTH + " (got " + o.depth + ").");
 
-        return scanInterior(level, cursor, o, min, max);
+        return scanInterior(level, cursor, o, generator, steamValves);
     }
 
-    // The two cross section axes (everything but depth), their bounds and centers, plus the inward direction along the depth axis
+    private static String squareLabel(int side) {
+        return side + "x" + side;
+    }
+
     private record Orientation(Direction.Axis depthAxis, Direction inward, int depthNear, int depthFar, int depth,
                                Direction.Axis axisA, int aMin, int aMax, int cA,
                                Direction.Axis axisB, int bMin, int bMax, int cB, int square) {}
 
     private static Orientation deriveOrientation(BlockPos gen, BlockPos min, BlockPos max) {
-        // Any axis can be the depth: X/Z make a horizontal turbine, Y a vertical one
         for (Direction.Axis depthAxis : Direction.Axis.values()) {
             Direction.Axis[] plane = otherAxes(depthAxis);
             Direction.Axis a = plane[0], b = plane[1];
@@ -188,12 +175,12 @@ public final class TurbineMultiblock {
             int bMin = coord(min, b), bMax = coord(max, b);
             int dMin = coord(min, depthAxis), dMax = coord(max, depthAxis);
             int side = aMax - aMin + 1;
-            if (side != bMax - bMin + 1) continue; // cross section has to be square
+            if (side != bMax - bMin + 1) continue;
             int cA = midpoint(aMin, aMax), cB = midpoint(bMin, bMax);
             if (cA == Integer.MIN_VALUE || cB == Integer.MIN_VALUE) continue;
             int genD = coord(gen, depthAxis);
-            if (coord(gen, a) != cA || coord(gen, b) != cB) continue; // generator centered on the cross section
-            if (genD != dMin && genD != dMax) continue; // and on an end wall
+            if (coord(gen, a) != cA || coord(gen, b) != cB) continue;
+            if (genD != dMin && genD != dMax) continue;
             Direction.AxisDirection towards = genD == dMin ? Direction.AxisDirection.POSITIVE : Direction.AxisDirection.NEGATIVE;
             Direction inward = Direction.fromAxisAndDirection(depthAxis, towards);
             return new Orientation(depthAxis, inward, dMin, dMax, dMax - dMin + 1, a, aMin, aMax, cA, b, bMin, bMax, cB, side);
@@ -213,23 +200,20 @@ public final class TurbineMultiblock {
         return axis.choose(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    // Integer center of an odd length span, or MIN_VALUE if the span is even (so it has no single center)
     private static int midpoint(int lo, int hi) {
         return (lo + hi) % 2 == 0 ? (lo + hi) / 2 : Integer.MIN_VALUE;
     }
 
     private static Result scanInterior(LevelAccessor level, BlockPos.MutableBlockPos cursor, Orientation o,
-                                       BlockPos min, BlockPos max) {
+                                       BlockPos generator, List<BlockPos> steamValves) {
         int aLo = o.aMin + 1, aHi = o.aMax - 1;
         int bLo = o.bMin + 1, bHi = o.bMax - 1;
 
-        // Depth coords in order, walking inward from the generator wall
         List<Integer> depths = new ArrayList<>();
-        if (o.inward.getAxisDirection() == Direction.AxisDirection.POSITIVE) {
-            for (int d = o.depthNear + 1; d < o.depthFar; d++) depths.add(d);
-        } else {
-            for (int d = o.depthFar - 1; d > o.depthNear; d--) depths.add(d);
-        }
+        for (int d = o.depthNear + 1; d < o.depthFar; d++)
+            depths.add(d);
+        if (o.inward.getAxisDirection() == Direction.AxisDirection.NEGATIVE)
+            Collections.reverse(depths);
 
         List<Slice> slices = new ArrayList<>();
         for (int d : depths) {
@@ -238,7 +222,6 @@ public final class TurbineMultiblock {
             slices.add(readout.slice());
         }
 
-        // Grammar: skip shaft only gaps, first stage must be a rotor, each rotor is immediately followed by a same size diaphragm
         int stages = 0;
         int bladeCells = 0;
         int lastStageIndex = -1;
@@ -247,7 +230,6 @@ public final class TurbineMultiblock {
             if (s.kind() == SliceKind.EMPTY) continue;
             if (s.kind() == SliceKind.DIAPHRAGM)
                 return Result.fail("A diaphragm needs a rotor in front of it (towards the generator).");
-            // rotor: pair it with the very next slice
             if (i + 1 >= slices.size())
                 return Result.fail("The last rotor needs a diaphragm right behind it.");
             Slice next = slices.get(i + 1);
@@ -264,20 +246,18 @@ public final class TurbineMultiblock {
         if (stages == 0)
             return Result.fail("Build at least one stage: a rotor, then a diaphragm right behind it.");
 
-        // The shaft has to run unbroken from the generator through the last stage
         for (int k = 0; k <= lastStageIndex; k++) {
             if (!slices.get(k).shaftOnAxis())
                 return Result.fail("The center shaft must run unbroken along the turbine axis from the generator through every stage.");
         }
 
-        return Result.ok(min, max, o.depthAxis, o.inward, o.square, o.depth, stages, bladeCells);
+        return Result.ok(o.depthAxis, generator, steamValves, stages, bladeCells);
     }
 
     private static SliceReadout readSlice(LevelAccessor level, BlockPos.MutableBlockPos cursor, Orientation o, int d,
                                           int aLo, int aHi, int bLo, int bHi) {
         BlockState center = stateAt(level, cursor, o, d, o.cA, o.cB);
 
-        // A rotor slice: the wheels master sits on the axis (with its built in shaft) and its structural plane fills the ring
         if (isRotor(center))
             return readRotorSlice(level, o, d, aLo, aHi, bLo, bHi, center);
 
@@ -289,7 +269,6 @@ public final class TurbineMultiblock {
         if (!shaft && !center.isAir())
             return new SliceReadout(null, "Only the drive shaft or a rotor may sit on the turbine axis.");
 
-        // Scan the ring: only a diaphragm may sit around the shaft here
         int maxR = 0;
         int nonAir = 0;
         for (int a = aLo; a <= aHi; a++) {
@@ -305,9 +284,8 @@ public final class TurbineMultiblock {
             }
         }
 
-        if (nonAir == 0) return new SliceReadout(new Slice(SliceKind.EMPTY, 0, d, shaftOnAxis), null);
+        if (nonAir == 0) return new SliceReadout(new Slice(SliceKind.EMPTY, 0, shaftOnAxis), null);
 
-        // Diaphragm has to fill a solid square centered on the shaft, everything past it air
         for (int a = aLo; a <= aHi; a++) {
             for (int b = bLo; b <= bHi; b++) {
                 if (a == o.cA && b == o.cB) continue;
@@ -323,10 +301,9 @@ public final class TurbineMultiblock {
             }
         }
 
-        return new SliceReadout(new Slice(SliceKind.DIAPHRAGM, 2 * maxR + 1, d, shaftOnAxis), null);
+        return new SliceReadout(new Slice(SliceKind.DIAPHRAGM, 2 * maxR + 1, shaftOnAxis), null);
     }
 
-    // A rotor slice is one placed rotor whose axis runs along the turbine, its structural fillers make up the rest of the wheel square
     private static SliceReadout readRotorSlice(LevelAccessor level, Orientation o, int d,
                                                int aLo, int aHi, int bLo, int bHi, BlockState center) {
         if (!center.hasProperty(BlockStateProperties.AXIS) || center.getValue(BlockStateProperties.AXIS) != o.depthAxis)
@@ -338,7 +315,6 @@ public final class TurbineMultiblock {
         if (rotorRadius > (aHi - o.cA) || rotorRadius > (bHi - o.cB))
             return new SliceReadout(null, "The rotor is too big for this turbine's cross section.");
 
-        // The rotor is one block at the center; only its solid hitbox cells are filled, the wider blade sweep is visual so it stays clear
         BlockPos masterPos = posAt(o, d, o.cA, o.cB);
         for (int a = aLo; a <= aHi; a++) {
             for (int b = bLo; b <= bHi; b++) {
@@ -347,7 +323,6 @@ public final class TurbineMultiblock {
                 BlockPos cell = posAt(o, d, a, b);
                 BlockState s = level.getBlockState(cell);
                 if (r <= hitboxRadius) {
-                    // The rotors own hitbox filler, so a foreign block cant sneak into the solid core
                     if (!isRotorStructural(s) || !TurbineRotorStructuralBlock.getMaster(level, cell, s).equals(masterPos))
                         return new SliceReadout(null, "The rotor's hitbox is obstructed (at " + cell.toShortString() + ").");
                 } else if (!s.isAir()) {
@@ -356,11 +331,9 @@ public final class TurbineMultiblock {
             }
         }
 
-        // The rotors center carries the built in shaft, so it counts as shaft on axis
-        return new SliceReadout(new Slice(SliceKind.ROTOR, side, d, true), null);
+        return new SliceReadout(new Slice(SliceKind.ROTOR, side, true), null);
     }
 
-    // The world pos for a depth coord plus the two cross section coords
     private static BlockPos posAt(Orientation o, int d, int a, int b) {
         int x = 0, y = 0, z = 0;
         switch (o.depthAxis) {
@@ -381,26 +354,9 @@ public final class TurbineMultiblock {
         return new BlockPos(x, y, z);
     }
 
-    // Build a pos from a depth coord and the two cross section coords, each mapped onto its own axis
     private static BlockState stateAt(LevelAccessor level, BlockPos.MutableBlockPos cursor, Orientation o,
                                       int d, int a, int b) {
-        int x = 0, y = 0, z = 0;
-        switch (o.depthAxis) {
-            case X -> x = d;
-            case Y -> y = d;
-            case Z -> z = d;
-        }
-        switch (o.axisA) {
-            case X -> x = a;
-            case Y -> y = a;
-            case Z -> z = a;
-        }
-        switch (o.axisB) {
-            case X -> x = b;
-            case Y -> y = b;
-            case Z -> z = b;
-        }
-        cursor.set(x, y, z);
+        cursor.set(posAt(o, d, a, b));
         return level.getBlockState(cursor);
     }
 

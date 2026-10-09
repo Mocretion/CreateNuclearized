@@ -1,0 +1,31 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ores/thorium"
+      }
+    }
+  ],
+  "type": "create:crushing",
+  "ingredients": [
+    {
+      "tag": "c:ores/thorium"
+    }
+  ],
+  "processing_time": 400,
+  "results": [
+    {
+      "id": "createnuclearized:crushed_raw_thorium"
+    },
+    {
+      "chance": 0.75,
+      "id": "createnuclearized:crushed_raw_thorium"
+    },
+    {
+      "chance": 0.75,
+      "id": "create:experience_nugget"
+    }
+  ]
+}

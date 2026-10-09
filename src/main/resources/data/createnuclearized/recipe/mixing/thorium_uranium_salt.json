@@ -1,0 +1,10 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    { "type": "neoforge:single", "amount": 1000, "fluid": "createnuclearized:molten_salt" },
+    { "type": "neoforge:single", "amount": 1000, "fluid": "createnuclearized:liquid_thorium_uranium" }
+  ],
+  "results": [
+    { "amount": 1000, "id": "createnuclearized:thorium_uranium_salt" }
+  ]
+}
