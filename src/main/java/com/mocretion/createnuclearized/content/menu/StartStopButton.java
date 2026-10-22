@@ -1,9 +1,6 @@
 package com.mocretion.createnuclearized.content.menu;
 
-import com.mocretion.createnuclearized.CreateNuclearized;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -12,18 +9,15 @@ import net.minecraft.resources.ResourceLocation;
 
 public class StartStopButton extends AbstractButton {
 
-    private static final int X = 114;
-    private static final int Y = 51;
-    private static final int WIDTH = 55;
-    private static final int HEIGHT = 19;
-    private static final int HOVER_U = 200;
-    private static final int START_HOVER_V = 0;
-    private static final int STOP_V = 20;
-    private static final int STOP_HOVER_V = 39;
-    private static final int LABEL_COLOR = 0xFFFFFF;
-
-    private static final Component START = Component.translatable(CreateNuclearized.MODID + ".gui.controller.start");
-    private static final Component STOP = Component.translatable(CreateNuclearized.MODID + ".gui.controller.stop");
+    private static final int X = 115;
+    private static final int Y = 64;
+    private static final int WIDTH = 56;
+    private static final int HEIGHT = 20;
+    private static final int U = 200;
+    private static final int START_V = 0;
+    private static final int START_HOVER_V = 20;
+    private static final int STOP_V = 40;
+    private static final int STOP_HOVER_V = 60;
 
     private final ResourceLocation texture;
     private final ControllerMenu menu;
@@ -44,21 +38,12 @@ public class StartStopButton extends AbstractButton {
         boolean running = menu.isRunning();
         boolean hovered = isHovered();
 
-        int u = HOVER_U;
         int v;
-        if (running) {
+        if (running)
             v = hovered ? STOP_HOVER_V : STOP_V;
-        } else if (hovered) {
-            v = START_HOVER_V;
-        } else {
-            u = X;
-            v = Y;
-        }
-        graphics.blit(texture, getX(), getY(), u, v, WIDTH, HEIGHT);
-
-        Font font = Minecraft.getInstance().font;
-        graphics.drawCenteredString(font, running ? STOP : START, getX() + WIDTH / 2,
-                getY() + (HEIGHT - font.lineHeight) / 2 + 1, LABEL_COLOR);
+        else
+            v = hovered ? START_HOVER_V : START_V;
+        graphics.blit(texture, getX(), getY(), U, v, WIDTH, HEIGHT);
     }
 
     @Override

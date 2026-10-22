@@ -11,33 +11,33 @@ import net.minecraft.world.entity.player.Inventory;
 
 public abstract class ControllerScreen<M extends ControllerMenu> extends AbstractContainerScreen<M> {
 
-    protected static final int TEXT_COLOR = 0x404040;
-
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
-            CreateNuclearized.MODID, "textures/gui/reactor_controller.png");
+    protected static final int TEXT_COLOR = 0x47644D;
 
     protected ControllerScreen(M menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 176;
-        this.imageHeight = 166;
+        this.imageHeight = 176;
     }
+
+    protected abstract ResourceLocation texture();
 
     @Override
     protected void init() {
         super.init();
-        this.inventoryLabelY = this.imageHeight - 94;
-        addRenderableWidget(new StartStopButton(TEXTURE, this.leftPos, this.topPos, this.menu));
+        this.inventoryLabelX = 8;
+        this.inventoryLabelY = 83;
+        addRenderableWidget(new StartStopButton(texture(), this.leftPos, this.topPos, this.menu));
     }
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.blit(TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        graphics.blit(texture(), this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         MultiblockState state = menu.getState();
-        graphics.drawString(this.font, state.label(), this.titleLabelX, this.titleLabelY, state.color(), false);
+        graphics.drawString(this.font, state.label(), this.titleLabelX, this.titleLabelY + 2, state.color(), false);
         renderInfo(graphics);
         graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, TEXT_COLOR, false);
     }

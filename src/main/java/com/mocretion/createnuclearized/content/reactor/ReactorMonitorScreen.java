@@ -39,6 +39,13 @@ public class ReactorMonitorScreen extends AbstractContainerScreen<ReactorMonitor
     private static final int PANEL_X = 7;
     private static final int PANEL_Y = 40;
 
+    private static final int INTERIOR_BG_U = 0;
+    private static final int INTERIOR_BG_V = 162;
+    private static final int INTERIOR_BG_W = 166;
+    private static final int INTERIOR_BG_H = 92;
+    private static final int INTERIOR_BG_X = 5;
+    private static final int INTERIOR_BG_Y = 30;
+
     private static final int GRID = 9;
     private static final int CELL = 18;
     private static final int ICON_V = 0;
@@ -62,8 +69,8 @@ public class ReactorMonitorScreen extends AbstractContainerScreen<ReactorMonitor
     private static final int ACTIVE_Y_OFFSET = 4;
 
     private static final int CONTENT_X = 8;
-    private static final int STATUS_Y = TAB_HEIGHT + 6;
-    private static final int CONTENT_Y = TAB_HEIGHT + 20;
+    private static final int STATUS_Y = TAB_HEIGHT + 8;
+    private static final int CONTENT_Y = TAB_HEIGHT + 22;
 
     private int activeTab;
 
@@ -83,6 +90,8 @@ public class ReactorMonitorScreen extends AbstractContainerScreen<ReactorMonitor
         graphics.blit(TEXTURE, overlayX, overlayY, ACTIVE_U, ACTIVE_V, ACTIVE_W, ACTIVE_H);
 
         if (isInteriorTab()) {
+            graphics.blit(REACTOR_TEXTURE, this.leftPos + INTERIOR_BG_X, this.topPos + INTERIOR_BG_Y,
+                    INTERIOR_BG_U, INTERIOR_BG_V, INTERIOR_BG_W, INTERIOR_BG_H);
             graphics.blit(REACTOR_TEXTURE, this.leftPos + PANEL_X, this.topPos + PANEL_Y, PANEL_U, PANEL_V, PANEL_W, PANEL_H);
             renderGridOverlays(graphics, clientGrid());
         }

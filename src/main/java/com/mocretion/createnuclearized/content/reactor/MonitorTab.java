@@ -46,8 +46,8 @@ public enum MonitorTab {
     };
 
     private static final String KEY = CreateNuclearized.MODID + ".gui.reactor_monitor.";
-    private static final int LINE_HEIGHT = 11;
-    private static final int TEXT_COLOR = 0x404040;
+    private static final int LINE_HEIGHT = 12;
+    private static final int TEXT_COLOR = 0x47644D;
 
     private final String id;
 

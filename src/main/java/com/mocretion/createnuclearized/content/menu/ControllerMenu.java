@@ -21,7 +21,7 @@ public abstract class ControllerMenu extends AbstractContainerMenu {
     public static final int BUTTON_TOGGLE = 0;
 
     private static final int INV_X = 8;
-    private static final int INV_Y = 84;
+    private static final int INV_Y = 94;
 
     private final ContainerLevelAccess access;
     private final Block block;
