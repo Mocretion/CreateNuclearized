@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "createnuclearized:reactor_casing"
+    },
+    {
+      "item": "create:fluid_tank"
+    },
+    {
+      "item": "create:mechanical_pump"
+    }
+  ],
+  "result": {
+    "id": "createnuclearized:spent_salt_output_valve"
+  }
+}

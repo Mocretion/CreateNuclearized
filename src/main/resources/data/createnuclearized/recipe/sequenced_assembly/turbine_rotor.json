@@ -1,0 +1,33 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "create:shaft"
+  },
+  "loops": 8,
+  "results": [
+    {
+      "id": "createnuclearized:turbine_rotor"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_turbine_rotor"
+        },
+        {
+          "item": "createnuclearized:turbine_blade"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_turbine_rotor"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_turbine_rotor"
+  }
+}

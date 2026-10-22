@@ -1,7 +1,8 @@
 package com.mocretion.createnuclearized.content.reactor;
 
 import java.util.List;
-import java.util.Locale;
+
+import javax.annotation.Nullable;
 
 import com.mocretion.createnuclearized.CreateNuclearized;
 import com.mocretion.createnuclearized.registry.CNBlocks;
@@ -55,6 +56,11 @@ public final class ReactorTooltips {
                 appendModerator(lines, moderatorRate);
                 return;
             }
+            int reflectorPercent = ReactorReflector.percent(state);
+            if (reflectorPercent > 0) {
+                appendReflector(lines, reflectorPercent);
+                return;
+            }
             ReactorModifier.Effect effect = ReactorModifier.effect(state);
             if (effect != null) {
                 appendModifier(lines, effect);
@@ -65,6 +71,7 @@ public final class ReactorTooltips {
             appendModifier(lines, ReactorModifier.WATER_SOURCE);
     }
 
+    @Nullable
     private static ReactorFuel spentBucketFuel(ItemStack stack) {
         for (ReactorFuel fuel : ReactorFuel.values()) {
             if (stack.getItem() == fuel.outputFluid().getBucket()) return fuel;
@@ -75,9 +82,18 @@ public final class ReactorTooltips {
     private static void appendModerator(List<Component> lines, double rate) {
         lines.add(Component.translatable("createnuclearized.tooltip.moderator")
                 .withStyle(ChatFormatting.AQUA));
-        lines.add(Component.translatable("createnuclearized.tooltip.moderator.rate", signed(rate))
+        lines.add(Component.translatable("createnuclearized.tooltip.moderator.rate", RateFormat.signed(rate))
                 .withStyle(ChatFormatting.GRAY));
         lines.add(Component.translatable("createnuclearized.tooltip.moderator.hint")
+                .withStyle(ChatFormatting.DARK_GRAY));
+    }
+
+    private static void appendReflector(List<Component> lines, int percent) {
+        lines.add(Component.translatable("createnuclearized.tooltip.reflector")
+                .withStyle(ChatFormatting.LIGHT_PURPLE));
+        lines.add(Component.translatable("createnuclearized.tooltip.reflector.heat", signedInt(percent))
+                .withStyle(ChatFormatting.GRAY));
+        lines.add(Component.translatable("createnuclearized.tooltip.reflector.hint")
                 .withStyle(ChatFormatting.DARK_GRAY));
     }
 
@@ -87,7 +103,7 @@ public final class ReactorTooltips {
         addDeltaLine(lines, "burn", signedInt(effect.dBurn()), effect.dBurn() != 0);
         addDeltaLine(lines, "purity", signedInt(effect.dPurity()), effect.dPurity() != 0);
         if (effect.dRate() != 0) {
-            lines.add(Component.translatable("createnuclearized.tooltip.rate", signed(effect.dRate()))
+            lines.add(Component.translatable("createnuclearized.tooltip.rate", RateFormat.signed(effect.dRate()))
                     .withStyle(ChatFormatting.GRAY));
         }
         lines.add(Component.translatable("createnuclearized.tooltip.modifier.hint")
@@ -127,10 +143,9 @@ public final class ReactorTooltips {
         }
     }
 
-    private static void addRoleElement(List<Component> lines, String roleKey, ReactorFuel.Element element) {
+    private static void addRoleElement(List<Component> lines, String roleKey, SaltElement element) {
         if (element == null) return;
-        lines.add(Component.translatable("createnuclearized.tooltip.fuel." + roleKey,
-                        Component.translatable("createnuclearized.tooltip.element." + element.name().toLowerCase(Locale.ROOT)))
+        lines.add(Component.translatable("createnuclearized.tooltip.fuel." + roleKey, element.displayName())
                 .withStyle(ChatFormatting.GRAY));
     }
 
@@ -142,12 +157,5 @@ public final class ReactorTooltips {
 
     private static String signedInt(int value) {
         return (value > 0 ? "+" : "") + value;
-    }
-
-    private static String signed(double value) {
-        String s = String.format(Locale.ROOT, "%.4f", value);
-        if (s.contains("."))
-            s = s.replaceAll("0+$", "").replaceAll("\\.$", "");
-        return (value > 0 ? "+" : "") + s;
     }
 }

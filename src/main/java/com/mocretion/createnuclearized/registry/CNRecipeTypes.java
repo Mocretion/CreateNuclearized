@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.mocretion.createnuclearized.CreateNuclearized;
 import com.mocretion.createnuclearized.content.boiler.BoilingRecipe;
 import com.mocretion.createnuclearized.content.boiler.DegassingRecipe;
+import com.mocretion.createnuclearized.content.boiler.HeatGenerationRecipe;
 import com.mocretion.createnuclearized.content.reconstitution.ReconstitutionRecipe;
 import com.mocretion.createnuclearized.content.unmixer.UnmixingRecipe;
 import com.mojang.serialization.MapCodec;
@@ -28,12 +29,15 @@ public final class CNRecipeTypes {
             DeferredRegister.create(Registries.RECIPE_SERIALIZER, CreateNuclearized.MODID);
 
     public static final DeferredHolder<RecipeType<?>, RecipeType<BoilingRecipe>> BOILING = type("boiling");
+    public static final DeferredHolder<RecipeType<?>, RecipeType<HeatGenerationRecipe>> HEAT_GENERATION = type("heat_generation");
     public static final DeferredHolder<RecipeType<?>, RecipeType<DegassingRecipe>> DEGASSING = type("degassing");
     public static final DeferredHolder<RecipeType<?>, RecipeType<UnmixingRecipe>> UNMIXING = type("unmixing");
     public static final DeferredHolder<RecipeType<?>, RecipeType<ReconstitutionRecipe>> RECONSTITUTION = type("reconstitution");
 
     public static final Supplier<RecipeSerializer<BoilingRecipe>> BOILING_SERIALIZER =
             SERIALIZERS.register("boiling", () -> serializer(BoilingRecipe.CODEC));
+    public static final Supplier<RecipeSerializer<HeatGenerationRecipe>> HEAT_GENERATION_SERIALIZER =
+            SERIALIZERS.register("heat_generation", () -> serializer(HeatGenerationRecipe.CODEC));
     public static final Supplier<RecipeSerializer<DegassingRecipe>> DEGASSING_SERIALIZER =
             SERIALIZERS.register("degassing", () -> serializer(DegassingRecipe.CODEC));
     public static final Supplier<RecipeSerializer<UnmixingRecipe>> UNMIXING_SERIALIZER =

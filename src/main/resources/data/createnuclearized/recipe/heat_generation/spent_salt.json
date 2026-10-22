@@ -1,0 +1,6 @@
+{
+  "type": "createnuclearized:heat_generation",
+  "input": { "tag": "createnuclearized:salts/spent" },
+  "heat": "heat",
+  "output": "cooled"
+}

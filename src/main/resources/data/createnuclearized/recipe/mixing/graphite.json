@@ -1,0 +1,10 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "superheated",
+  "ingredients": [
+    { "tag": "minecraft:coals" }
+  ],
+  "results": [
+    { "id": "createnuclearized:graphite" }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "values": [
+    "createnuclearized:reactor_casing",
+    "createnuclearized:reactor_glass",
+    "createnuclearized:reactor_controller",
+    "createnuclearized:fissile_salt_input_valve",
+    "createnuclearized:spent_salt_output_valve",
+    "createnuclearized:control_rod",
+    "createnuclearized:reactor_monitor",
+    "createnuclearized:reactor_casing_encased_shaft",
+    "createnuclearized:reactor_casing_encased_cogwheel",
+    "createnuclearized:reactor_casing_encased_large_cogwheel",
+    "createnuclearized:reactor_encased_chain_drive"
+  ]
+}

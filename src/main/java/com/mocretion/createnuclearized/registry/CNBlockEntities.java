@@ -2,23 +2,24 @@ package com.mocretion.createnuclearized.registry;
 
 import static com.mocretion.createnuclearized.registry.CNRegistrate.REGISTRATE;
 
-import com.mocretion.createnuclearized.content.boiler.ContainedBlazeBurnerBlockEntity;
-import com.mocretion.createnuclearized.content.boiler.ContainedBlazeBurnerRenderer;
+import com.mocretion.createnuclearized.content.boiler.IndustrialHeaterBlockEntity;
+import com.mocretion.createnuclearized.content.boiler.IndustrialHeaterRenderer;
 import com.mocretion.createnuclearized.content.boiler.EvaporationBasinBlockEntity;
 import com.mocretion.createnuclearized.content.boiler.EvaporationBasinRenderer;
 import com.mocretion.createnuclearized.content.boiler.ExhaustHoodBlockEntity;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodBlockEntity;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodRenderer;
 import com.mocretion.createnuclearized.content.fluid.SpentSaltBlockEntity;
+import com.mocretion.createnuclearized.content.kinetics.RtgBlockEntity;
 import com.mocretion.createnuclearized.content.reactor.ReactorControllerBlockEntity;
 import com.mocretion.createnuclearized.content.reactor.ReactorFluidValveBlockEntity;
 import com.mocretion.createnuclearized.content.reactor.ReactorMonitorBlockEntity;
-import com.mocretion.createnuclearized.content.turbine.SteamInputValveBlockEntity;
 import com.mocretion.createnuclearized.content.turbine.TurbineControllerBlockEntity;
 import com.mocretion.createnuclearized.content.turbine.TurbineGeneratorBlockEntity;
 import com.mocretion.createnuclearized.content.turbine.TurbineRotorBlockEntity;
 import com.mocretion.createnuclearized.content.turbine.TurbineRotorRenderer;
 import com.mocretion.createnuclearized.content.turbine.TurbineRotorVisual;
+import com.mocretion.createnuclearized.content.turbine.TurbineSteamInputValveBlockEntity;
 import com.mocretion.createnuclearized.content.unmixer.PrecisionUnmixerBlockEntity;
 import com.mocretion.createnuclearized.content.unmixer.PrecisionUnmixerRenderer;
 import com.simibubi.create.AllPartialModels;
@@ -28,12 +29,10 @@ import com.simibubi.create.content.kinetics.base.SingleAxisRotatingVisual;
 import com.simibubi.create.content.kinetics.simpleRelays.SimpleKineticBlockEntity;
 import com.simibubi.create.content.kinetics.simpleRelays.encased.EncasedCogRenderer;
 import com.simibubi.create.content.kinetics.simpleRelays.encased.EncasedCogVisual;
-import com.mocretion.createnuclearized.CreateNuclearized;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
+import com.tterrag.registrate.util.entry.FluidEntry;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 
 public final class CNBlockEntities {
@@ -45,7 +44,7 @@ public final class CNBlockEntities {
 
     public static final BlockEntityEntry<ReactorFluidValveBlockEntity> REACTOR_FLUID_VALVE = REGISTRATE
             .blockEntity("reactor_fluid_valve", ReactorFluidValveBlockEntity::new)
-            .validBlocks(CNBlocks.MOLTEN_SALT_INPUT_VALVE, CNBlocks.HEATED_SALT_OUTPUT_VALVE)
+            .validBlocks(CNBlocks.FISSILE_SALT_INPUT_VALVE, CNBlocks.SPENT_SALT_OUTPUT_VALVE)
             .register();
 
     public static final BlockEntityEntry<ReactorMonitorBlockEntity> REACTOR_MONITOR = REGISTRATE
@@ -80,6 +79,13 @@ public final class CNBlockEntities {
             .renderer(() -> EncasedCogRenderer::large)
             .register();
 
+    public static final BlockEntityEntry<RtgBlockEntity> RTG = REGISTRATE
+            .blockEntity("rtg", RtgBlockEntity::new)
+            .visual(() -> SingleAxisRotatingVisual.of(AllPartialModels.SHAFT))
+            .validBlocks(CNBlocks.PLUTONIUM_RTG, CNBlocks.AMERICIUM_RTG)
+            .renderer(() -> ShaftRenderer::new)
+            .register();
+
     public static final BlockEntityEntry<KineticBlockEntity> REACTOR_ENCASED_CHAIN_DRIVE = REGISTRATE
             .blockEntity("reactor_encased_chain_drive", KineticBlockEntity::new)
             .visual(() -> SingleAxisRotatingVisual.of(AllPartialModels.SHAFT))
@@ -92,20 +98,22 @@ public final class CNBlockEntities {
             .validBlock(CNBlocks.TURBINE_CONTROLLER)
             .register();
 
-    public static final BlockEntityEntry<SteamInputValveBlockEntity> STEAM_INPUT_VALVE = REGISTRATE
-            .blockEntity("steam_input_valve", SteamInputValveBlockEntity::new)
-            .validBlock(CNBlocks.STEAM_INPUT_VALVE)
+    public static final BlockEntityEntry<TurbineSteamInputValveBlockEntity> TURBINE_STEAM_INPUT_VALVE = REGISTRATE
+            .blockEntity("turbine_steam_input_valve", TurbineSteamInputValveBlockEntity::new)
+            .validBlock(CNBlocks.TURBINE_STEAM_INPUT_VALVE)
             .register();
 
     public static final BlockEntityEntry<TurbineGeneratorBlockEntity> TURBINE_GENERATOR = REGISTRATE
             .blockEntity("turbine_generator", TurbineGeneratorBlockEntity::new)
+            .visual(() -> SingleAxisRotatingVisual.of(AllPartialModels.SHAFT))
             .validBlock(CNBlocks.TURBINE_GENERATOR)
+            .renderer(() -> ShaftRenderer::new)
             .register();
 
     public static final BlockEntityEntry<TurbineRotorBlockEntity> TURBINE_ROTOR = REGISTRATE
             .blockEntity("turbine_rotor", TurbineRotorBlockEntity::new)
             .visual(() -> TurbineRotorVisual::new)
-            .validBlocks(CNBlocks.TURBINE_ROTOR, CNBlocks.MEDIUM_TURBINE_ROTOR, CNBlocks.LARGE_TURBINE_ROTOR)
+            .validBlocks(CNBlocks.TURBINE_ROTOR, CNBlocks.LARGE_TURBINE_ROTOR)
             .renderer(() -> TurbineRotorRenderer::new)
             .register();
 
@@ -115,10 +123,10 @@ public final class CNBlockEntities {
             .renderer(() -> PrecisionUnmixerRenderer::new)
             .register();
 
-    public static final BlockEntityEntry<ContainedBlazeBurnerBlockEntity> CONTAINED_BLAZE_BURNER = REGISTRATE
-            .blockEntity("contained_blaze_burner", ContainedBlazeBurnerBlockEntity::new)
-            .validBlock(CNBlocks.CONTAINED_BLAZE_BURNER)
-            .renderer(() -> ContainedBlazeBurnerRenderer::new)
+    public static final BlockEntityEntry<IndustrialHeaterBlockEntity> INDUSTRIAL_HEATER = REGISTRATE
+            .blockEntity("industrial_heater", IndustrialHeaterBlockEntity::new)
+            .validBlock(CNBlocks.INDUSTRIAL_HEATER)
+            .renderer(() -> IndustrialHeaterRenderer::new)
             .register();
 
     public static final BlockEntityEntry<EvaporationBasinBlockEntity> EVAPORATION_BASIN = REGISTRATE
@@ -134,13 +142,13 @@ public final class CNBlockEntities {
 
     public static final BlockEntityEntry<SpentSaltBlockEntity> SPENT_SALT = REGISTRATE
             .blockEntity("spent_salt", SpentSaltBlockEntity::new)
-            .validBlock(spentSaltBlock("spent_uranium_salt"))
-            .validBlock(spentSaltBlock("spent_plutonium_salt"))
-            .validBlock(spentSaltBlock("spent_thorium_uranium_salt"))
+            .validBlock(spentSaltBlock(CNFluids.SPENT_URANIUM_SALT))
+            .validBlock(spentSaltBlock(CNFluids.SPENT_PLUTONIUM_SALT))
+            .validBlock(spentSaltBlock(CNFluids.SPENT_THORIUM_URANIUM_SALT))
             .register();
 
-    private static NonNullSupplier<Block> spentSaltBlock(String name) {
-        return () -> BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, name));
+    private static NonNullSupplier<Block> spentSaltBlock(FluidEntry<?> fluid) {
+        return () -> fluid.getSource().defaultFluidState().createLegacyBlock().getBlock();
     }
 
     private CNBlockEntities() {}

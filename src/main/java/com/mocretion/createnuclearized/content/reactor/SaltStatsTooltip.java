@@ -24,10 +24,11 @@ public final class SaltStatsTooltip {
         statLine(tooltip, "gui.goggles.salt_heat", stats.heat(), "°", null);
         if (fuel != null) {
             elementLine(tooltip, stats, fuel.unconsumed(), fuel);
-            elementLine(tooltip, stats, fuel.bred(), fuel);
+            if (fuel.bred() != fuel.unconsumed())
+                elementLine(tooltip, stats, fuel.bred(), fuel);
         } else {
-            for (ReactorFuel.Element element : ReactorFuel.Element.values())
-                statLineIfNonzero(tooltip, elementKey(element), stats.amount(element), "%", null);
+            for (SaltElement element : SaltElement.values())
+                statLineIfNonzero(tooltip, element.displayName(), stats.amount(element), "%", null);
         }
         statLineIfNonzero(tooltip, "gui.goggles.salt_off_gas", stats.offGas(), "%", null);
     }
@@ -43,25 +44,14 @@ public final class SaltStatsTooltip {
         lang("gui.goggles.salt_rate")
                 .style(ChatFormatting.GRAY)
                 .text(ChatFormatting.GRAY, ": ")
-                .add(CreateLang.text(formatRate(rate)).style(ChatFormatting.GOLD))
+                .add(CreateLang.text(RateFormat.format(rate) + " mB/t").style(ChatFormatting.GOLD))
                 .forGoggles(tooltip, 1);
     }
 
-    private static void elementLine(List<Component> tooltip, SaltStats stats, @Nullable ReactorFuel.Element element,
+    private static void elementLine(List<Component> tooltip, SaltStats stats, @Nullable SaltElement element,
             ReactorFuel fuel) {
         if (element == null) return;
-        statLineIfNonzero(tooltip, elementKey(element), stats.amount(element), "%", fuel.role(element));
-    }
-
-    private static String elementKey(ReactorFuel.Element element) {
-        return "gui.goggles.salt_" + element.name().toLowerCase(java.util.Locale.ROOT);
-    }
-
-    private static String formatRate(double rate) {
-        String s = String.format(java.util.Locale.ROOT, "%.4f", rate);
-        if (s.contains("."))
-            s = s.replaceAll("0+$", "").replaceAll("\\.$", "");
-        return s + " mB/t";
+        statLineIfNonzero(tooltip, element.displayName(), stats.amount(element), "%", fuel.role(element));
     }
 
     private static LangBuilder lang(String key) {
@@ -74,9 +64,20 @@ public final class SaltStatsTooltip {
             statLine(tooltip, key, value, unit, roleKey);
     }
 
+    private static void statLineIfNonzero(List<Component> tooltip, Component label, int value, String unit,
+            @Nullable String roleKey) {
+        if (value != 0)
+            statLine(tooltip, new LangBuilder(CreateNuclearized.MODID).add(label), value, unit, roleKey);
+    }
+
     private static void statLine(List<Component> tooltip, String key, int value, String unit,
             @Nullable String roleKey) {
-        LangBuilder line = lang(key)
+        statLine(tooltip, lang(key), value, unit, roleKey);
+    }
+
+    private static void statLine(List<Component> tooltip, LangBuilder label, int value, String unit,
+            @Nullable String roleKey) {
+        LangBuilder line = label
                 .style(ChatFormatting.GRAY)
                 .text(ChatFormatting.GRAY, ": ")
                 .add(CreateLang.number(value).style(ChatFormatting.GOLD).text(ChatFormatting.GOLD, unit));

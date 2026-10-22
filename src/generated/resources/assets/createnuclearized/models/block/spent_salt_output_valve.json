@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "createnuclearized:block/reactor_output_output",
+    "east": "createnuclearized:block/reactor_casing",
+    "north": "createnuclearized:block/reactor_casing",
+    "particle": "createnuclearized:block/reactor_casing",
+    "south": "createnuclearized:block/reactor_casing",
+    "up": "createnuclearized:block/reactor_output_input",
+    "west": "createnuclearized:block/reactor_casing"
+  }
+}

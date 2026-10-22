@@ -1,0 +1,15 @@
+{
+  "type": "create:crushing",
+  "ingredients": [
+    {
+      "item": "minecraft:emerald"
+    }
+  ],
+  "processing_time": 350,
+  "results": [
+    {
+      "chance": 0.05,
+      "id": "createnuclearized:beryllium"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": false,
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "createnuclearized:turbine_casing"
+    },
+    "M": {
+      "item": "create:stressometer"
+    },
+    "I": {
+      "tag": "c:ingots/steel"
+    },
+    "T": {
+      "item": "create:transmitter"
+    },
+    "R": {
+      "tag": "c:storage_blocks/redstone"
+    },
+    "U": {
+      "item": "createnuclearized:control_unit"
+    },
+    "S": {
+      "item": "create:content_observer"
+    }
+  },
+  "pattern": [
+    "CCCCC",
+    "CMITC",
+    "CIRIC",
+    "CUSUC",
+    "CCCCC"
+  ],
+  "result": {
+    "id": "createnuclearized:turbine_controller"
+  },
+  "show_notification": false
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "AAA",
+    "AAA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "createnuclearized:xenon_crystals"
+    }
+  },
+  "result": {
+    "id": "createnuclearized:xenon_block"
+  }
+}

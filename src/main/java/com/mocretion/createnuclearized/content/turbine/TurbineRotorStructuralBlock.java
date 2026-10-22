@@ -76,10 +76,10 @@ public class TurbineRotorStructuralBlock extends DirectionalBlock {
 
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (stillValid(level, pos, state)) {
+        if (!level.isClientSide() && stillValid(level, pos, state)) {
             BlockPos master = getMaster(level, pos, state);
-            if (!level.isClientSide() && player.isCreative())
-                level.destroyBlock(master, false);
+            boolean drop = !player.isCreative() && player.hasCorrectToolForDrops(level.getBlockState(master));
+            level.destroyBlock(master, drop);
         }
         return super.playerWillDestroy(level, pos, state, player);
     }

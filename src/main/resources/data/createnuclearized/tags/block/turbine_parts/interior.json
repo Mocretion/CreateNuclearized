@@ -1,0 +1,9 @@
+{
+  "values": [
+    "createnuclearized:turbine_rotor",
+    "createnuclearized:large_turbine_rotor",
+    "createnuclearized:turbine_stator",
+    "createnuclearized:turbine_rotor_structural",
+    "create:shaft"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "create:block/encased_shaft/item",
+  "textures": {
+    "casing": "createnuclearized:block/amaricium_rtg",
+    "opening": "createnuclearized:block/reactor_gearbox"
+  }
+}

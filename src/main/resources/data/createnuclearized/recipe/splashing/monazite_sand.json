@@ -1,0 +1,22 @@
+{
+  "type": "create:splashing",
+  "ingredients": [
+    {
+      "item": "createnuclearized:monazite_sand"
+    }
+  ],
+  "results": [
+    {
+      "chance": 0.2,
+      "id": "createnuclearized:raw_thorium"
+    },
+    {
+      "chance": 0.1,
+      "id": "create:zinc_nugget"
+    },
+    {
+      "chance": 0.1,
+      "id": "create:copper_nugget"
+    }
+  ]
+}

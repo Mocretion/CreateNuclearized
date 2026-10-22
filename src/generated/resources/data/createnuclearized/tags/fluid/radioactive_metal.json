@@ -1,0 +1,16 @@
+{
+  "values": [
+    "createnuclearized:flowing_liquid_uranium",
+    "createnuclearized:liquid_uranium",
+    "createnuclearized:flowing_liquid_plutonium",
+    "createnuclearized:liquid_plutonium",
+    "createnuclearized:flowing_liquid_thorium",
+    "createnuclearized:liquid_thorium",
+    "createnuclearized:flowing_liquid_americium",
+    "createnuclearized:liquid_americium",
+    "createnuclearized:flowing_liquid_thorium_uranium",
+    "createnuclearized:liquid_thorium_uranium",
+    "createnuclearized:flowing_enriched_liquid_uranium",
+    "createnuclearized:enriched_liquid_uranium"
+  ]
+}

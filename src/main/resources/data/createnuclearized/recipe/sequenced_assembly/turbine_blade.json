@@ -1,0 +1,75 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "createnuclearized:steel_sheet"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "createnuclearized:turbine_blade"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_turbine_blade"
+        },
+        {
+          "tag": "c:ingots/brass"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_turbine_blade"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_turbine_blade"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_turbine_blade"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_turbine_blade"
+        },
+        {
+          "item": "createnuclearized:steel_sheet"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_turbine_blade"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_turbine_blade"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_turbine_blade"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_turbine_blade"
+  }
+}

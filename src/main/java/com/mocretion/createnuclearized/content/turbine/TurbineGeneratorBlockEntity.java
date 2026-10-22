@@ -1,10 +1,8 @@
 package com.mocretion.createnuclearized.content.turbine;
 
 import com.simibubi.create.content.kinetics.base.GeneratingKineticBlockEntity;
-import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
@@ -13,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class TurbineGeneratorBlockEntity extends GeneratingKineticBlockEntity {
 
-    private static final float SPEED_RPM = 160f;
+    private static final float SPEED_RPM = 128f;
     private static final int DRIVE_TIMEOUT = 10;
 
     private float stressCapacity;
@@ -37,12 +35,6 @@ public class TurbineGeneratorBlockEntity extends GeneratingKineticBlockEntity {
     public void drive(float stressCapacity) {
         driveTimer = DRIVE_TIMEOUT;
         setStressCapacity(stressCapacity);
-    }
-
-    public void alignTo(Axis axis) {
-        BlockState state = getBlockState();
-        if (state.getValue(RotatedPillarKineticBlock.AXIS) != axis)
-            switchToBlockState(level, worldPosition, state.setValue(RotatedPillarKineticBlock.AXIS, axis));
     }
 
     @Override

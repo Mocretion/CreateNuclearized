@@ -1,0 +1,6 @@
+{
+  "feature": "createnuclearized:monazite_surface",
+  "placement": [
+    { "type": "minecraft:count", "count": 1 }
+  ]
+}

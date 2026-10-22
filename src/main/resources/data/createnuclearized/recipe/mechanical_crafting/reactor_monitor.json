@@ -1,0 +1,30 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": false,
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "createnuclearized:reactor_casing"
+    },
+    "U": {
+      "item": "createnuclearized:control_unit"
+    },
+    "S": {
+      "item": "create:content_observer"
+    },
+    "G": {
+      "item": "createnuclearized:reactor_glass"
+    }
+  },
+  "pattern": [
+    "CCCCC",
+    "CSUSC",
+    "CGGGC",
+    "CSUSC",
+    "CCCCC"
+  ],
+  "result": {
+    "id": "createnuclearized:reactor_monitor"
+  },
+  "show_notification": false
+}

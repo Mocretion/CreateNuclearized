@@ -3,23 +3,23 @@ package com.mocretion.createnuclearized.content.reconstitution;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mocretion.createnuclearized.content.reactor.SaltStats;
+import javax.annotation.Nullable;
+
 import com.mocretion.createnuclearized.registry.CNDataComponents;
 import com.mocretion.createnuclearized.registry.CNRecipeTypes;
 import com.simibubi.create.content.processing.basin.BasinBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
-import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour.TankSegment;
 
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 
 public final class Reconstitution {
 
     private Reconstitution() {}
 
+    @Nullable
     public static ReconstitutionRecipe find(Level level, BasinBlockEntity basin) {
         for (RecipeHolder<ReconstitutionRecipe> holder : level.getRecipeManager().getAllRecipesFor(CNRecipeTypes.RECONSTITUTION.get())) {
             if (canRun(holder.value(), basin)) return holder.value();
@@ -47,9 +47,8 @@ public final class Reconstitution {
         List<FluidStack> outputs = outputs(recipe);
         if (!basin.acceptOutputs(List.of(), outputs, true)) return;
 
-        salt.shrink(recipe.amount());
-        metal.shrink(needed);
-        basin.getTanks().getFirst().forEach(TankSegment::onFluidStackChanged);
+        input.drain(salt.copyWithAmount(recipe.amount()), FluidAction.EXECUTE);
+        input.drain(metal.copyWithAmount(needed), FluidAction.EXECUTE);
         basin.acceptOutputs(List.of(), outputs, false);
         basin.inputTank.sendDataImmediately();
         basin.notifyChangeOfContents();

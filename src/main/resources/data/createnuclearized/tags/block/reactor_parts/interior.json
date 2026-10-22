@@ -1,0 +1,30 @@
+{
+  "values": [
+    "createnuclearized:graphite_block",
+    "createnuclearized:beryllium_block",
+    "createnuclearized:xenon_block",
+    "minecraft:sculk",
+    "minecraft:sea_lantern",
+    "minecraft:glowstone",
+    "minecraft:sponge",
+    "minecraft:amethyst_block",
+    "minecraft:honey_block",
+    "minecraft:diamond_block",
+    "minecraft:water",
+    "create:fluid_pipe",
+    "create:encased_fluid_pipe",
+    "create:glass_fluid_pipe",
+    "create:smart_fluid_pipe",
+    "create:fluid_valve",
+    "create:mechanical_pump",
+    "create:shaft",
+    "create:cogwheel",
+    "create:large_cogwheel",
+    "create:andesite_encased_shaft",
+    "create:brass_encased_shaft",
+    "create:andesite_encased_cogwheel",
+    "create:brass_encased_cogwheel",
+    "create:andesite_encased_large_cogwheel",
+    "create:brass_encased_large_cogwheel"
+  ]
+}

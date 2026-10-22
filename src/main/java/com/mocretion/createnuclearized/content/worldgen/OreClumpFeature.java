@@ -22,10 +22,12 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 public class OreClumpFeature extends Feature<OreClumpFeature.Config> {
 
     public record Config(RuleTest target, BlockState state, IntProvider size) implements FeatureConfiguration {
+        private static final int MAX_SIZE = 16;
+
         public static final Codec<Config> CODEC = RecordCodecBuilder.create(i -> i.group(
                 RuleTest.CODEC.fieldOf("target").forGetter(Config::target),
                 BlockState.CODEC.fieldOf("state").forGetter(Config::state),
-                IntProvider.codec(1, 64).fieldOf("size").forGetter(Config::size)
+                IntProvider.codec(1, MAX_SIZE).fieldOf("size").forGetter(Config::size)
         ).apply(i, Config::new));
     }
 

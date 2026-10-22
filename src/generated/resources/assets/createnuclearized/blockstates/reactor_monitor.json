@@ -1,7 +1,50 @@
 {
   "variants": {
-    "": {
+    "facing=down,lit=false": {
+      "model": "createnuclearized:block/reactor_monitor",
+      "x": 90
+    },
+    "facing=down,lit=true": {
+      "model": "createnuclearized:block/reactor_monitor_on",
+      "x": 90
+    },
+    "facing=east,lit=false": {
+      "model": "createnuclearized:block/reactor_monitor",
+      "y": 90
+    },
+    "facing=east,lit=true": {
+      "model": "createnuclearized:block/reactor_monitor_on",
+      "y": 90
+    },
+    "facing=north,lit=false": {
       "model": "createnuclearized:block/reactor_monitor"
+    },
+    "facing=north,lit=true": {
+      "model": "createnuclearized:block/reactor_monitor_on"
+    },
+    "facing=south,lit=false": {
+      "model": "createnuclearized:block/reactor_monitor",
+      "y": 180
+    },
+    "facing=south,lit=true": {
+      "model": "createnuclearized:block/reactor_monitor_on",
+      "y": 180
+    },
+    "facing=up,lit=false": {
+      "model": "createnuclearized:block/reactor_monitor",
+      "x": 270
+    },
+    "facing=up,lit=true": {
+      "model": "createnuclearized:block/reactor_monitor_on",
+      "x": 270
+    },
+    "facing=west,lit=false": {
+      "model": "createnuclearized:block/reactor_monitor",
+      "y": 270
+    },
+    "facing=west,lit=true": {
+      "model": "createnuclearized:block/reactor_monitor_on",
+      "y": 270
     }
   }
 }

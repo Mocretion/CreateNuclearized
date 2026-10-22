@@ -20,7 +20,6 @@ import org.joml.Vector3f;
 
 public class TexturedFluidType extends FluidType {
 
-    private static final int UNTINTED = 0xFFFFFFFF;
     private static final float FOG_START = 0.0f;
     private static final float FOG_END = 0.8f;
 
@@ -29,10 +28,6 @@ public class TexturedFluidType extends FluidType {
     private final int tint;
     private int radiationLevel;
     private boolean burns;
-
-    public TexturedFluidType(Properties properties, ResourceLocation stillTexture, ResourceLocation flowingTexture) {
-        this(properties, stillTexture, flowingTexture, UNTINTED);
-    }
 
     public TexturedFluidType(Properties properties, ResourceLocation stillTexture, ResourceLocation flowingTexture, int tint) {
         super(properties);
@@ -53,6 +48,12 @@ public class TexturedFluidType extends FluidType {
 
     public boolean burns() {
         return burns;
+    }
+
+    @Override
+    public int getTemperature(FluidStack stack) {
+        SaltStats stats = stack.get(CNDataComponents.SALT_STATS.get());
+        return stats != null ? stats.heat() : super.getTemperature(stack);
     }
 
     @Override

@@ -11,4 +11,9 @@ public class TurbineRotorBlockEntity extends KineticBlockEntity {
     public TurbineRotorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
+
+    @Override
+    public float calculateAddedStressCapacity() {
+        return 0; // registered capacity is for the tooltip only, the generator supplies the real SU
+    }
 }

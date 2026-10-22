@@ -3,6 +3,8 @@ package com.mocretion.createnuclearized.content.turbine;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.mocretion.createnuclearized.registry.CNBlockEntities;
 import com.mocretion.createnuclearized.registry.CNBlocks;
 import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
@@ -22,11 +24,13 @@ public class TurbineRotorBlock extends RotatedPillarKineticBlock implements IBE<
 
     private final int radius;
     private final int hitboxRadius;
+    private final double stressCapacity;
 
-    public TurbineRotorBlock(Properties properties, int radius, int hitboxRadius) {
+    public TurbineRotorBlock(Properties properties, int radius, int hitboxRadius, double stressCapacity) {
         super(properties);
         this.radius = radius;
         this.hitboxRadius = hitboxRadius;
+        this.stressCapacity = stressCapacity;
     }
 
     public int radius() {
@@ -35,6 +39,15 @@ public class TurbineRotorBlock extends RotatedPillarKineticBlock implements IBE<
 
     public int hitboxRadius() {
         return hitboxRadius;
+    }
+
+    public double stressCapacity() {
+        return stressCapacity;
+    }
+
+    public int steamPerTick() {
+        int side = 2 * radius + 1;
+        return (side * side - 1) * TurbineControllerBlockEntity.STEAM_PER_BLADE_CELL;
     }
 
     @Override
@@ -57,6 +70,7 @@ public class TurbineRotorBlock extends RotatedPillarKineticBlock implements IBE<
         return base != null ? base.getValue(AXIS) : context.getClickedFace().getAxis();
     }
 
+    @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState state = super.getStateForPlacement(context);

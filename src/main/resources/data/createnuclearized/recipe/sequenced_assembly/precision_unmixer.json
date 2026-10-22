@@ -1,0 +1,78 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "create:mechanical_mixer"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "createnuclearized:precision_unmixer"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_precision_unmixer"
+        },
+        {
+          "item": "createnuclearized:control_unit"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_precision_unmixer"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_precision_unmixer"
+        },
+        {
+          "item": "create:precision_mechanism"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_precision_unmixer"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_precision_unmixer"
+        },
+        {
+          "item": "create:propeller"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_precision_unmixer"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_precision_unmixer"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_precision_unmixer"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_precision_unmixer"
+  }
+}

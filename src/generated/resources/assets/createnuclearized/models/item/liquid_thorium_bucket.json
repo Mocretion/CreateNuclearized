@@ -1,6 +1,5 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "createnuclearized:item/liquid_thorium_bucket"
-  }
+  "parent": "neoforge:item/bucket",
+  "fluid": "createnuclearized:liquid_thorium",
+  "loader": "neoforge:fluid_container"
 }

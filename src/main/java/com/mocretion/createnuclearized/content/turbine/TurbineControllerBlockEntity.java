@@ -5,11 +5,17 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.mocretion.createnuclearized.CreateNuclearized;
+import com.mocretion.createnuclearized.content.multiblock.MultiblockController;
+import com.mocretion.createnuclearized.content.multiblock.MultiblockErrorPayload;
+import com.mocretion.createnuclearized.content.multiblock.MultiblockState;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -17,13 +23,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class TurbineControllerBlockEntity extends BlockEntity implements MenuProvider {
+public class TurbineControllerBlockEntity extends BlockEntity implements MenuProvider, MultiblockController {
 
     private static final int TICKS_PER_SECOND = 20;
 
-    private static final int STEAM_PER_BLADE_CELL = 2;
-
-    private static final float CAPACITY_PER_BLADE_CELL = 2f;
+    public static final int STEAM_PER_BLADE_CELL = 2;
 
     private static final int RUN_UP_SECONDS = 1;
 
@@ -32,6 +36,7 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
     private List<BlockPos> valvePositions = List.of();
     private int stages;
     private int bladeCells;
+    private float rotorCapacity;
 
     private boolean running;
     private boolean spinning;
@@ -40,30 +45,24 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
     private int sampleTimer;
     private int steamDrawnThisSample;
     private int steamUse;
-    private TurbineState state = TurbineState.STOPPED;
+    private MultiblockState state = MultiblockState.STOPPED;
 
     public TurbineControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
+    @Override
     public boolean isRunning() {
         return running;
     }
 
-    public TurbineState getState() {
+    @Override
+    public MultiblockState getState() {
         return state;
-    }
-
-    public int getStateOrdinal() {
-        return state.ordinal();
     }
 
     public int getStages() {
         return stages;
-    }
-
-    public int getBladeCells() {
-        return bladeCells;
     }
 
     public int getSteamUse() {
@@ -76,14 +75,14 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
 
     public int getSteamBuffered() {
         int total = 0;
-        for (SteamInputValveBlockEntity valve : steamValves())
+        for (TurbineSteamInputValveBlockEntity valve : steamValves())
             total += valve.getSteamAmount();
         return total;
     }
 
     public int getSteamCapacity() {
         int total = 0;
-        for (SteamInputValveBlockEntity valve : steamValves())
+        for (TurbineSteamInputValveBlockEntity valve : steamValves())
             total += valve.getSteamTank().getCapacity();
         return total;
     }
@@ -93,14 +92,7 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
         return generator != null ? Math.round(Math.abs(generator.getGeneratedSpeed())) : 0;
     }
 
-    public void setRunningFromNetwork(boolean running) {
-        this.running = running;
-    }
-
-    public void setStateFromNetwork(int ordinal) {
-        this.state = TurbineState.byOrdinal(ordinal);
-    }
-
+    @Override
     public void toggleRunning(@Nullable Player player) {
         if (level == null) return;
         if (running) {
@@ -110,8 +102,12 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
         TurbineMultiblock.Result result = TurbineMultiblock.validate(level, worldPosition);
         if (!result.valid()) {
             clearStructure();
-            if (player != null)
-                player.displayClientMessage(Component.literal("Turbine invalid: " + result.reason()), true);
+            if (player != null) {
+                Component message = Component.translatable(CreateNuclearized.MODID + ".multiblock.turbine.invalid", result.reason());
+                player.displayClientMessage(message, true);
+                if (player instanceof ServerPlayer serverPlayer && result.at() != null)
+                    MultiblockErrorPayload.send(serverPlayer, result.at());
+            }
             return;
         }
         applyStructure(result);
@@ -137,6 +133,7 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
     }
 
     private void revalidate() {
+        if (!turbineChunksLoaded()) return;
         TurbineMultiblock.Result result = TurbineMultiblock.validate(level, worldPosition);
         if (!result.valid()) {
             stop();
@@ -146,14 +143,18 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
         applyStructure(result);
     }
 
+    private boolean turbineChunksLoaded() {
+        int reach = TurbineMultiblock.MAX_DEPTH;
+        return level.hasChunksAt(worldPosition.getX() - reach, worldPosition.getZ() - reach,
+                worldPosition.getX() + reach, worldPosition.getZ() + reach);
+    }
+
     private void applyStructure(TurbineMultiblock.Result result) {
         generatorPos = result.generator();
         valvePositions = result.steamValves();
         stages = result.stages();
         bladeCells = result.bladeCells();
-        TurbineGeneratorBlockEntity generator = generator();
-        if (generator != null)
-            generator.alignTo(result.depthAxis());
+        rotorCapacity = result.rotorCapacity();
         setChanged();
     }
 
@@ -162,6 +163,7 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
         valvePositions = List.of();
         stages = 0;
         bladeCells = 0;
+        rotorCapacity = 0;
         setChanged();
     }
 
@@ -171,7 +173,7 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
         load = 0;
         steamDrawnThisSample = 0;
         steamUse = 0;
-        state = TurbineState.STOPPED;
+        state = MultiblockState.STOPPED;
         driveGenerator();
         setChanged();
     }
@@ -182,7 +184,7 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
 
     private void tickConsume() {
         int demand = steamDemand();
-        int runUp = Math.min(demand * RUN_UP_SECONDS * TICKS_PER_SECOND, SteamInputValveBlockEntity.CAPACITY);
+        int runUp = Math.min(demand * RUN_UP_SECONDS * TICKS_PER_SECOND, TurbineSteamInputValveBlockEntity.CAPACITY);
         if (!spinning && getSteamBuffered() >= runUp)
             spinning = true;
 
@@ -192,12 +194,12 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
 
         steamUse = drawn;
         steamDrawnThisSample += drawn;
-        state = spinning ? TurbineState.RUNNING : TurbineState.IDLE;
+        state = spinning ? MultiblockState.RUNNING : MultiblockState.IDLE;
     }
 
     private int drawSteam(int demand) {
         int drawn = 0;
-        for (SteamInputValveBlockEntity valve : steamValves()) {
+        for (TurbineSteamInputValveBlockEntity valve : steamValves()) {
             if (drawn >= demand) break;
             drawn += valve.consume(demand - drawn);
         }
@@ -213,7 +215,7 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
     private void driveGenerator() {
         TurbineGeneratorBlockEntity generator = generator();
         if (generator != null)
-            generator.drive(bladeCells * CAPACITY_PER_BLADE_CELL * load);
+            generator.drive(rotorCapacity * load);
     }
 
     @Nullable
@@ -222,11 +224,11 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
         return level.getBlockEntity(generatorPos) instanceof TurbineGeneratorBlockEntity generator ? generator : null;
     }
 
-    private List<SteamInputValveBlockEntity> steamValves() {
-        List<SteamInputValveBlockEntity> valves = new ArrayList<>();
+    private List<TurbineSteamInputValveBlockEntity> steamValves() {
+        List<TurbineSteamInputValveBlockEntity> valves = new ArrayList<>();
         if (level == null) return valves;
         for (BlockPos pos : valvePositions) {
-            if (level.getBlockEntity(pos) instanceof SteamInputValveBlockEntity valve)
+            if (level.getBlockEntity(pos) instanceof TurbineSteamInputValveBlockEntity valve)
                 valves.add(valve);
         }
         return valves;
@@ -251,6 +253,7 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
         tag.putFloat("Load", load);
         tag.putInt("Stages", stages);
         tag.putInt("BladeCells", bladeCells);
+        tag.putFloat("RotorCapacity", rotorCapacity);
     }
 
     @Override
@@ -261,5 +264,6 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
         load = tag.getFloat("Load");
         stages = tag.getInt("Stages");
         bladeCells = tag.getInt("BladeCells");
+        rotorCapacity = tag.getFloat("RotorCapacity");
     }
 }

@@ -45,7 +45,7 @@ public class ExhaustHoodBlockEntity extends SmartBlockEntity implements IHaveGog
         if (gas.isEmpty()) return;
         IFluidHandler tank = level.getCapability(Capabilities.FluidHandler.BLOCK, worldPosition.above(), Direction.DOWN);
         if (tank == null) return;
-        int filled = tank.fill(gas, FluidAction.EXECUTE);
+        int filled = tank.fill(gas.copy(), FluidAction.EXECUTE);
         if (filled > 0)
             gasTank.getPrimaryHandler().drain(filled, FluidAction.EXECUTE);
     }

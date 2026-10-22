@@ -1,0 +1,107 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "createnuclearized:reactor_casing"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "createnuclearized:control_rod"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_control_rod"
+        },
+        {
+          "item": "minecraft:obsidian"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_control_rod"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_control_rod"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_control_rod"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_control_rod"
+        },
+        {
+          "item": "minecraft:obsidian"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_control_rod"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_control_rod"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_control_rod"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_control_rod"
+        },
+        {
+          "item": "create:transmitter"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_control_rod"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_control_rod"
+        },
+        {
+          "item": "create:cogwheel"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_control_rod"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_control_rod"
+  }
+}

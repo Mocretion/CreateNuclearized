@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "AAA",
+    "AAA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "createnuclearized:steel_sheet"
+    }
+  },
+  "result": {
+    "id": "createnuclearized:turbine_stator",
+    "count": 8
+  }
+}

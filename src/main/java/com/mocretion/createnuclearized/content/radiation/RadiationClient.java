@@ -18,6 +18,7 @@ public final class RadiationClient {
 
     private static final RandomSource RANDOM = RandomSource.create();
     private static final float NUDGE_PER_LEVEL = 0.9f;
+    private static final int MAX_NUDGE_LEVEL = 8;
     private static final int BASE_INTERVAL = 140;
     private static final float EASE = 0.12f;
     private static final float TARGET_DECAY = 0.88f;
@@ -42,7 +43,7 @@ public final class RadiationClient {
             return;
         }
 
-        int radiationLevel = effect.getAmplifier() + 1;
+        int radiationLevel = Math.min(effect.getAmplifier() + 1, MAX_NUDGE_LEVEL);
         if (--ticksUntilNudge <= 0) {
             float magnitude = NUDGE_PER_LEVEL * radiationLevel;
             yawTarget = (RANDOM.nextFloat() * 2f - 1f) * magnitude;

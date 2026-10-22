@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.fluids.FluidUtil;
 
@@ -47,6 +46,12 @@ public class EvaporationBasinBlock extends Block implements IBE<EvaporationBasin
         if (FluidUtil.interactWithFluidHandler(player, hand, level, pos, hit.getDirection()))
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        IBE.onRemove(state, level, pos, newState);
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override

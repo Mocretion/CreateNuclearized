@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "CCC",
+    "CGC",
+    "CCC"
+  ],
+  "key": {
+    "C": {
+      "item": "createnuclearized:turbine_casing"
+    },
+    "G": {
+      "tag": "c:glass_blocks/cheap"
+    }
+  },
+  "result": {
+    "id": "createnuclearized:turbine_glass",
+    "count": 8
+  }
+}

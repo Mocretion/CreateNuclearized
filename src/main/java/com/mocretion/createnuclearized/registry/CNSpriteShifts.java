@@ -11,6 +11,8 @@ public final class CNSpriteShifts {
 
     public static final CTSpriteShiftEntry REACTOR_CASING = omni("reactor_casing");
     public static final CTSpriteShiftEntry REACTOR_GLASS = omni("reactor_glass");
+    public static final CTSpriteShiftEntry TURBINE_CASING = omni("turbine_casing");
+    public static final CTSpriteShiftEntry TURBINE_GLASS = omni("turbine_glass");
 
     public static final CTSpriteShiftEntry REACTOR_COGWHEEL_SIDE = cogSide(AllCTTypes.VERTICAL);
     public static final CTSpriteShiftEntry REACTOR_COGWHEEL_OTHERSIDE = cogSide(AllCTTypes.HORIZONTAL);
@@ -25,7 +27,7 @@ public final class CNSpriteShifts {
 
     private static CTSpriteShiftEntry cogSide(AllCTTypes type) {
         return CTSpriteShifter.getCT(type,
-                ResourceLocation.fromNamespaceAndPath("create", "block/andesite_encased_cogwheel_side"),
-                ResourceLocation.fromNamespaceAndPath("create", "block/andesite_encased_cogwheel_side_connected"));
+                ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "block/reactor_encased_cogwheel_side"),
+                ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "block/reactor_encased_cogwheel_side_connected"));
     }
 }

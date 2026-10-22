@@ -1,0 +1,46 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "createnuclearized:steel_sheet"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "createnuclearized:reactor_plating"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_reactor_plating"
+        },
+        {
+          "item": "create:powdered_obsidian"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_reactor_plating"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_reactor_plating"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_reactor_plating"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_reactor_plating"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": false,
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "createnuclearized:reactor_casing"
+    },
+    "L": {
+      "item": "create:rose_quartz_lamp"
+    },
+    "N": {
+      "tag": "c:ingots/netherite"
+    },
+    "I": {
+      "tag": "c:ingots/steel"
+    },
+    "T": {
+      "item": "create:transmitter"
+    },
+    "R": {
+      "tag": "c:storage_blocks/redstone"
+    },
+    "U": {
+      "item": "createnuclearized:control_unit"
+    },
+    "S": {
+      "item": "create:content_observer"
+    }
+  },
+  "pattern": [
+    "CCCCC",
+    "CLNTC",
+    "CIRIC",
+    "CUSUC",
+    "CCCCC"
+  ],
+  "result": {
+    "id": "createnuclearized:reactor_controller"
+  },
+  "show_notification": false
+}

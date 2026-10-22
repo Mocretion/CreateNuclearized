@@ -39,3 +39,5 @@ run/
 repo/
 !**/src/**/repo/
 *.blend1
+docs/
+*.bbmodel

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SSS",
+    " T ",
+    " P "
+  ],
+  "key": {
+    "S": {
+      "item": "create:copper_sheet"
+    },
+    "T": {
+      "item": "create:fluid_tank"
+    },
+    "P": {
+      "item": "create:propeller"
+    }
+  },
+  "result": {
+    "id": "createnuclearized:exhaust_hood"
+  }
+}

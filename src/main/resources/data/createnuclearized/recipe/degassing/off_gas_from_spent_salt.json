@@ -1,0 +1,18 @@
+{
+  "type": "createnuclearized:degassing",
+  "input": { "tag": "createnuclearized:salts/spent" },
+  "gas": "createnuclearized:off_gas",
+  "output": "off_gas",
+  "rate": 2,
+  "yield": 1.0,
+  "effects": [
+    { "effect": "createnuclearized:radiation_sickness", "amplifier": 0, "duration": 200 },
+    { "effect": "minecraft:nausea", "amplifier": 0, "duration": 200 }
+  ],
+  "particles": {
+    "particle": { "type": "minecraft:smoke" },
+    "count": 1,
+    "spread": 0.4,
+    "speed": 0.03
+  }
+}

@@ -35,8 +35,4 @@ public final class ReactorModifier {
         if (state.is(CNBlocks.XENON_BLOCK.get())) return XENON;
         return BY_BLOCK.get(state.getBlock());
     }
-
-    public static boolean isModifier(BlockState state) {
-        return effect(state) != null;
-    }
 }

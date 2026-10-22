@@ -1,0 +1,16 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "superheated",
+  "ingredients": [
+    { "type": "neoforge:single", "amount": 1000, "fluid": "minecraft:water" },
+    { "item": "createnuclearized:beryllium" },
+    { "item": "createnuclearized:beryllium" },
+    { "item": "createnuclearized:beryllium" },
+    { "item": "createnuclearized:beryllium" },
+    { "item": "minecraft:netherite_scrap" },
+    { "item": "minecraft:netherite_scrap" }
+  ],
+  "results": [
+    { "amount": 1000, "id": "createnuclearized:molten_salt" }
+  ]
+}

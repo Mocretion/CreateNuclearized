@@ -1,0 +1,62 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "createnuclearized:steel_sheet"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "createnuclearized:control_unit"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_control_unit"
+        },
+        {
+          "item": "create:precision_mechanism"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_control_unit"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_control_unit"
+        },
+        {
+          "item": "create:electron_tube"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_control_unit"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_control_unit"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_control_unit"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_control_unit"
+  }
+}

@@ -2,6 +2,7 @@ package com.mocretion.createnuclearized.content.reactor;
 
 import javax.annotation.Nullable;
 
+import com.mocretion.createnuclearized.content.multiblock.MultiblockState;
 import com.mocretion.createnuclearized.registry.CNBlockEntities;
 
 import net.minecraft.core.BlockPos;
@@ -27,13 +28,13 @@ import net.minecraft.world.phys.BlockHitResult;
 public class ReactorControllerBlock extends Block implements EntityBlock {
 
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
-    public static final EnumProperty<ReactorState> STATE = EnumProperty.create("state", ReactorState.class);
+    public static final EnumProperty<MultiblockState> STATE = EnumProperty.create("state", MultiblockState.class);
 
     public ReactorControllerBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
-                .setValue(STATE, ReactorState.STOPPED));
+                .setValue(STATE, MultiblockState.STOPPED));
     }
 
     @Override

@@ -1,0 +1,13 @@
+{
+  "type": "create:pressing",
+  "ingredients": [
+    {
+      "tag": "c:ingots/steel"
+    }
+  ],
+  "results": [
+    {
+      "id": "createnuclearized:steel_sheet"
+    }
+  ]
+}

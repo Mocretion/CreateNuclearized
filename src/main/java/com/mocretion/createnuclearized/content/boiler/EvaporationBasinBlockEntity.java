@@ -87,23 +87,24 @@ public class EvaporationBasinBlockEntity extends SmartBlockEntity implements IHa
         if (effectCooldown > 0)
             effectCooldown--;
         FluidStack in = inputTank.getFluid();
-        if (in.isEmpty()) return;
-
-        if (level.getBlockEntity(worldPosition.below()) instanceof ContainedBlazeBurnerBlockEntity burner) {
-            BoilingRecipe boiling = findBoiling(in, burner.getHeater());
-            if (boiling != null && boil(boiling, burner)) return;
-        }
-        DegassingRecipe degassing = findDegassing(in);
-        if (degassing != null)
+        DegassingRecipe degassing = in.isEmpty() || tryBoil(in) ? null : findDegassing(in);
+        if (degassing == null)
+            setBlocked(false);
+        else
             degas(degassing, in);
     }
 
-    private boolean boil(BoilingRecipe recipe, ContainedBlazeBurnerBlockEntity burner) {
-        int temperature = BoilingRecipe.temperatureOf(burner.getHeater());
-        int amount = Math.min(recipe.maxRate(), inputTank.getFluidAmount());
-        amount = Math.min(amount, (int) Math.floor(burner.availableHeater() * temperature / recipe.heatPerMb()));
+    private boolean tryBoil(FluidStack in) {
+        if (!(level.getBlockEntity(worldPosition.below()) instanceof IndustrialHeaterBlockEntity burner)) return false;
+        BoilingRecipe boiling = findBoiling(in, burner);
+        return boiling != null && boil(boiling, burner);
+    }
+
+    private boolean boil(BoilingRecipe recipe, IndustrialHeaterBlockEntity burner) {
+        int maxWater = Math.min(recipe.maxRate(), inputTank.getFluidAmount());
+        if (maxWater <= 0) return false;
+        int amount = burner.boil(maxWater, recipe);
         if (amount <= 0) return false;
-        if (!burner.spendHeater(amount * (double) recipe.heatPerMb() / temperature, recipe)) return false;
 
         inputTank.drain(amount, FluidAction.EXECUTE);
         releaseGas(new FluidStack(recipe.gas().builtInRegistryHolder(), amount), recipe.particles(), recipe.hazards());
@@ -117,9 +118,7 @@ public class EvaporationBasinBlockEntity extends SmartBlockEntity implements IHa
 
         double gasExact = amount * recipe.gasShare(in) + gasCarry;
         int gas = (int) gasExact;
-        FluidStack rest = FluidStack.EMPTY;
-        if (recipe.source().isPresent() && amount > gas)
-            rest = recipe.source().get().strip(in, amount - gas);
+        FluidStack rest = recipe.outputLiquid(in, amount, gas);
         if (!rest.isEmpty() && outputTank.fill(rest, FluidAction.SIMULATE) < rest.getAmount()) {
             setBlocked(true);
             return;
@@ -136,10 +135,10 @@ public class EvaporationBasinBlockEntity extends SmartBlockEntity implements IHa
     }
 
     @Nullable
-    private BoilingRecipe findBoiling(FluidStack in, FluidStack heater) {
+    private BoilingRecipe findBoiling(FluidStack in, IndustrialHeaterBlockEntity burner) {
         for (RecipeHolder<BoilingRecipe> holder : level.getRecipeManager().getAllRecipesFor(CNRecipeTypes.BOILING.get())) {
             BoilingRecipe recipe = holder.value();
-            if (recipe.input().test(in) && recipe.acceptsHeater(heater) && filterAccepts(recipe.gas())) return recipe;
+            if (recipe.input().test(in) && filterAccepts(recipe.gas()) && burner.hasHeatFor(recipe)) return recipe;
         }
         return null;
     }
@@ -230,12 +229,18 @@ public class EvaporationBasinBlockEntity extends SmartBlockEntity implements IHa
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
         tag.putBoolean("Blocked", blocked);
+        if (clientPacket) return;
+        tag.putDouble("DegasProgress", degasProgress);
+        tag.putDouble("GasCarry", gasCarry);
     }
 
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
         blocked = tag.getBoolean("Blocked");
+        if (clientPacket) return;
+        degasProgress = tag.getDouble("DegasProgress");
+        gasCarry = tag.getDouble("GasCarry");
     }
 
     static class BasinValueBox extends ValueBoxTransform.Sided {

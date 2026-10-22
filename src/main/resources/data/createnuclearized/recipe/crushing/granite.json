@@ -1,0 +1,19 @@
+{
+  "type": "create:crushing",
+  "ingredients": [
+    {
+      "item": "minecraft:granite"
+    }
+  ],
+  "processing_time": 250,
+  "results": [
+    {
+      "chance": 0.5,
+      "id": "minecraft:red_sand"
+    },
+    {
+      "chance": 0.5,
+      "id": "createnuclearized:monazite_sand"
+    }
+  ]
+}

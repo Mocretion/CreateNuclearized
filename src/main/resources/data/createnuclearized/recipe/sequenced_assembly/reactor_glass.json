@@ -1,0 +1,49 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "tag": "c:glass_blocks/cheap"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "createnuclearized:reactor_glass"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_reactor_glass"
+        },
+        {
+          "tag": "c:ingots/brass"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_reactor_glass"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_reactor_glass"
+        },
+        {
+          "item": "createnuclearized:reactor_plating"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_reactor_glass"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_reactor_glass"
+  }
+}

@@ -16,7 +16,7 @@ public class ControlRodBlockEntity extends KineticBlockEntity {
     private static final float BLOCKS_PER_TICK_PER_RPM = 1f / 512f;
     private static final int MAX_REACH = 16;
     private static final float DROP_PER_TICK = 0.25f;
-    private static final int ENGAGE_TIMEOUT = 3;
+    private static final int ENGAGE_TIMEOUT = 20;
     private static final float RAISED_EPS = 0.05f;
 
     private float offset = MAX_REACH;
@@ -119,8 +119,7 @@ public class ControlRodBlockEntity extends KineticBlockEntity {
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
         tag.putFloat("Offset", offset);
-        if (clientPacket)
-            tag.putBoolean("Engaged", engaged);
+        tag.putBoolean("Engaged", engaged);
     }
 
     @Override
@@ -128,7 +127,8 @@ public class ControlRodBlockEntity extends KineticBlockEntity {
         super.read(tag, registries, clientPacket);
         offset = tag.contains("Offset") ? tag.getFloat("Offset") : MAX_REACH;
         prevOffset = offset;
-        if (clientPacket)
-            engaged = tag.getBoolean("Engaged");
+        engaged = tag.getBoolean("Engaged");
+        if (engaged && !clientPacket)
+            engagedTimer = ENGAGE_TIMEOUT;
     }
 }

@@ -5,7 +5,11 @@
   "mixins": [
     "BasinGoggleMixin",
     "BasinReconstitutionMixin",
-    "FluidTankGoggleMixin"
+    "FluidDrainingBehaviourSaltMixin",
+    "FluidFillingBehaviourSaltMixin",
+    "FluidTankGoggleMixin",
+    "HosePulleyFluidHandlerSaltMixin",
+    "OpenEndedPipeSaltMixin"
   ],
   "injectors": {
     "defaultRequire": 1

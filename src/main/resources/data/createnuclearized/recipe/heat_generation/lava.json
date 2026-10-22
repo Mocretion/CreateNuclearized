@@ -1,0 +1,6 @@
+{
+  "type": "createnuclearized:heat_generation",
+  "input": { "fluid": "minecraft:lava" },
+  "heat": "heat",
+  "output": "consumed"
+}

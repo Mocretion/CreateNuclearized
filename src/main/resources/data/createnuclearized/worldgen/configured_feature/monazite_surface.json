@@ -1,0 +1,13 @@
+{
+  "type": "createnuclearized:monazite_surface",
+  "config": {
+    "biomes": "#createnuclearized:has_monazite",
+    "target": { "Name": "minecraft:sand" },
+    "state": { "Name": "createnuclearized:monazite_sand" },
+    "region_scale": 0.0012,
+    "region_threshold": 0.72,
+    "edge_scale": 0.03,
+    "edge_jitter": 0.08,
+    "depth": { "type": "minecraft:uniform", "min_inclusive": 2, "max_inclusive": 3 }
+  }
+}

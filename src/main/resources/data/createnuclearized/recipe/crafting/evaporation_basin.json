@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "I",
+    "C",
+    "B"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_bars"
+    },
+    "C": {
+      "item": "minecraft:copper_block"
+    },
+    "B": {
+      "item": "create:basin"
+    }
+  },
+  "result": {
+    "id": "createnuclearized:evaporation_basin"
+  }
+}

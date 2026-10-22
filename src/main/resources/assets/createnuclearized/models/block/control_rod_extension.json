@@ -1,9 +1,8 @@
 {
-  "__comment": "Partial model rendered by ControlRodRenderer (stretched in Y). Placeholder iron texture until real art exists.",
   "parent": "block/block",
   "textures": {
-    "rod": "minecraft:block/iron_block",
-    "particle": "minecraft:block/iron_block"
+    "rod": "minecraft:block/obsidian",
+    "particle": "minecraft:block/obsidian"
   },
   "elements": [
     {

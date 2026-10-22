@@ -1,0 +1,19 @@
+{
+  "values": [
+    "createnuclearized:uranium_salt_bucket",
+    "createnuclearized:spent_uranium_salt_bucket",
+    "createnuclearized:plutonium_salt_bucket",
+    "createnuclearized:spent_plutonium_salt_bucket",
+    "createnuclearized:thorium_uranium_salt_bucket",
+    "createnuclearized:spent_thorium_uranium_salt_bucket",
+    "createnuclearized:molten_salt_bucket",
+    "createnuclearized:liquid_uranium_bucket",
+    "createnuclearized:liquid_plutonium_bucket",
+    "createnuclearized:liquid_thorium_bucket",
+    "createnuclearized:liquid_americium_bucket",
+    "createnuclearized:liquid_thorium_uranium_bucket",
+    "createnuclearized:enriched_liquid_uranium_bucket",
+    "createnuclearized:pressurized_steam_bucket",
+    "createnuclearized:off_gas_bucket"
+  ]
+}

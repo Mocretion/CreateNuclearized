@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "facing=down,open=false": {
+      "model": "createnuclearized:block/turbine_stator"
+    },
+    "facing=down,open=true": {
+      "model": "createnuclearized:block/turbine_stator_open"
+    },
+    "facing=east,open=false": {
+      "model": "createnuclearized:block/turbine_stator",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,open=true": {
+      "model": "createnuclearized:block/turbine_stator_open",
+      "x": 270,
+      "y": 90
+    },
+    "facing=north,open=false": {
+      "model": "createnuclearized:block/turbine_stator",
+      "x": 270
+    },
+    "facing=north,open=true": {
+      "model": "createnuclearized:block/turbine_stator_open",
+      "x": 270
+    },
+    "facing=south,open=false": {
+      "model": "createnuclearized:block/turbine_stator",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,open=true": {
+      "model": "createnuclearized:block/turbine_stator_open",
+      "x": 270,
+      "y": 180
+    },
+    "facing=up,open=false": {
+      "model": "createnuclearized:block/turbine_stator",
+      "x": 180
+    },
+    "facing=up,open=true": {
+      "model": "createnuclearized:block/turbine_stator_open",
+      "x": 180
+    },
+    "facing=west,open=false": {
+      "model": "createnuclearized:block/turbine_stator",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,open=true": {
+      "model": "createnuclearized:block/turbine_stator_open",
+      "x": 270,
+      "y": 270
+    }
+  }
+}

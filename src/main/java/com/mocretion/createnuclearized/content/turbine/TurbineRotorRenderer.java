@@ -27,6 +27,11 @@ public class TurbineRotorRenderer extends KineticBlockEntityRenderer<TurbineRoto
         super(context);
     }
 
+    public static void registerCompartments() {
+        SuperByteBufferCache.getInstance().registerCompartment(ROTOR);
+        SuperByteBufferCache.getInstance().registerCompartment(CASING);
+    }
+
     @Override
     protected void renderSafe(TurbineRotorBlockEntity be, float partialTicks, PoseStack ms,
                               MultiBufferSource buffer, int light, int overlay) {

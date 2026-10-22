@@ -8,7 +8,6 @@ import com.mocretion.createnuclearized.registry.CNRecipeTypes;
 import com.simibubi.create.content.kinetics.mixer.MechanicalMixerBlockEntity;
 import com.simibubi.create.content.processing.basin.BasinBlockEntity;
 import com.simibubi.create.foundation.advancement.CreateAdvancement;
-import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour.TankSegment;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -18,6 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 
 public class PrecisionUnmixerBlockEntity extends MechanicalMixerBlockEntity {
 
@@ -59,9 +59,9 @@ public class PrecisionUnmixerBlockEntity extends MechanicalMixerBlockEntity {
         boolean wasEmpty = basin.canContinueProcessing();
         if (!basin.acceptOutputs(itemOutputs, fluidOutputs, true)) return;
 
-        in.shrink(recipe.amount());
-        basin.getTanks().getFirst().forEach(TankSegment::onFluidStackChanged);
-        basin.acceptOutputs(itemOutputs, fluidOutputs, false);
+        FluidStack consumed = in.copyWithAmount(recipe.amount());
+        basin.getTanks().getFirst().getCapability().drain(consumed, FluidAction.EXECUTE);
+        basin.acceptOutputs(recipe.rollItemOutputs(consumed, level.random), fluidOutputs, false);
         basin.inputTank.sendDataImmediately();
 
         if (wasEmpty) {

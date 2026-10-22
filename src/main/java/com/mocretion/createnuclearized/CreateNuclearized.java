@@ -1,8 +1,14 @@
 package com.mocretion.createnuclearized;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 
+import com.mocretion.createnuclearized.content.filter.SaltStatsAttribute;
 import com.mocretion.createnuclearized.content.fluid.SpentSaltBucketWrapper;
+import com.mocretion.createnuclearized.content.metal.Metals;
+import com.mocretion.createnuclearized.content.multiblock.MultiblockErrorPayload;
 import com.mocretion.createnuclearized.content.radiation.CNEffects;
 import com.mocretion.createnuclearized.content.reactor.ReactorFuel;
 import com.mocretion.createnuclearized.registry.CNBlockEntities;
@@ -22,14 +28,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -61,7 +66,6 @@ public class CreateNuclearized {
                     .icon(() -> CNBlocks.GRAPHITE_BLOCK.asStack())
                     .displayItems((params, output) -> {
                         output.accept(CNBlocks.GRAPHITE_BLOCK.get());
-                        output.accept(CNBlocks.BERYLLIUM_BLOCK.get());
                         output.accept(Blocks.SEA_LANTERN);
                         output.accept(Blocks.GLOWSTONE);
                         output.accept(Blocks.SCULK);
@@ -71,15 +75,17 @@ public class CreateNuclearized {
                         output.accept(CNBlocks.XENON_BLOCK.get());
                         output.accept(Blocks.DIAMOND_BLOCK);
                         output.accept(Items.WATER_BUCKET);
+                        output.accept(CNBlocks.BERYLLIUM_BLOCK.get());
                     })
                     .build());
 
-    public CreateNuclearized(IEventBus modEventBus, ModContainer modContainer) {
+    public CreateNuclearized(IEventBus modEventBus) {
         CNRegistrate.REGISTRATE.registerEventListeners(modEventBus);
         CNBlocks.register();
         CNBlockEntities.register();
         CNItems.register();
         CNFluids.register();
+        Metals.init(modEventBus);
         CNDataComponents.register();
         CNRegistrate.registerRawLang();
 
@@ -93,8 +99,8 @@ public class CreateNuclearized {
 
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(this::buildCreativeTabContents);
-
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modEventBus.addListener(MultiblockErrorPayload::register);
+        modEventBus.addListener(SaltStatsAttribute::register);
 
         LOGGER.info("Create: Nuclearized loaded");
     }
@@ -103,14 +109,14 @@ public class CreateNuclearized {
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
                 CNBlockEntities.REACTOR_FLUID_VALVE.get(),
+                (be, side) -> be.getFluidHandler(side));
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                CNBlockEntities.TURBINE_STEAM_INPUT_VALVE.get(),
                 (be, side) -> be.getFluidHandler());
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
-                CNBlockEntities.STEAM_INPUT_VALVE.get(),
-                (be, side) -> be.getFluidHandler());
-        event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                CNBlockEntities.CONTAINED_BLAZE_BURNER.get(),
+                CNBlockEntities.INDUSTRIAL_HEATER.get(),
                 (be, side) -> be.getFluidHandler());
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
@@ -120,12 +126,15 @@ public class CreateNuclearized {
                 Capabilities.FluidHandler.BLOCK,
                 CNBlockEntities.EXHAUST_HOOD.get(),
                 (be, side) -> be.getFluidHandler());
+        List<Item> spentBuckets = new ArrayList<>(List.of(
+                CNFluids.spentUraniumSalt().getBucket(),
+                CNFluids.spentPlutoniumSalt().getBucket(),
+                CNFluids.spentThoriumUraniumSalt().getBucket()));
+        spentBuckets.addAll(Metals.spentBuckets());
         event.registerItem(
                 Capabilities.FluidHandler.ITEM,
                 (stack, ctx) -> new SpentSaltBucketWrapper(stack),
-                CNFluids.spentUraniumSalt().getBucket(),
-                CNFluids.spentPlutoniumSalt().getBucket(),
-                CNFluids.spentThoriumUraniumSalt().getBucket());
+                spentBuckets.toArray(Item[]::new));
     }
 
     private void buildCreativeTabContents(BuildCreativeModeTabContentsEvent event) {
@@ -133,6 +142,7 @@ public class CreateNuclearized {
         acceptWithBaseStats(event, CNFluids.spentUraniumSalt());
         acceptWithBaseStats(event, CNFluids.spentPlutoniumSalt());
         acceptWithBaseStats(event, CNFluids.spentThoriumUraniumSalt());
+        Metals.addCreativeItems(event);
     }
 
     private static void acceptWithBaseStats(BuildCreativeModeTabContentsEvent event, Fluid spent) {

@@ -44,13 +44,24 @@ public class ControlRodRenderer extends KineticBlockEntityRenderer<ControlRodBlo
         shaft.renderInto(ms, buffer.getBuffer(RenderType.solid()));
 
         float length = be.getRenderedExtension(partialTicks);
-        if (length > 1f / 16f) {
-            SuperByteBuffer rod = CachedBuffers.partial(ControlRodPartials.CONTROL_ROD_EXTENSION, state);
-            rod.translate(0, -length, 0);
-            rod.scale(1, length, 1);
-            rod.light(neighborLight);
-            rod.renderInto(ms, buffer.getBuffer(RenderType.solid()));
-        }
+        if (length <= 1f / 16f) return;
+
+        int fullSegments = (int) length;
+        for (int i = 0; i < fullSegments; i++)
+            renderSegment(state, ms, buffer, neighborLight, i + 1f, 1f);
+
+        float remainder = length - fullSegments;
+        if (remainder > 1f / 16f)
+            renderSegment(state, ms, buffer, neighborLight, length, remainder);
+    }
+
+    private static void renderSegment(BlockState state, PoseStack ms, MultiBufferSource buffer,
+                                      int light, float bottom, float height) {
+        SuperByteBuffer rod = CachedBuffers.partial(ControlRodPartials.CONTROL_ROD_EXTENSION, state);
+        rod.translate(0, -bottom, 0);
+        rod.scale(1, height, 1);
+        rod.light(light);
+        rod.renderInto(ms, buffer.getBuffer(RenderType.solid()));
     }
 
     @Override

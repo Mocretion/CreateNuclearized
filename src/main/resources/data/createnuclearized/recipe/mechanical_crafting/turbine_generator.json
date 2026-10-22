@@ -1,0 +1,33 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": false,
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "createnuclearized:turbine_casing"
+    },
+    "K": {
+      "tag": "c:storage_blocks/copper"
+    },
+    "M": {
+      "item": "create:shaft"
+    },
+    "G": {
+      "item": "create:large_cogwheel"
+    },
+    "U": {
+      "item": "createnuclearized:control_unit"
+    }
+  },
+  "pattern": [
+    "CCCCC",
+    "CKMKC",
+    "CGUGC",
+    "CKMKC",
+    "CCCCC"
+  ],
+  "result": {
+    "id": "createnuclearized:turbine_generator"
+  },
+  "show_notification": false
+}

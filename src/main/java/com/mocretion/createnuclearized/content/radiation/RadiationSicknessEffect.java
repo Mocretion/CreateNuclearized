@@ -22,7 +22,7 @@ public class RadiationSicknessEffect extends MobEffect {
 
     @Override
     public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
-        int interval = Math.max(DAMAGE_INTERVAL >> amplifier, 1);
+        int interval = amplifier >= Integer.SIZE ? 1 : Math.max(DAMAGE_INTERVAL >> amplifier, 1);
         return duration % interval == 0;
     }
 }

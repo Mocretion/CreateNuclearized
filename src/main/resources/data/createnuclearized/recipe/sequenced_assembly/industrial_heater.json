@@ -1,0 +1,62 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "create:blaze_burner"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "createnuclearized:industrial_heater"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_industrial_heater"
+        },
+        {
+          "item": "createnuclearized:steel_sheet"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_industrial_heater"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_industrial_heater"
+        },
+        {
+          "item": "create:fluid_tank"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_industrial_heater"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_industrial_heater"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_industrial_heater"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_industrial_heater"
+  }
+}

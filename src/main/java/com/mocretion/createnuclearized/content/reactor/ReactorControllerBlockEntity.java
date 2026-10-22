@@ -1,23 +1,32 @@
 package com.mocretion.createnuclearized.content.reactor;
 
-import java.util.EnumMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.ToIntFunction;
 
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Iterables;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodBlockEntity;
+import com.mocretion.createnuclearized.CreateNuclearized;
+import com.mocretion.createnuclearized.content.multiblock.MultiblockController;
+import com.mocretion.createnuclearized.content.multiblock.MultiblockErrorPayload;
+import com.mocretion.createnuclearized.content.multiblock.MultiblockState;
 import com.mocretion.createnuclearized.registry.CNDataComponents;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.Block;
@@ -27,21 +36,25 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 
-public class ReactorControllerBlockEntity extends BlockEntity implements MenuProvider {
+public class ReactorControllerBlockEntity extends BlockEntity implements MenuProvider, MultiblockController {
 
     private static final int TICKS_PER_SECOND = 20;
 
     @Nullable
     private ReactorMultiblock.Structure structure;
     private List<ReactorStats.Channel> channels = List.of();
-    private final Map<ReactorFuel, SaltStats> compositions = new EnumMap<>(ReactorFuel.class);
+    private List<ReactorStats.Channel> producing = List.of();
+    private Map<Long, List<ReactorStats.ModEntry>> channelMods = Map.of();
+    private final Set<BlockPos> activeValves = new HashSet<>();
+    private final Set<BlockPos> fullValves = new HashSet<>();
+    private int reflectorPercent;
+    private final Map<ReactorFuel, SaltStats> compositions = new HashMap<>();
     private ReactorFuel fuel = ReactorFuel.URANIUM;
 
     private boolean running;
     private int timer = TICKS_PER_SECOND;
-    private ReactorState state = ReactorState.STOPPED;
+    private MultiblockState state = MultiblockState.STOPPED;
 
-    private int flowPerTick;
     private int activeChannels;
     private long runTicks;
 
@@ -49,20 +62,14 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         super(type, pos, state);
     }
 
+    @Override
     public boolean isRunning() {
         return running;
     }
 
-    public ReactorState getState() {
+    @Override
+    public MultiblockState getState() {
         return state;
-    }
-
-    public int getStateOrdinal() {
-        return state.ordinal();
-    }
-
-    public int getFlowPerTick() {
-        return flowPerTick;
     }
 
     public int getActiveChannels() {
@@ -79,6 +86,31 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
 
     public ReactorFuel getFuel() {
         return fuel;
+    }
+
+    public InteriorGrid buildInteriorGrid() {
+        ReactorMultiblock.Structure reactor = structure;
+        if (reactor == null) return InteriorGrid.EMPTY;
+        BlockPos min = reactor.min();
+        BlockPos max = reactor.max();
+        BlockPos origin = new BlockPos(min.getX() + 1, min.getY(), min.getZ() + 1);
+        List<InteriorGrid.Cell> cells = new ArrayList<>();
+        for (ReactorStats.Channel channel : channels) {
+            BlockPos valve = channel.valve();
+            List<InteriorGrid.Mod> mods = new ArrayList<>();
+            for (ReactorStats.ModEntry mod : channelMods.getOrDefault(ReactorMultiblock.column(valve), List.of()))
+                mods.add(new InteriorGrid.Mod(BuiltInRegistries.BLOCK.getKey(mod.block()), mod.count()));
+            cells.add(new InteriorGrid.Cell(valve.getX() - origin.getX(), valve.getZ() - origin.getZ(),
+                    valveState(valve), channel.burnShift(), channel.purityShift(), channel.rate(), mods));
+        }
+        return new InteriorGrid(max.getX() - min.getX() - 1, max.getZ() - min.getZ() - 1,
+                origin, fuel.index(), reflectorPercent, cells);
+    }
+
+    private InteriorGrid.ValveState valveState(BlockPos valve) {
+        if (activeValves.contains(valve)) return InteriorGrid.ValveState.ACTIVE;
+        if (fullValves.contains(valve)) return InteriorGrid.ValveState.FULL;
+        return InteriorGrid.ValveState.INACTIVE;
     }
 
     public int getTotalRateMilli() {
@@ -101,36 +133,33 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
     }
 
     public int getSpentCapacity() {
-        return sumValves(outputValves(), valve -> valve.getHeatedTank().getCapacity());
+        return sumValves(outputValves(), ReactorFluidValveBlockEntity::getHeatedCapacity);
     }
 
     public int getRunSeconds() {
         return (int) (runTicks / TICKS_PER_SECOND);
     }
 
-    public void setRunningFromNetwork(boolean running) {
-        this.running = running;
-    }
-
-    public void setStateFromNetwork(int ordinal) {
-        this.state = ReactorState.byOrdinal(ordinal);
-    }
-
+    @Override
     public void toggleRunning(@Nullable Player player) {
         if (level == null) return;
         if (running) {
             running = false;
-            state = ReactorState.STOPPED;
-            flowPerTick = 0;
+            state = MultiblockState.STOPPED;
             activeChannels = 0;
+            syncStateToBlock();
             setChanged();
             return;
         }
         ReactorMultiblock.Result result = ReactorMultiblock.validate(level, worldPosition);
         if (!result.valid()) {
             clearStructure();
-            if (player != null)
-                player.displayClientMessage(Component.literal("Reactor invalid: " + result.reason()), true);
+            if (player != null) {
+                Component message = Component.translatable(CreateNuclearized.MODID + ".multiblock.reactor.invalid", result.reason());
+                player.displayClientMessage(message, true);
+                if (player instanceof ServerPlayer serverPlayer && result.at() != null)
+                    MultiblockErrorPayload.send(serverPlayer, result.at());
+            }
             return;
         }
         applyStructure(result.structure());
@@ -145,7 +174,8 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
 
     public void serverTick() {
         if (level == null || level.isClientSide) return;
-        if (++timer >= TICKS_PER_SECOND) {
+        boolean validate = ++timer >= TICKS_PER_SECOND;
+        if (validate) {
             timer = 0;
             revalidate();
         }
@@ -154,10 +184,12 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
             driveRods(reactor);
             tickConversion(reactor);
         } else {
-            flowPerTick = 0;
             activeChannels = 0;
+            activeValves.clear();
+            fullValves.clear();
         }
-        syncStateToBlock();
+        if (validate)
+            syncStateToBlock();
     }
 
     private void syncStateToBlock() {
@@ -178,30 +210,52 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
                 clearStructure();
                 setChanged();
             }
-            state = ReactorState.STOPPED;
+            state = MultiblockState.STOPPED;
             return;
         }
         applyStructure(result.structure());
         if (!running)
-            state = ReactorState.STOPPED;
+            state = MultiblockState.STOPPED;
     }
 
     private void applyStructure(ReactorMultiblock.Structure next) {
         clearValveStatsExcept(next.outputValves());
         structure = next;
-        channels = ReactorStats.channels(level, next);
-        for (ReactorFuel candidate : ReactorFuel.values())
-            compositions.put(candidate, ReactorStats.composition(channels, candidate));
+        ReactorStats.Layout layout = ReactorStats.scan(level, next);
+        channels = layout.channels();
+        channelMods = layout.modifiers();
+        reflectorPercent = layout.reflectorPercent();
+        updateCompositions(producingChannels(next));
         fuel = detectFuel();
         pushChannelStats();
+    }
+
+    private void updateCompositions(List<ReactorStats.Channel> nowProducing) {
+        producing = nowProducing;
+        List<ReactorStats.Channel> basis = nowProducing.isEmpty() ? channels : nowProducing;
+        for (ReactorFuel candidate : ReactorFuel.values())
+            compositions.put(candidate, ReactorStats.composition(basis, candidate, reflectorPercent));
+    }
+
+    private List<ReactorStats.Channel> producingChannels(ReactorMultiblock.Structure reactor) {
+        List<ReactorStats.Channel> open = new ArrayList<>();
+        for (ReactorStats.Channel channel : channels) {
+            if (channel.rate() > 0 && channelOpen(reactor, channel.valve()))
+                open.add(channel);
+        }
+        return open;
     }
 
     private void clearStructure() {
         clearValveStats();
         structure = null;
         channels = List.of();
+        producing = List.of();
+        channelMods = Map.of();
+        activeValves.clear();
+        fullValves.clear();
+        reflectorPercent = 0;
         compositions.clear();
-        flowPerTick = 0;
         activeChannels = 0;
     }
 
@@ -236,40 +290,46 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
     }
 
     private void tickConversion(ReactorMultiblock.Structure reactor) {
-        int flow = 0;
+        List<ReactorStats.Channel> nowProducing = producingChannels(reactor);
+        if (!nowProducing.equals(producing))
+            updateCompositions(nowProducing);
+        activeValves.clear();
+        fullValves.clear();
         int active = 0;
-        for (BlockPos pos : reactor.outputValves()) {
-            ReactorFluidValveBlockEntity valve = valveAt(pos);
-            if (valve == null || !channelOpen(reactor, pos)) continue;
-            valve.advanceRate();
+        for (ReactorStats.Channel channel : nowProducing) {
+            ReactorFluidValveBlockEntity valve = valveAt(channel.valve());
+            if (valve == null) continue;
             ReactorFuel valveFuel = valve.moltenFuel();
             if (valveFuel == null) continue;
-            flow += convert(valve, valveFuel);
-            if (valve.getRate() > 0 && hasRoomFor(valve, valveFuel))
+            valve.advanceRate();
+            convert(valve, valveFuel);
+            if (hasRoomFor(valve, valveFuel)) {
                 active++;
+                activeValves.add(channel.valve());
+            } else {
+                fullValves.add(channel.valve());
+            }
         }
-        flowPerTick = flow;
         activeChannels = active;
-        state = active > 0 ? ReactorState.RUNNING : ReactorState.IDLE;
+        state = active > 0 ? MultiblockState.RUNNING : MultiblockState.IDLE;
         runTicks++;
     }
 
-    private int convert(ReactorFluidValveBlockEntity valve, ReactorFuel valveFuel) {
+    private void convert(ReactorFluidValveBlockEntity valve, ReactorFuel valveFuel) {
         int want = Math.min(valve.pendingWholeMb(), valve.getMoltenAmount());
-        if (want <= 0) return 0;
+        if (want <= 0) return;
         FluidStack spent = spentSalt(valveFuel, want);
-        int converted = valve.getHeatedTank().fill(spent, FluidAction.SIMULATE);
-        if (converted <= 0) return 0;
+        int converted = valve.fillHeated(spent, FluidAction.SIMULATE);
+        if (converted <= 0) return;
         spent.setAmount(converted);
         valve.getMoltenTank().drain(converted, FluidAction.EXECUTE);
-        valve.getHeatedTank().fill(spent, FluidAction.EXECUTE);
+        valve.fillHeated(spent, FluidAction.EXECUTE);
         valve.consumePending(converted);
         valve.notifyContentsChanged();
-        return converted;
     }
 
     private boolean hasRoomFor(ReactorFluidValveBlockEntity valve, ReactorFuel valveFuel) {
-        return valve.getHeatedTank().fill(spentSalt(valveFuel, 1), FluidAction.SIMULATE) > 0;
+        return valve.fillHeated(spentSalt(valveFuel, 1), FluidAction.SIMULATE) > 0;
     }
 
     private FluidStack spentSalt(ReactorFuel saltFuel, int amount) {

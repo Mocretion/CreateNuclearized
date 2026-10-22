@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "createnuclearized:block/spent_salt_output_valve"
+    }
+  }
+}

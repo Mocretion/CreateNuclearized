@@ -1,6 +1,48 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#side"
+        },
+        "east": {
+          "cullface": "east",
+          "texture": "#side"
+        },
+        "north": {
+          "cullface": "north",
+          "texture": "#front"
+        },
+        "south": {
+          "cullface": "south",
+          "texture": "#side"
+        },
+        "up": {
+          "cullface": "up",
+          "texture": "#side"
+        },
+        "west": {
+          "cullface": "west",
+          "texture": "#side"
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ]
+    }
+  ],
   "textures": {
-    "all": "minecraft:block/sea_lantern"
+    "front": "createnuclearized:block/reactor_monitor",
+    "particle": "createnuclearized:block/reactor_casing",
+    "side": "createnuclearized:block/reactor_casing"
   }
 }

@@ -1,6 +1,7 @@
 package com.mocretion.createnuclearized.registry;
 
 import com.mocretion.createnuclearized.CreateNuclearized;
+import com.mocretion.createnuclearized.content.worldgen.MonaziteSurfaceFeature;
 import com.mocretion.createnuclearized.content.worldgen.OreClumpFeature;
 
 import net.minecraft.core.registries.Registries;
@@ -13,6 +14,9 @@ public final class CNFeatures {
     public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(Registries.FEATURE, CreateNuclearized.MODID);
 
     public static final DeferredHolder<Feature<?>, OreClumpFeature> ORE_CLUMP = FEATURES.register("ore_clump", OreClumpFeature::new);
+
+    public static final DeferredHolder<Feature<?>, MonaziteSurfaceFeature> MONAZITE_SURFACE =
+            FEATURES.register("monazite_surface", MonaziteSurfaceFeature::new);
 
     private CNFeatures() {}
 }

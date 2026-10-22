@@ -155,6 +155,9 @@ dependencies {
     runtimeOnly "dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}"
     implementation "com.tterrag.registrate:Registrate:${registrate_version}"
 
+    compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+
     // Dev-only debugging mods: JEI (item/recipe browser) and Jade (block-under-cursor tooltips,
     // which read our block-entity data and render Create's goggle info). 'localRuntime' loads them in
     // runClient/runServer but does not publish a dependency on them.

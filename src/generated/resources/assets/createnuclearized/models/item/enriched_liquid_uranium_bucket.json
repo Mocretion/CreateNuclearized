@@ -1,6 +1,5 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "createnuclearized:item/enriched_liquid_uranium_bucket"
-  }
+  "parent": "neoforge:item/bucket",
+  "fluid": "createnuclearized:enriched_liquid_uranium",
+  "loader": "neoforge:fluid_container"
 }

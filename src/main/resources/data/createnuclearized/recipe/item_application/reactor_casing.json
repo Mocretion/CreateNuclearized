@@ -1,0 +1,16 @@
+{
+  "type": "create:item_application",
+  "ingredients": [
+    {
+      "item": "create:brass_casing"
+    },
+    {
+      "item": "createnuclearized:reactor_plating"
+    }
+  ],
+  "results": [
+    {
+      "id": "createnuclearized:reactor_casing"
+    }
+  ]
+}

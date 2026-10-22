@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "AAA",
+    "AAA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "createnuclearized:beryllium"
+    }
+  },
+  "result": {
+    "id": "createnuclearized:beryllium_block"
+  }
+}

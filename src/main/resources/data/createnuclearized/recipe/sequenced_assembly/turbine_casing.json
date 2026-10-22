@@ -1,0 +1,47 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "createnuclearized:steel_sheet"
+  },
+  "loops": 3,
+  "results": [
+    {
+      "id": "createnuclearized:turbine_casing",
+      "count": 8
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_turbine_casing"
+        },
+        {
+          "item": "createnuclearized:steel_sheet"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_turbine_casing"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_turbine_casing"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_turbine_casing"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_turbine_casing"
+  }
+}

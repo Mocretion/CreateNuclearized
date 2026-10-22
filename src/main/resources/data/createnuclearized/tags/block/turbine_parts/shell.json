@@ -1,0 +1,9 @@
+{
+  "values": [
+    "createnuclearized:turbine_casing",
+    "createnuclearized:turbine_glass",
+    "createnuclearized:turbine_controller",
+    "createnuclearized:turbine_generator",
+    "createnuclearized:turbine_steam_input_valve"
+  ]
+}

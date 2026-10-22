@@ -1,0 +1,94 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "createnuclearized:turbine_rotor"
+  },
+  "loops": 8,
+  "results": [
+    {
+      "id": "createnuclearized:large_turbine_rotor"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_large_turbine_rotor"
+        },
+        {
+          "item": "createnuclearized:steel_sheet"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_large_turbine_rotor"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_large_turbine_rotor"
+        },
+        {
+          "item": "createnuclearized:steel_sheet"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_large_turbine_rotor"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_large_turbine_rotor"
+        },
+        {
+          "item": "createnuclearized:steel_sheet"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_large_turbine_rotor"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_large_turbine_rotor"
+        },
+        {
+          "item": "createnuclearized:steel_sheet"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_large_turbine_rotor"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_large_turbine_rotor"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_large_turbine_rotor"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_large_turbine_rotor"
+  }
+}

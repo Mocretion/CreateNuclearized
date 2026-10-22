@@ -1,0 +1,15 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "heated",
+  "ingredients": [
+    {
+      "item": "createnuclearized:crushed_raw_thorium"
+    }
+  ],
+  "results": [
+    {
+      "amount": 100,
+      "id": "createnuclearized:liquid_thorium"
+    }
+  ]
+}
