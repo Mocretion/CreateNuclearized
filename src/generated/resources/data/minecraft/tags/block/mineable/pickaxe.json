@@ -3,8 +3,8 @@
     "createnuclearized:reactor_controller",
     "createnuclearized:reactor_casing",
     "createnuclearized:reactor_glass",
-    "createnuclearized:fissile_salt_input_valve",
-    "createnuclearized:spent_salt_output_valve",
+    "createnuclearized:reactor_salt_input_valve",
+    "createnuclearized:reactor_salt_output_valve",
     "createnuclearized:reactor_casing_encased_shaft",
     "createnuclearized:reactor_casing_encased_cogwheel",
     "createnuclearized:reactor_casing_encased_large_cogwheel",
@@ -30,6 +30,7 @@
     "createnuclearized:industrial_heater",
     "createnuclearized:evaporation_basin",
     "createnuclearized:exhaust_hood",
+    "createnuclearized:metering_valve",
     "createnuclearized:thorium_ore",
     "createnuclearized:deepslate_thorium_ore",
     "createnuclearized:sculk_uranium_ore"

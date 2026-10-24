@@ -60,11 +60,11 @@ public final class ReactorMultiblock {
     }
 
     public static boolean isInputValve(BlockState state) {
-        return state.is(CNBlocks.FISSILE_SALT_INPUT_VALVE.get());
+        return state.is(CNBlocks.REACTOR_SALT_INPUT_VALVE.get());
     }
 
     public static boolean isOutputValve(BlockState state) {
-        return state.is(CNBlocks.SPENT_SALT_OUTPUT_VALVE.get());
+        return state.is(CNBlocks.REACTOR_SALT_OUTPUT_VALVE.get());
     }
 
     public static boolean isControlRod(BlockState state) {

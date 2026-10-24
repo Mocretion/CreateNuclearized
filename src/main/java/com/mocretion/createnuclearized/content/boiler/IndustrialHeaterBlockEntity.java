@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.mocretion.createnuclearized.CreateNuclearized;
+import com.mocretion.createnuclearized.content.menu.CNIcons;
 import com.mocretion.createnuclearized.registry.CNRecipeTypes;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
@@ -55,8 +56,8 @@ public class IndustrialHeaterBlockEntity extends SmartBlockEntity implements IHa
     private static final int WORK_LINGER = 10;
 
     public enum DrainSource implements INamedIconOptions {
-        OUTPUT(AllIcons.I_SEND_ONLY),
-        INPUT(AllIcons.I_REFRESH);
+        OUTPUT(CNIcons.SNOW_FLAKE),
+        INPUT(CNIcons.FIRE);
 
         private final AllIcons icon;
 

@@ -11,11 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "createnuclearized:fissile_salt_input_valve"
+          "name": "createnuclearized:reactor_salt_output_valve"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "createnuclearized:blocks/fissile_salt_input_valve"
+  "random_sequence": "createnuclearized:blocks/reactor_salt_output_valve"
 }

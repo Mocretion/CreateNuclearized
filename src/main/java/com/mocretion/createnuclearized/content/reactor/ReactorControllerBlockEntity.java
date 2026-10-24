@@ -80,6 +80,24 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         return channels.size();
     }
 
+    public int getSpentDrainCount() {
+        return countDrain(ReactorFluidValveBlockEntity.DrainSource.OUTPUT);
+    }
+
+    public int getFuelDrainCount() {
+        return countDrain(ReactorFluidValveBlockEntity.DrainSource.INPUT);
+    }
+
+    private int countDrain(ReactorFluidValveBlockEntity.DrainSource source) {
+        int count = 0;
+        for (BlockPos pos : outputValves()) {
+            ReactorFluidValveBlockEntity valve = valveAt(pos);
+            if (valve != null && valve.getDrainSource() == source)
+                count++;
+        }
+        return count;
+    }
+
     public SaltStats getOutputStats() {
         return compositionFor(fuel);
     }
@@ -163,9 +181,34 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
             return;
         }
         applyStructure(result.structure());
+        setAllDrainSources(ReactorFluidValveBlockEntity.DrainSource.OUTPUT);
         runTicks = 0;
         running = true;
         setChanged();
+    }
+
+    public void toggleDrainSources() {
+        if (level == null || running) return;
+        int spent = 0;
+        int fuel = 0;
+        for (BlockPos pos : outputValves()) {
+            ReactorFluidValveBlockEntity valve = valveAt(pos);
+            if (valve == null) continue;
+            if (valve.getDrainSource() == ReactorFluidValveBlockEntity.DrainSource.INPUT) fuel++;
+            else spent++;
+        }
+        if (spent + fuel == 0) return;
+        setAllDrainSources(spent <= fuel
+                ? ReactorFluidValveBlockEntity.DrainSource.OUTPUT
+                : ReactorFluidValveBlockEntity.DrainSource.INPUT);
+    }
+
+    private void setAllDrainSources(ReactorFluidValveBlockEntity.DrainSource source) {
+        for (BlockPos pos : outputValves()) {
+            ReactorFluidValveBlockEntity valve = valveAt(pos);
+            if (valve != null)
+                valve.setDrainSource(source);
+        }
     }
 
     public void clearValveStats() {

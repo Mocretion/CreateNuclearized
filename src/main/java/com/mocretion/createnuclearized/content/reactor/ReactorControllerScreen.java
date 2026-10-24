@@ -27,10 +27,23 @@ public class ReactorControllerScreen extends ControllerScreen<ReactorControllerM
     }
 
     @Override
+    protected void init() {
+        super.init();
+        addRenderableWidget(new DrainToggleButton(texture(), this.leftPos, this.topPos, this.menu));
+    }
+
+    @Override
     protected void renderInfo(GuiGraphics graphics) {
         drawLine(graphics, 0, text("reactor_controller.fissile_capacity", menu.getFissileCapacity()));
         drawLine(graphics, 1, text("reactor_controller.spent_capacity", menu.getSpentCapacity()));
-        drawLine(graphics, 2, text("reactor_controller.channels", menu.getTotalChannels()));
+        drawLine(graphics, 2, text("reactor_controller.channels", menu.getTotalChannels(), drainLabel()));
+    }
+
+    private Component drainLabel() {
+        int spent = menu.getSpentDrainCount();
+        int fuel = menu.getFuelDrainCount();
+        String key = spent > 0 && fuel > 0 ? "mixed" : fuel > 0 ? "fuel" : "spent";
+        return text("reactor_controller.drain." + key);
     }
 
     private void drawLine(GuiGraphics graphics, int line, Component text) {

@@ -37,7 +37,7 @@ public class ReactorMonitorScreen extends AbstractContainerScreen<ReactorMonitor
     private static final int PANEL_W = 162;
     private static final int PANEL_H = 162;
     private static final int PANEL_X = 7;
-    private static final int PANEL_Y = 40;
+    private static final int PANEL_Y = 44;
 
     private static final int INTERIOR_BG_U = 0;
     private static final int INTERIOR_BG_V = 162;
@@ -69,7 +69,7 @@ public class ReactorMonitorScreen extends AbstractContainerScreen<ReactorMonitor
     private static final int ACTIVE_Y_OFFSET = 4;
 
     private static final int CONTENT_X = 8;
-    private static final int STATUS_Y = TAB_HEIGHT + 8;
+    private static final int STATUS_Y = TAB_HEIGHT + 9;
     private static final int CONTENT_Y = TAB_HEIGHT + 22;
 
     private int activeTab;
@@ -205,7 +205,7 @@ public class ReactorMonitorScreen extends AbstractContainerScreen<ReactorMonitor
 
     private List<Component> valveTooltip(InteriorGrid grid, InteriorGrid.Cell cell) {
         List<Component> lines = new ArrayList<>();
-        lines.add(CNBlocks.SPENT_SALT_OUTPUT_VALVE.get().getName());
+        lines.add(CNBlocks.REACTOR_SALT_OUTPUT_VALVE.get().getName());
         ReactorFuel fuel = grid.fuel();
         ReactorStats.Channel channel =
                 new ReactorStats.Channel(BlockPos.ZERO, cell.burnShift(), cell.purityShift(), cell.rate());

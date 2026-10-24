@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import javax.annotation.Nullable;
 
+import com.mocretion.createnuclearized.content.menu.CNIcons;
 import com.mocretion.createnuclearized.registry.CNDataComponents;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
@@ -30,14 +31,14 @@ public class ReactorFluidValveBlockEntity extends SmartBlockEntity implements IH
 
     public static final int CAPACITY = 2000;
     public static final int OUTPUT_MOLTEN_CAPACITY = 100;
-    public static final int OUTPUT_HEATED_CAPACITY = 500;
+    public static final int OUTPUT_HEATED_CAPACITY = 100;
 
     private static final double RATE_ACCUM_CAP = 10.0;
     private static final int SYNC_INTERVAL = 10;
 
     public enum DrainSource implements INamedIconOptions {
-        OUTPUT(AllIcons.I_SEND_ONLY),
-        INPUT(AllIcons.I_REFRESH);
+        OUTPUT(AllIcons.I_PRIORITY_LOW),
+        INPUT(CNIcons.BLOCK_INPUT);
 
         private final AllIcons icon;
 
@@ -93,6 +94,16 @@ public class ReactorFluidValveBlockEntity extends SmartBlockEntity implements IH
 
     public boolean isInput() {
         return getBlockState().getBlock() instanceof ReactorFluidValveBlock valve && valve.isInput();
+    }
+
+    @Nullable
+    public DrainSource getDrainSource() {
+        return drainSource == null ? null : drainSource.get();
+    }
+
+    public void setDrainSource(DrainSource source) {
+        if (drainSource != null)
+            drainSource.setValue(source.ordinal());
     }
 
     public IFluidHandler getFluidHandler(@Nullable Direction side) {

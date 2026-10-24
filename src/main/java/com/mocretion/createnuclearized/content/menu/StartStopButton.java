@@ -1,5 +1,7 @@
 package com.mocretion.createnuclearized.content.menu;
 
+import com.mocretion.createnuclearized.CreateNuclearized;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -9,15 +11,17 @@ import net.minecraft.resources.ResourceLocation;
 
 public class StartStopButton extends AbstractButton {
 
+    private static final int LABEL_COLOR = 0xFFFFFF;
+
     private static final int X = 115;
     private static final int Y = 64;
     private static final int WIDTH = 56;
-    private static final int HEIGHT = 20;
+    private static final int HEIGHT = 18;
     private static final int U = 200;
     private static final int START_V = 0;
-    private static final int START_HOVER_V = 20;
-    private static final int STOP_V = 40;
-    private static final int STOP_HOVER_V = 60;
+    private static final int START_HOVER_V = 18;
+    private static final int STOP_V = 36;
+    private static final int STOP_HOVER_V = 54;
 
     private final ResourceLocation texture;
     private final ControllerMenu menu;
@@ -44,6 +48,9 @@ public class StartStopButton extends AbstractButton {
         else
             v = hovered ? START_HOVER_V : START_V;
         graphics.blit(texture, getX(), getY(), U, v, WIDTH, HEIGHT);
+
+        Component label = Component.translatable(CreateNuclearized.MODID + ".gui.controller." + (running ? "stop" : "start"));
+        graphics.drawCenteredString(Minecraft.getInstance().font, label, getX() + WIDTH / 2, getY() + (HEIGHT - 8) / 2, LABEL_COLOR);
     }
 
     @Override
