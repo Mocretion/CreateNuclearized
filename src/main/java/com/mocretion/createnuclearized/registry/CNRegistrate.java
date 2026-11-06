@@ -24,40 +24,61 @@ public final class CNRegistrate {
         REGISTRATE.addRawLang("createnuclearized.gui.goggles.salt_purity", "Purity");
         REGISTRATE.addRawLang("createnuclearized.gui.goggles.salt_rate", "Rate");
         REGISTRATE.addRawLang("createnuclearized.gui.goggles.basin_input", "Input Composition");
+        REGISTRATE.addRawLang("createnuclearized.gui.goggles.metering_dose", "Dose: %s mB");
+        REGISTRATE.addRawLang("createnuclearized.metering_valve.dose", "Dose per Pulse");
+        REGISTRATE.addRawLang("createnuclearized.metering_valve.fine", "1 mB steps");
+        REGISTRATE.addRawLang("createnuclearized.metering_valve.coarse", "10 mB steps");
+        REGISTRATE.addRawLang("createnuclearized.metering_valve.amount", "%s mB");
         REGISTRATE.addRawLang("createnuclearized.gui.goggles.basin_output", "Output Composition");
         REGISTRATE.addRawLang("createnuclearized.gui.goggles.basin_blocked", "Output blocked, drain it to continue");
-        REGISTRATE.addRawLang("createnuclearized.gui.goggles.heater_buffers", "Heat Buffers");
-        REGISTRATE.addRawLang("createnuclearized.gui.goggles.heater_buffer_empty", "Empty");
+        REGISTRATE.addRawLang("createnuclearized.gui.goggles.heater_buffers", "Heat Buffer");
+        REGISTRATE.addRawLang("createnuclearized.generic.unit.heat", "heat");
+        REGISTRATE.addRawLang("createnuclearized.gui.goggles.tank_input", "Input:");
+        REGISTRATE.addRawLang("createnuclearized.gui.goggles.tank_output", "Output:");
 
         REGISTRATE.addRawLang("createnuclearized.salt_valve.drain_source", "Drain Source");
-        REGISTRATE.addRawLang("createnuclearized.salt_valve.drain_source.output", "Spent Salt");
-        REGISTRATE.addRawLang("createnuclearized.salt_valve.drain_source.input", "Fuel Salt");
+        REGISTRATE.addRawLang("createnuclearized.salt_valve.drain_source.output", "Spent Salt (Output)");
+        REGISTRATE.addRawLang("createnuclearized.salt_valve.drain_source.input", "Fuel Salt (Input)");
 
         REGISTRATE.addRawLang("createnuclearized.industrial_heater.drain_source", "Drain Source");
-        REGISTRATE.addRawLang("createnuclearized.industrial_heater.drain_source.output", "Cooled Fluid");
-        REGISTRATE.addRawLang("createnuclearized.industrial_heater.drain_source.input", "Heater Fluid");
+        REGISTRATE.addRawLang("createnuclearized.industrial_heater.drain_source.output", "Cooled Fluid (Output)");
+        REGISTRATE.addRawLang("createnuclearized.industrial_heater.drain_source.input", "Heater Fluid (Input)");
 
         REGISTRATE.addRawLang("death.attack.createnuclearized.steam", "%1$s was scalded by steam");
         REGISTRATE.addRawLang("death.attack.createnuclearized.steam.player", "%1$s was scalded by steam while fighting %2$s");
 
+        REGISTRATE.addRawLang("death.attack.createnuclearized.scorching_heat", "%1$s was roasted on an Industrial Heater");
+        REGISTRATE.addRawLang("death.attack.createnuclearized.scorching_heat.player",
+                "%1$s was roasted on an Industrial Heater while fighting %2$s");
+
         REGISTRATE.addRawLang("effect.createnuclearized.radiation_sickness", "Radiation Sickness");
+        REGISTRATE.addRawLang("effect.createnuclearized.blue_glow", "Bluebird Glow");
+
+        REGISTRATE.addRawLang("item.minecraft.potion.effect.radiation_sickness", "Potion of Radiation Sickness");
+        REGISTRATE.addRawLang("item.minecraft.splash_potion.effect.radiation_sickness", "Splash Potion of Radiation Sickness");
+        REGISTRATE.addRawLang("item.minecraft.lingering_potion.effect.radiation_sickness", "Lingering Potion of Radiation Sickness");
+        REGISTRATE.addRawLang("item.minecraft.tipped_arrow.effect.radiation_sickness", "Arrow of Radiation Sickness");
+        REGISTRATE.addRawLang("item.minecraft.potion.effect.bluebird", "Potion of the Bluebird");
+        REGISTRATE.addRawLang("item.minecraft.splash_potion.effect.bluebird", "Splash Potion of the Bluebird");
+        REGISTRATE.addRawLang("item.minecraft.lingering_potion.effect.bluebird", "Lingering Potion of the Bluebird");
+        REGISTRATE.addRawLang("item.minecraft.tipped_arrow.effect.bluebird", "Arrow of the Bluebird");
         REGISTRATE.addRawLang("death.attack.createnuclearized.radiation", "%1$s succumbed to radiation sickness");
         REGISTRATE.addRawLang("death.attack.createnuclearized.radiation.player",
                 "%1$s succumbed to radiation sickness while fighting %2$s");
 
         REGISTRATE.addRawLang("createnuclearized.tooltip.turbine_rotor.steam", "Steam Use: %s mB/t");
         REGISTRATE.addRawLang("createnuclearized.tooltip.moderator", "Reactor Moderator");
-        REGISTRATE.addRawLang("createnuclearized.tooltip.moderator.rate", "%s mB/t to each bridged channel");
         REGISTRATE.addRawLang("createnuclearized.tooltip.moderator.hint", "Sits between two channels, or a channel and a reflector");
         REGISTRATE.addRawLang("createnuclearized.tooltip.reflector", "Reactor Reflector");
-        REGISTRATE.addRawLang("createnuclearized.tooltip.reflector.heat", "%s%% heat when lined up with a moderator and channel");
         REGISTRATE.addRawLang("createnuclearized.tooltip.reflector.hint", "Line up as reflector, moderator, channel");
         REGISTRATE.addRawLang("createnuclearized.tooltip.modifier", "Moderator Cooler");
         REGISTRATE.addRawLang("createnuclearized.tooltip.modifier.hint", "Place on a moderator's face");
-        REGISTRATE.addRawLang("createnuclearized.tooltip.rate", "%s mB/t");
-        REGISTRATE.addRawLang("createnuclearized.tooltip.delta.burn", "%s%% burn");
-        REGISTRATE.addRawLang("createnuclearized.tooltip.delta.purity", "%s%% purity");
-        REGISTRATE.addRawLang("createnuclearized.tooltip.help.hint", "Hold Shift for burn & purity info");
+        REGISTRATE.addRawLang("createnuclearized.tooltip.stat.burn", "Burn: %s%%");
+        REGISTRATE.addRawLang("createnuclearized.tooltip.stat.purity", "Purity: %s%%");
+        REGISTRATE.addRawLang("createnuclearized.tooltip.stat.heat", "Heat: %s%%");
+        REGISTRATE.addRawLang("createnuclearized.tooltip.stat.rate", "Rate: %s mB/t");
+        REGISTRATE.addRawLang("createnuclearized.tooltip.shift_hint", "Hold Shift for Reactor Bonuses");
+        REGISTRATE.addRawLang("createnuclearized.tooltip.ctrl_hint", "Hold Ctrl for burn & purity info");
         REGISTRATE.addRawLang("createnuclearized.tooltip.help.burn", "Burn: how much fuel reacts");
         REGISTRATE.addRawLang("createnuclearized.tooltip.help.burn.desc",
                 "more heat & output, less unconsumed fuel");
@@ -80,7 +101,7 @@ public final class CNRegistrate {
         REGISTRATE.addRawLang("createnuclearized.item_attributes.has_off_gas.inverted", "Has no off-gas");
 
         REGISTRATE.addRawLang("createnuclearized.tooltip.fuel", "Reactor Fuel");
-        REGISTRATE.addRawLang("createnuclearized.tooltip.fuel.heat", "Base heat: %s");
+        REGISTRATE.addRawLang("createnuclearized.tooltip.fuel.heat", "Max heat: %s");
         REGISTRATE.addRawLang("createnuclearized.tooltip.fuel.burn", "Base burn: %s%%");
         REGISTRATE.addRawLang("createnuclearized.tooltip.fuel.purity", "Base purity: %s%%");
         REGISTRATE.addRawLang("createnuclearized.tooltip.fuel.unconsumed", "Unconsumed: %s");
@@ -99,23 +120,32 @@ public final class CNRegistrate {
         REGISTRATE.addRawLang("createnuclearized.recipe.degassing", "Degassing");
         REGISTRATE.addRawLang("createnuclearized.recipe.unmixing", "Unmixing");
         REGISTRATE.addRawLang("createnuclearized.recipe.reconstitution", "Reconstitution");
+        REGISTRATE.addRawLang("createnuclearized.recipe.gas_conversion", "Gas Conversion");
+        REGISTRATE.addRawLang("createnuclearized.jei.gas_conversion_note", "Blow the gas through with an Encased Fan");
+        REGISTRATE.addRawLang("createnuclearized.jei.gas_conversion_potion", "Copies the potion's effect onto the result");
         REGISTRATE.addRawLang("createnuclearized.jei.boil_cost", "Boil Cost: %s°/mB");
         REGISTRATE.addRawLang("createnuclearized.jei.heat_generated", "Generates %s heat per mB");
         REGISTRATE.addRawLang("createnuclearized.jei.rate", "Rate: %s mB/t");
         REGISTRATE.addRawLang("createnuclearized.jei.yield", "Yield: %s%%");
         REGISTRATE.addRawLang("createnuclearized.jei.hazard_damage", "Deals %s damage");
         REGISTRATE.addRawLang("createnuclearized.jei.hazard_ignite", "Sets on fire for %ss");
+        REGISTRATE.addRawLang("createnuclearized.jei.hazard_potion", "Applies the potion's effects at %s%% of their duration");
         REGISTRATE.addRawLang("createnuclearized.jei.unmixing_pass", "One element per pass (example shown)");
         REGISTRATE.addRawLang("createnuclearized.jei.reconstitution_note", "Metal tops up the drained salt");
 
-        REGISTRATE.addRawLang("createnuclearized.gui.controller.start", "start");
-        REGISTRATE.addRawLang("createnuclearized.gui.controller.stop", "stop");
+        REGISTRATE.addRawLang("createnuclearized.gui.controller.start", "Start");
+        REGISTRATE.addRawLang("createnuclearized.gui.controller.stop", "Stop");
+        REGISTRATE.addRawLang("createnuclearized.gui.controller.swap.locked", "Stop the reactor to swap drain sources");
+        REGISTRATE.addRawLang("createnuclearized.gui.controller.swap.warning", "Attention: Pipes which are draining Output Valves might break!");
         REGISTRATE.addRawLang("createnuclearized.multiblock.state.stopped", "Stopped");
         REGISTRATE.addRawLang("createnuclearized.multiblock.state.idle", "Idle");
         REGISTRATE.addRawLang("createnuclearized.multiblock.state.running", "Running");
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_controller.fissile_capacity", "Fissile Capacity: %s mB");
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_controller.spent_capacity", "Spent Capacity: %s mB");
-        REGISTRATE.addRawLang("createnuclearized.gui.reactor_controller.channels", "Channels: %s");
+        REGISTRATE.addRawLang("createnuclearized.gui.reactor_controller.channels", "Channels: %s, Drain: %s");
+        REGISTRATE.addRawLang("createnuclearized.gui.reactor_controller.drain.mixed", "Mixed");
+        REGISTRATE.addRawLang("createnuclearized.gui.reactor_controller.drain.spent", "Spent");
+        REGISTRATE.addRawLang("createnuclearized.gui.reactor_controller.drain.fuel", "Fuel");
         REGISTRATE.addRawLang("createnuclearized.gui.turbine_controller.steam", "Steam: %s / %s mB");
         REGISTRATE.addRawLang("createnuclearized.gui.turbine_controller.steam_use", "Steam Use: %s mB/t");
         REGISTRATE.addRawLang("createnuclearized.gui.turbine_controller.stages", "Stages: %s");
@@ -126,6 +156,9 @@ public final class CNRegistrate {
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.tab.interior", "Reactor Interior");
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.modifiers", "Modifiers");
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.no_modifiers", "No modifiers");
+        REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.affecting", "Affects selected valve");
+        REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.valve_hint",
+                "Hold Shift for modifier info, or click to highlight");
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.row", "%s: %s");
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.fissile_buffer", "Fissile Buffer");
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.spent_buffer", "Spent Buffer");
@@ -134,6 +167,10 @@ public final class CNRegistrate {
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.runtime", "Runtime");
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.heat", "Heat");
         REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.off_gas", "Off-Gas");
+        REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.unconsumed", "Unconsumed");
+        REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.bred", "Bred");
+        REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.unknown_liquid", "Unknown. Input a liquid");
+        REGISTRATE.addRawLang("createnuclearized.gui.reactor_monitor.unknown_value", "???");
         REGISTRATE.addRawLang("createnuclearized.gui.duration", "%sd %sh %sm %ss");
         REGISTRATE.addRawLang("createnuclearized.multiblock.too_large", "Structure is too large or malformed.");
         REGISTRATE.addRawLang("createnuclearized.multiblock.shell_incomplete", "Shell is incomplete or has extra blocks attached.");
@@ -193,5 +230,43 @@ public final class CNRegistrate {
                 "The rotor is too big for this turbine's cross section.");
         REGISTRATE.addRawLang("createnuclearized.multiblock.turbine.rotor_obstructed", "The rotor's hitbox is obstructed (at %s).");
         REGISTRATE.addRawLang("createnuclearized.multiblock.turbine.rotor_sweep", "Nothing may sit in the rotor's sweep (at %s).");
+
+        REGISTRATE.addRawLang("advancements.createnuclearized.main.title", "Create: Nuclearized");
+        REGISTRATE.addRawLang("advancements.createnuclearized.main.description",
+                "Dig into reactors, turbines and radioactive plumbing.");
+        REGISTRATE.addRawLang("advancements.createnuclearized.dont_eat_that.title", "Galen, don't eat that!");
+        REGISTRATE.addRawLang("advancements.createnuclearized.dont_eat_that.description",
+                "Pick up a piece of raw thorium. Not for consumption.");
+        REGISTRATE.addRawLang("advancements.createnuclearized.i_flibe_you.title", "I FLiBe You");
+        REGISTRATE.addRawLang("advancements.createnuclearized.i_flibe_you.description",
+                "Get a bucket of molten salt. The carrier of all good chemistry.");
+        REGISTRATE.addRawLang("advancements.createnuclearized.not_a_centrifuge.title", "It's Not a Centrifuge!");
+        REGISTRATE.addRawLang("advancements.createnuclearized.not_a_centrifuge.description",
+                "Craft a Precision Unmixer and start taking salts apart.");
+        REGISTRATE.addRawLang("advancements.createnuclearized.lots_of_heat.title", "Lots of Heat");
+        REGISTRATE.addRawLang("advancements.createnuclearized.lots_of_heat.description",
+                "Start a reactor and watch the salts flow.");
+        REGISTRATE.addRawLang("advancements.createnuclearized.that_tingles.title", "That Tingles!");
+        REGISTRATE.addRawLang("advancements.createnuclearized.that_tingles.description",
+                "Stand in the vapor above a working Evaporation Basin.");
+        REGISTRATE.addRawLang("advancements.createnuclearized.master_of_pneumatics.title", "Master of Pneumatics");
+        REGISTRATE.addRawLang("advancements.createnuclearized.master_of_pneumatics.description",
+                "Spin up a valid turbine with pressurized steam.");
+        REGISTRATE.addRawLang("advancements.createnuclearized.spacecraft_magic.title", "Spacecraft Magic");
+        REGISTRATE.addRawLang("advancements.createnuclearized.spacecraft_magic.description",
+                "Place a Radioisotope Thermoelectric Generator (RTG) and let it spin forever.");
+
+        REGISTRATE.addRawLang("advancements.createnuclearized.liquids.title", "Nuclearized Liquids");
+        REGISTRATE.addRawLang("advancements.createnuclearized.liquids.description",
+                "Convert fuel salts in the reactor into their spent equivalent.");
+        REGISTRATE.addRawLang("advancements.createnuclearized.salty_uranium.title", "Salty Uranium");
+        REGISTRATE.addRawLang("advancements.createnuclearized.salty_uranium.description",
+                "Convert uranium salt to spent uranium salt in your reactor.");
+        REGISTRATE.addRawLang("advancements.createnuclearized.salty_plutonium.title", "Salty Plutonium");
+        REGISTRATE.addRawLang("advancements.createnuclearized.salty_plutonium.description",
+                "Convert plutonium salt to spent plutonium salt in your reactor.");
+        REGISTRATE.addRawLang("advancements.createnuclearized.salty_thorium_uranium.title", "Salty Thorium-Uranium");
+        REGISTRATE.addRawLang("advancements.createnuclearized.salty_thorium_uranium.description",
+                "Convert thorium-uranium salt to spent thorium-uranium salt in your reactor.");
     }
 }

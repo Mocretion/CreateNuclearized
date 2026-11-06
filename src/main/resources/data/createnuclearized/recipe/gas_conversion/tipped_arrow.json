@@ -1,0 +1,9 @@
+{
+  "type": "createnuclearized:gas_conversion",
+  "gas": { "fluid": "create:potion" },
+  "ingredient": { "item": "minecraft:arrow" },
+  "copy_potion": true,
+  "results": [
+    { "id": "minecraft:tipped_arrow", "count": 1 }
+  ]
+}

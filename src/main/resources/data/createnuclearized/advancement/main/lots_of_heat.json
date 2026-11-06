@@ -1,0 +1,18 @@
+{
+  "parent": "createnuclearized:main/i_flibe_you",
+  "display": {
+    "icon": { "id": "createnuclearized:reactor_controller" },
+    "title": { "translate": "advancements.createnuclearized.lots_of_heat.title" },
+    "description": { "translate": "advancements.createnuclearized.lots_of_heat.description" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "started_reactor": {
+      "trigger": "createnuclearized:reactor_started"
+    }
+  },
+  "requirements": [["started_reactor"]]
+}

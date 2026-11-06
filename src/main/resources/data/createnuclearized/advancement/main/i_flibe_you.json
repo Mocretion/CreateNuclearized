@@ -1,0 +1,21 @@
+{
+  "parent": "createnuclearized:main/dont_eat_that",
+  "display": {
+    "icon": { "id": "createnuclearized:molten_salt_bucket" },
+    "title": { "translate": "advancements.createnuclearized.i_flibe_you.title" },
+    "description": { "translate": "advancements.createnuclearized.i_flibe_you.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_molten_salt": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [{ "items": "createnuclearized:molten_salt_bucket" }]
+      }
+    }
+  },
+  "requirements": [["has_molten_salt"]]
+}

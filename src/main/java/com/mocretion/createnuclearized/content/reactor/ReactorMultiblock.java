@@ -93,7 +93,22 @@ public final class ReactorMultiblock {
     }
 
     private static boolean isAllowedInterior(BlockState state) {
-        return state.isAir() || state.is(CNTags.REACTOR_PARTS_INTERIOR);
+        return state.isAir()
+                || state.is(CNTags.REACTOR_PARTS_INTERIOR)
+                || ReactorComponents.isComponent(state.getBlock());
+    }
+
+    @Nullable
+    public static BlockPos findController(LevelAccessor level, BlockPos seed) {
+        MultiblockShell shell = MultiblockShell.scan(level, seed, ReactorMultiblock::isShellMember, MAX_SHELL_VISITED);
+        if (shell == null) return null;
+        BlockPos controller = null;
+        for (BlockPos pos : shell.members()) {
+            if (!isController(level.getBlockState(pos))) continue;
+            if (controller != null) return null;
+            controller = pos;
+        }
+        return controller;
     }
 
     public static Result validate(LevelAccessor level, BlockPos seed) {

@@ -7,8 +7,6 @@ import com.mocretion.createnuclearized.content.boiler.BoilingRecipe;
 import com.mocretion.createnuclearized.content.reactor.ReactorFuel;
 import com.mocretion.createnuclearized.registry.CNBlocks;
 import com.mocretion.createnuclearized.registry.CNFluids;
-import com.simibubi.create.compat.jei.category.animations.AnimatedBlazeBurner;
-import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -21,17 +19,19 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 public class BoilingCategory extends CNRecipeCategory<BoilingRecipe> {
 
     private static final int HEATER_DISPLAY = 100;
-    private static final int BASIN_Y = 34;
+    private static final int BASIN_Y = 31;
+    private static final int HEATER_Y = 55;
     private static final float INFO_SCALE = 0.7f;
     private static final int HAZARD_Y = 31;
 
     private final AnimatedEvaporationBasin basin = new AnimatedEvaporationBasin();
-    private final AnimatedBlazeBurner burner = new AnimatedBlazeBurner();
+    private final AnimatedIndustrialHeater heater = new AnimatedIndustrialHeater();
 
     public BoilingCategory(Info<BoilingRecipe> info, IGuiHelper guiHelper) {
         super(info, guiHelper);
@@ -40,8 +40,8 @@ public class BoilingCategory extends CNRecipeCategory<BoilingRecipe> {
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, BoilingRecipe recipe, IFocusGroup focuses) {
         fluidSlot(builder, RecipeIngredientRole.INPUT, 26, 51, recipe.input(), recipe.maxRate());
-        fluidSlot(builder, RecipeIngredientRole.OUTPUT, 142, 20,
-                new FluidStack(recipe.gas().builtInRegistryHolder(), recipe.maxRate()));
+        recipe.gas().ifPresent(gas ->
+                fluidSlot(builder, RecipeIngredientRole.OUTPUT, 142, 20, new FluidStack(gas.builtInRegistryHolder(), recipe.maxRate())));
 
         List<FluidStack> heaters = heaterExamples(recipe);
         if (!heaters.isEmpty()) {
@@ -55,15 +55,16 @@ public class BoilingCategory extends CNRecipeCategory<BoilingRecipe> {
 
     @Override
     public void draw(BoilingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
-        AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 136, 1);
+        if (recipe.gas().isPresent())
+            AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 136, 1);
 
         int sceneX = getBackground().getWidth() / 2 + 3;
 
         AllGuiTextures.JEI_LIGHT.render(graphics, sceneX - 10, 88);
 
-        burner.withHeat(HeatLevel.KINDLED).draw(graphics, sceneX, BASIN_Y + 21);
+        heater.draw(graphics, sceneX, HEATER_Y);
         basin.draw(graphics, sceneX, BASIN_Y);
-        risingParticles(graphics, recipe.particles(), sceneX + 14, 22, 52);
+        risingParticles(graphics, recipe.particles(), slots, sceneX + 14, 22, 52);
 
         infoBorder(graphics, 0, 0);
         line(graphics, Component.translatable("createnuclearized.jei.rate", recipe.maxRate()), 6, 7, WHITE, INFO_SCALE);
@@ -85,7 +86,7 @@ public class BoilingCategory extends CNRecipeCategory<BoilingRecipe> {
         return out;
     }
 
-    private static FluidStack heaterDisplay(net.minecraft.world.level.material.Fluid fluid) {
+    private static FluidStack heaterDisplay(Fluid fluid) {
         ReactorFuel fuel = ReactorFuel.forOutput(fluid);
         if (fuel == null) return new FluidStack(fluid.builtInRegistryHolder(), HEATER_DISPLAY);
         return CNFluids.spentOrMolten(fluid, fuel.baseComposition(), HEATER_DISPLAY);

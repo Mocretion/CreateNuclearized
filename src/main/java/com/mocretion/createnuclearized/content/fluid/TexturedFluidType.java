@@ -42,6 +42,10 @@ public class TexturedFluidType extends FluidType {
         return this;
     }
 
+    public int getTint() {
+        return tint;
+    }
+
     public int getRadiationLevel() {
         return radiationLevel;
     }

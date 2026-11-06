@@ -1,0 +1,138 @@
+{
+	"parent": "block/block",
+	"textures": {
+		"basin": "createnuclearized:block/evaporation_basin",
+		"bars": "minecraft:block/iron_bars",
+		"bottom": "createnuclearized:block/evaporation_basin_bottom_connected",
+		"outer": "createnuclearized:block/evaporation_basin_side_outer_connected",
+		"inner": "createnuclearized:block/evaporation_basin_side_inner_connected",
+		"particle": "createnuclearized:block/evaporation_basin"
+	},
+	"elements": [
+		{
+			"name": "bottom",
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				0,
+				16
+			],
+			"faces": {
+				"down": {
+					"uv": [
+						8,
+						12,
+						12,
+						8
+					],
+					"texture": "#bottom",
+					"cullface": "down"
+				}
+			}
+		},
+		{
+			"name": "coil",
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				10,
+				14
+			],
+			"faces": {
+				"up": {
+					"uv": [
+						8,
+						8,
+						12,
+						11.5
+					],
+					"texture": "#bottom"
+				}
+			}
+		},
+		{
+			"name": "bars",
+			"from": [
+				0,
+				15,
+				0
+			],
+			"to": [
+				16,
+				15,
+				14
+			],
+			"faces": {
+				"up": {
+					"uv": [
+						0,
+						0,
+						16,
+						14
+					],
+					"texture": "#bars"
+				},
+				"down": {
+					"uv": [
+						9,
+						9,
+						15,
+						15
+					],
+					"texture": "#basin"
+				}
+			}
+		},
+		{
+			"name": "wall_s",
+			"from": [
+				0,
+				0,
+				14
+			],
+			"to": [
+				16,
+				16,
+				16
+			],
+			"faces": {
+				"north": {
+					"uv": [
+						5.3333,
+						0,
+						10.6667,
+						5.3333
+					],
+					"texture": "#inner"
+				},
+				"south": {
+					"uv": [
+						5.3333,
+						0,
+						10.6667,
+						5.3333
+					],
+					"texture": "#outer",
+					"cullface": "south"
+				},
+				"up": {
+					"uv": [
+						0,
+						8,
+						8,
+						9
+					],
+					"texture": "#basin"
+				}
+			}
+		}
+	]
+}

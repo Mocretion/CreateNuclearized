@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "createnuclearized:block/metering_valve",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "createnuclearized:block/metering_valve",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "createnuclearized:block/metering_valve",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "createnuclearized:block/metering_valve",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "createnuclearized:block/metering_valve"
+    },
+    "facing=west": {
+      "model": "createnuclearized:block/metering_valve",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

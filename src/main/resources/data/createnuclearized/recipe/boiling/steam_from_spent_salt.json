@@ -3,8 +3,8 @@
   "input": { "fluid": "minecraft:water" },
   "gas": "createnuclearized:pressurized_steam",
   "heater": { "tag": "createnuclearized:salts/spent" },
-  "heat_per_mb": 1000,
-  "max_rate": 5,
+  "heat_per_mb": 100,
+  "max_rate": 16,
   "damage": { "type": "createnuclearized:steam", "amount": 1 },
   "ignite": 2,
   "particles": {

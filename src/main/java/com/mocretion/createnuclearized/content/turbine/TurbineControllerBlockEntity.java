@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.mocretion.createnuclearized.CreateNuclearized;
+import com.mocretion.createnuclearized.content.advancement.CNCriteriaTriggers;
 import com.mocretion.createnuclearized.content.multiblock.MultiblockController;
 import com.mocretion.createnuclearized.content.multiblock.MultiblockErrorPayload;
 import com.mocretion.createnuclearized.content.multiblock.MultiblockState;
@@ -27,7 +28,7 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
 
     private static final int TICKS_PER_SECOND = 20;
 
-    public static final int STEAM_PER_BLADE_CELL = 2;
+    public static final float STEAM_PER_BLADE_CELL = 0.5f;
 
     private static final int RUN_UP_SECONDS = 1;
 
@@ -114,6 +115,8 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
         running = true;
         validationTimer = 0;
         sampleTimer = 0;
+        if (player instanceof ServerPlayer serverPlayer)
+            CNCriteriaTriggers.TURBINE_STARTED.get().trigger(serverPlayer);
         setChanged();
     }
 
@@ -179,7 +182,7 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
     }
 
     private int steamDemand() {
-        return bladeCells * STEAM_PER_BLADE_CELL;
+        return (int)(bladeCells * STEAM_PER_BLADE_CELL);
     }
 
     private void tickConsume() {
@@ -207,7 +210,8 @@ public class TurbineControllerBlockEntity extends BlockEntity implements MenuPro
     }
 
     private void sampleLoad() {
-        load = Math.min(1f, steamDrawnThisSample / (float) (steamDemand() * TICKS_PER_SECOND));
+        float sampleDemand = steamDemand() * TICKS_PER_SECOND;
+        load = sampleDemand <= 0 ? 0 : Math.min(1f, steamDrawnThisSample / sampleDemand);
         steamDrawnThisSample = 0;
         setChanged();
     }

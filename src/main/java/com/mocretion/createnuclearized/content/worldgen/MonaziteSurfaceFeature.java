@@ -44,8 +44,21 @@ public class MonaziteSurfaceFeature extends Feature<MonaziteSurfaceFeature.Confi
         ).apply(i, Config::new));
     }
 
+    private record Noises(long seed, SimplexNoise region, SimplexNoise edge) {}
+
+    private static volatile Noises cachedNoises;
+
     public MonaziteSurfaceFeature() {
         super(Config.CODEC);
+    }
+
+    private static Noises noisesFor(long seed) {
+        Noises current = cachedNoises;
+        if (current != null && current.seed() == seed) return current;
+        Noises created = new Noises(seed, new SimplexNoise(new XoroshiroRandomSource(seed ^ REGION_SALT)),
+                new SimplexNoise(new XoroshiroRandomSource(seed ^ EDGE_SALT)));
+        cachedNoises = created;
+        return created;
     }
 
     @Override
@@ -56,8 +69,9 @@ public class MonaziteSurfaceFeature extends Feature<MonaziteSurfaceFeature.Confi
         int chunkX = ctx.origin().getX() & ~15;
         int chunkZ = ctx.origin().getZ() & ~15;
 
-        SimplexNoise region = new SimplexNoise(new XoroshiroRandomSource(level.getSeed() ^ REGION_SALT));
-        SimplexNoise edge = new SimplexNoise(new XoroshiroRandomSource(level.getSeed() ^ EDGE_SALT));
+        Noises noises = noisesFor(level.getSeed());
+        SimplexNoise region = noises.region();
+        SimplexNoise edge = noises.edge();
 
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         boolean placedAny = false;

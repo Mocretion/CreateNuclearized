@@ -6,6 +6,8 @@ import java.util.List;
 import com.mocretion.createnuclearized.content.boiler.DegassingRecipe;
 import com.mocretion.createnuclearized.content.reactor.ReactorFuel;
 import com.mocretion.createnuclearized.registry.CNFluids;
+import com.simibubi.create.content.fluids.potion.PotionFluid;
+import com.simibubi.create.content.fluids.potion.PotionFluid.BottleType;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -16,7 +18,10 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 public class DegassingCategory extends CNRecipeCategory<DegassingRecipe> {
@@ -38,7 +43,7 @@ public class DegassingCategory extends CNRecipeCategory<DegassingRecipe> {
         IRecipeSlotBuilder inputSlot = fluidSlot(builder, RecipeIngredientRole.INPUT, 26, 51, inputs);
         if (recipe.producesOffGas()) saltTooltip(inputSlot);
 
-        fluidSlot(builder, RecipeIngredientRole.OUTPUT, 142, 20, gasExamples(recipe, inputs));
+        recipe.gas().ifPresent(gas -> fluidSlot(builder, RecipeIngredientRole.OUTPUT, 142, 20, gasExamples(recipe, gas, inputs)));
 
         if (recipe.hasOutputLiquid()) {
             List<FluidStack> stripped = strippedExamples(recipe, inputs);
@@ -51,7 +56,8 @@ public class DegassingCategory extends CNRecipeCategory<DegassingRecipe> {
 
     @Override
     public void draw(DegassingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
-        AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 136, 1);
+        if (recipe.gas().isPresent())
+            AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 136, 1);
         if (recipe.hasOutputLiquid())
             AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 136, 41);
 
@@ -60,12 +66,13 @@ public class DegassingCategory extends CNRecipeCategory<DegassingRecipe> {
         AllGuiTextures.JEI_SHADOW.render(graphics, sceneX - 10, 68);
 
         basin.draw(graphics, sceneX, BASIN_Y);
-        risingParticles(graphics, recipe.particles(), sceneX + 14, 22, 52);
+        risingParticles(graphics, recipe.particles(), slots, sceneX + 14, 22, 52);
 
         infoBorder(graphics, 0, 0);
         line(graphics, Component.translatable("createnuclearized.jei.rate", formatFloat(recipe.rate())), 6, 7, WHITE, INFO_SCALE);
-        line(graphics, Component.translatable("createnuclearized.jei.yield", Math.round(recipe.yield() * 100)), 6, 16, WHITE,
-                INFO_SCALE);
+        if (recipe.gas().isPresent())
+            line(graphics, Component.translatable("createnuclearized.jei.yield", Math.round(recipe.yield() * 100)), 6, 16, WHITE,
+                    INFO_SCALE);
         drawHazards(graphics, recipe.hazards(), HAZARD_X, HAZARD_Y);
     }
 
@@ -79,6 +86,10 @@ public class DegassingCategory extends CNRecipeCategory<DegassingRecipe> {
         boolean salt = recipe.producesOffGas();
         for (FluidStack stack : recipe.input().getStacks()) {
             if (!stack.getFluid().defaultFluidState().isSource()) continue;
+            if (stack.getFluid() instanceof PotionFluid) {
+                out.addAll(potionExamples());
+                continue;
+            }
             ReactorFuel fuel = salt ? ReactorFuel.forOutput(stack.getFluid()) : null;
             if (fuel == null)
                 out.add(stack.copyWithAmount(DISPLAY_BATCH));
@@ -88,12 +99,20 @@ public class DegassingCategory extends CNRecipeCategory<DegassingRecipe> {
         return out;
     }
 
-    private static List<FluidStack> gasExamples(DegassingRecipe recipe, List<FluidStack> inputs) {
+    private static List<FluidStack> potionExamples() {
+        List<FluidStack> out = new ArrayList<>();
+        BuiltInRegistries.POTION.holders()
+                .filter(potion -> !potion.value().getEffects().isEmpty())
+                .forEach(potion -> out.add(PotionFluid.of(DISPLAY_BATCH, new PotionContents(potion), BottleType.REGULAR)));
+        return out;
+    }
+
+    private static List<FluidStack> gasExamples(DegassingRecipe recipe, Fluid gas, List<FluidStack> inputs) {
         List<FluidStack> out = new ArrayList<>();
         for (FluidStack input : inputs)
-            out.add(new FluidStack(recipe.gas().builtInRegistryHolder(), Math.max(displayGas(recipe, input), 1)));
+            out.add(new FluidStack(gas.builtInRegistryHolder(), Math.max(displayGas(recipe, input), 1)));
         if (out.isEmpty())
-            out.add(new FluidStack(recipe.gas().builtInRegistryHolder(), Math.max(Math.round(DISPLAY_BATCH * recipe.yield()), 1)));
+            out.add(new FluidStack(gas.builtInRegistryHolder(), Math.max(Math.round(DISPLAY_BATCH * recipe.yield()), 1)));
         return out;
     }
 

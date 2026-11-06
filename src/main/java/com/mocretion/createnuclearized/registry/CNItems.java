@@ -6,7 +6,6 @@ import com.mocretion.createnuclearized.CreateNuclearized;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyItem;
 import com.tterrag.registrate.util.entry.ItemEntry;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.common.Tags;
 
@@ -60,8 +59,6 @@ public final class CNItems {
 
     public static final ItemEntry<Item> TURBINE_BLADE = REGISTRATE
             .item("turbine_blade", Item::new)
-            .model((c, p) -> p.generated(c,
-                    ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "item/steel_sheet")))
             .register();
 
     public static final ItemEntry<SequencedAssemblyItem> INCOMPLETE_REACTOR_PLATING = incomplete("incomplete_reactor_plating");
@@ -75,6 +72,9 @@ public final class CNItems {
 
     public static final ItemEntry<SequencedAssemblyItem> INCOMPLETE_INDUSTRIAL_HEATER = incomplete("incomplete_industrial_heater");
     public static final ItemEntry<SequencedAssemblyItem> INCOMPLETE_PRECISION_UNMIXER = incomplete("incomplete_precision_unmixer");
+
+    public static final ItemEntry<SequencedAssemblyItem> INCOMPLETE_PLUTONIUM_RTG = incomplete("incomplete_plutonium_rtg");
+    public static final ItemEntry<SequencedAssemblyItem> INCOMPLETE_AMERICIUM_RTG = incomplete("incomplete_americium_rtg");
 
     private CNItems() {}
 

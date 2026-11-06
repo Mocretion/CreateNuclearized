@@ -3,8 +3,10 @@ package com.mocretion.createnuclearized.registry;
 import static com.mocretion.createnuclearized.registry.CNRegistrate.REGISTRATE;
 
 import com.mocretion.createnuclearized.CreateNuclearized;
+import com.mocretion.createnuclearized.content.boiler.CellSlot;
 import com.mocretion.createnuclearized.content.boiler.IndustrialHeaterBlock;
 import com.mocretion.createnuclearized.content.boiler.EvaporationBasinBlock;
+import com.mocretion.createnuclearized.content.meteringvalve.MeteringValveBlock;
 import com.mocretion.createnuclearized.content.boiler.ExhaustHoodBlock;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodBlock;
 import com.mocretion.createnuclearized.content.kinetics.ReactorEncasedChainDriveBlock;
@@ -137,10 +139,10 @@ public final class CNBlocks {
             .build()
             .register();
 
-    public static final BlockEntry<ReactorFluidValveBlock> FISSILE_SALT_INPUT_VALVE = REGISTRATE
-            .block("fissile_salt_input_valve", p -> new ReactorFluidValveBlock(p, true))
+    public static final BlockEntry<ReactorFluidValveBlock> REACTOR_SALT_INPUT_VALVE = REGISTRATE
+            .block("reactor_salt_input_valve", p -> new ReactorFluidValveBlock(p, true))
             .tag(BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_IRON_TOOL)
-            .lang("Fissile Salt Input Valve")
+            .lang("Reactor Salt Input Valve")
             .initialProperties(() -> Blocks.IRON_BLOCK)
             .properties(p -> p.mapColor(MapColor.COLOR_ORANGE)
                     .sound(SoundType.NETHERITE_BLOCK)
@@ -152,10 +154,10 @@ public final class CNBlocks {
             .simpleItem()
             .register();
 
-    public static final BlockEntry<ReactorFluidValveBlock> SPENT_SALT_OUTPUT_VALVE = REGISTRATE
-            .block("spent_salt_output_valve", p -> new ReactorFluidValveBlock(p, false))
+    public static final BlockEntry<ReactorFluidValveBlock> REACTOR_SALT_OUTPUT_VALVE = REGISTRATE
+            .block("reactor_salt_output_valve", p -> new ReactorFluidValveBlock(p, false))
             .tag(BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_IRON_TOOL)
-            .lang("Spent Salt Output Valve")
+            .lang("Reactor Salt Output Valve")
             .initialProperties(() -> Blocks.IRON_BLOCK)
             .properties(p -> p.mapColor(MapColor.COLOR_RED)
                     .sound(SoundType.NETHERITE_BLOCK)
@@ -584,11 +586,9 @@ public final class CNBlocks {
             .properties(p -> p.mapColor(MapColor.COLOR_ORANGE)
                     .sound(SoundType.NETHERITE_BLOCK)
                     .lightLevel(IndustrialHeaterBlock::getLight)
-                    .requiresCorrectToolForDrops()
-                    .noOcclusion())
+                    .requiresCorrectToolForDrops())
             .addLayer(() -> RenderType::cutoutMipped)
-            .blockstate((c, p) -> p.simpleBlock(c.getEntry(), new ModelFile.UncheckedModelFile(
-                    ResourceLocation.fromNamespaceAndPath("create", "block/blaze_burner/block"))))
+            .blockstate(CNBlocks::heaterBlockstate)
             .item()
             .model((c, p) -> {})
             .build()
@@ -601,10 +601,10 @@ public final class CNBlocks {
             .properties(p -> p.mapColor(MapColor.COLOR_GRAY)
                     .sound(SoundType.NETHERITE_BLOCK)
                     .requiresCorrectToolForDrops()
-                    .noOcclusion())
+                    .isRedstoneConductor((s, l, pos) -> true)
+                    .isViewBlocking((s, l, pos) -> true))
             .addLayer(() -> RenderType::cutoutMipped)
-            .blockstate((c, p) -> p.simpleBlock(c.getEntry(), new ModelFile.UncheckedModelFile(
-                    ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "block/evaporation_basin"))))
+            .blockstate(CNBlocks::basinBlockstate)
             .item()
             .model((c, p) -> {})
             .build()
@@ -624,6 +624,21 @@ public final class CNBlocks {
             .item()
             .model((c, p) -> {})
             .build()
+            .register();
+
+    public static final BlockEntry<MeteringValveBlock> METERING_VALVE = REGISTRATE
+            .block("metering_valve", MeteringValveBlock::new)
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .initialProperties(() -> Blocks.COPPER_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_ORANGE)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion())
+            .blockstate((c, p) -> {
+                ModelFile model = new ModelFile.UncheckedModelFile(cn("block/metering_valve"));
+                p.getVariantBuilder(c.getEntry()).forAllStatesExcept(
+                        s -> upFacingModel(model, s.getValue(MeteringValveBlock.FACING)), MeteringValveBlock.POWERED);
+            })
+            .item().model((c, p) -> {}).build()
             .register();
 
     public static final BlockEntry<Block> THORIUM_ORE = REGISTRATE
@@ -674,6 +689,21 @@ public final class CNBlocks {
             .build()
             .register();
 
+    public static final BlockEntry<Block> RAW_URANIUM_BLOCK = REGISTRATE
+            .block("raw_uranium_block", Block::new)
+            .initialProperties(() -> Blocks.RAW_IRON_BLOCK)
+            .properties(p -> p.mapColor(MapColor.COLOR_GREEN)
+                    .requiresCorrectToolForDrops())
+            .blockstate((c, p) -> p.simpleBlock(c.getEntry(),
+                    p.models().cubeAll(c.getName(), cn("block/raw_uranium_block"))))
+            .lang("Block of Raw Uranium")
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_IRON_TOOL,
+                    Tags.Blocks.STORAGE_BLOCKS, CNTags.RAW_URANIUM_BLOCKS)
+            .item()
+            .tag(Tags.Items.STORAGE_BLOCKS, CNTags.RAW_URANIUM_BLOCK_ITEMS)
+            .build()
+            .register();
+
     public static final BlockEntry<ColoredFallingBlock> MONAZITE_SAND = REGISTRATE
             .block("monazite_sand", p -> new ColoredFallingBlock(new ColorRGBA(0x867538), p))
             .initialProperties(() -> Blocks.SAND)
@@ -693,6 +723,25 @@ public final class CNBlocks {
 
     private static ResourceLocation cn(String path) {
         return ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, path);
+    }
+
+    private static void basinBlockstate(DataGenContext<Block, EvaporationBasinBlock> c, RegistrateBlockstateProvider p) {
+        p.getVariantBuilder(c.getEntry()).forAllStates(s -> {
+            CellSlot slot = s.getValue(CellSlot.PROPERTY);
+            String model = slot == CellSlot.SINGLE ? "block/evaporation_basin" : "block/evaporation_basin/evaporation_basin_" + slot.getSerializedName();
+            return ConfiguredModel.builder().modelFile(new ModelFile.UncheckedModelFile(cn(model))).build();
+        });
+    }
+
+    private static void heaterBlockstate(DataGenContext<Block, IndustrialHeaterBlock> c, RegistrateBlockstateProvider p) {
+        p.getVariantBuilder(c.getEntry()).forAllStatesExcept(s -> {
+            String temperature = s.getValue(IndustrialHeaterBlock.TEMPERATURE).getSerializedName();
+            CellSlot slot = s.getValue(CellSlot.PROPERTY).asLarge();
+            String model = slot == CellSlot.SINGLE
+                    ? "block/industrial_heater_" + temperature
+                    : "block/industrial_heater/industrial_heater_" + temperature + "_" + slot.getSerializedName();
+            return ConfiguredModel.builder().modelFile(new ModelFile.UncheckedModelFile(cn(model))).build();
+        }, IndustrialHeaterBlock.HEAT_LEVEL);
     }
 
     private static ConfiguredModel[] axisModel(ModelFile model, BlockState state, boolean uvlock) {
@@ -786,6 +835,15 @@ public final class CNBlocks {
             case DOWN -> 0;
             case UP -> 180;
             default -> 270;
+        };
+        return ConfiguredModel.builder().modelFile(model).rotationX(rotX).rotationY(horizontalRotation(dir)).build();
+    }
+
+    private static ConfiguredModel[] upFacingModel(ModelFile model, Direction dir) {
+        int rotX = switch (dir) {
+            case UP -> 0;
+            case DOWN -> 180;
+            default -> 90;
         };
         return ConfiguredModel.builder().modelFile(model).rotationX(rotX).rotationY(horizontalRotation(dir)).build();
     }

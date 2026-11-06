@@ -69,11 +69,20 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
         addDataSlot(syncedInt(() -> be.getActiveChannels(), v -> activeChannels = v));
         addDataSlot(syncedInt(() -> be.getTotalChannels(), v -> totalChannels = v));
         addWideInt(this::addDataSlot, () -> be.getTotalRateMilli(), v -> totalRateMilli = v);
-        addWideInt(this::addDataSlot, () -> be.getOutputStats().heat(), v -> statHeat = v);
-        addDataSlot(syncedInt(() -> elementAmount(be, be.getFuel().unconsumed()), v -> statUnconsumed = v));
-        addDataSlot(syncedInt(() -> elementAmount(be, be.getFuel().bred()), v -> statBred = v));
-        addDataSlot(syncedInt(() -> be.getOutputStats().offGas(), v -> statOffGas = v));
-        addDataSlot(syncedInt(() -> be.getFuel().index(), v -> fuelIndex = v));
+        addWideInt(this::addDataSlot, () -> {
+            SaltStats stats = be.getOutputStats();
+            return stats == null ? 0 : stats.heat();
+        }, v -> statHeat = v);
+        addDataSlot(syncedInt(() -> elementAmount(be, unconsumedOf(be)), v -> statUnconsumed = v));
+        addDataSlot(syncedInt(() -> elementAmount(be, bredOf(be)), v -> statBred = v));
+        addDataSlot(syncedInt(() -> {
+            SaltStats stats = be.getOutputStats();
+            return stats == null ? 0 : stats.offGas();
+        }, v -> statOffGas = v));
+        addDataSlot(syncedInt(() -> {
+            ReactorFuel current = be.getFuel();
+            return current == null ? -1 : current.index();
+        }, v -> fuelIndex = v));
     }
 
     public BlockPos getPos() {
@@ -119,6 +128,7 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
     public SaltStats getOutputStats() {
         ReactorFuel fuel = getFuel();
         SaltStats stats = new SaltStats(statHeat, Map.of(), statOffGas);
+        if (fuel == null) return stats;
         if (fuel.unconsumed() != null)
             stats = stats.withElement(fuel.unconsumed(), statUnconsumed);
         if (fuel.bred() != null && fuel.bred() != fuel.unconsumed())
@@ -126,16 +136,31 @@ public class ReactorMonitorMenu extends AbstractContainerMenu {
         return stats;
     }
 
+    @Nullable
     public ReactorFuel getFuel() {
-        return ReactorFuel.byIndex(fuelIndex);
+        return fuelIndex < 0 ? null : ReactorFuel.byIndex(fuelIndex);
     }
 
     public void setInventoryVisible(boolean visible) {
         this.inventoryVisible = visible;
     }
 
-    private static int elementAmount(ReactorMonitorBlockEntity be, SaltElement element) {
-        return element == null ? 0 : be.getOutputStats().amount(element);
+    private static int elementAmount(ReactorMonitorBlockEntity be, @Nullable SaltElement element) {
+        if (element == null) return 0;
+        SaltStats stats = be.getOutputStats();
+        return stats == null ? 0 : stats.amount(element);
+    }
+
+    @Nullable
+    private static SaltElement unconsumedOf(ReactorMonitorBlockEntity be) {
+        ReactorFuel fuel = be.getFuel();
+        return fuel == null ? null : fuel.unconsumed();
+    }
+
+    @Nullable
+    private static SaltElement bredOf(ReactorMonitorBlockEntity be) {
+        ReactorFuel fuel = be.getFuel();
+        return fuel == null ? null : fuel.bred();
     }
 
     @Override

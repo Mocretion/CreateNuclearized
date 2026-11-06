@@ -3,12 +3,13 @@ package com.mocretion.createnuclearized.registry;
 import static com.mocretion.createnuclearized.registry.CNRegistrate.REGISTRATE;
 
 import com.mocretion.createnuclearized.content.boiler.IndustrialHeaterBlockEntity;
-import com.mocretion.createnuclearized.content.boiler.IndustrialHeaterRenderer;
 import com.mocretion.createnuclearized.content.boiler.EvaporationBasinBlockEntity;
 import com.mocretion.createnuclearized.content.boiler.EvaporationBasinRenderer;
 import com.mocretion.createnuclearized.content.boiler.ExhaustHoodBlockEntity;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodBlockEntity;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodRenderer;
+import com.mocretion.createnuclearized.content.meteringvalve.MeteringValveBlockEntity;
+import com.mocretion.createnuclearized.content.meteringvalve.MeteringValveRenderer;
 import com.mocretion.createnuclearized.content.fluid.SpentSaltBlockEntity;
 import com.mocretion.createnuclearized.content.kinetics.RtgBlockEntity;
 import com.mocretion.createnuclearized.content.reactor.ReactorControllerBlockEntity;
@@ -44,7 +45,7 @@ public final class CNBlockEntities {
 
     public static final BlockEntityEntry<ReactorFluidValveBlockEntity> REACTOR_FLUID_VALVE = REGISTRATE
             .blockEntity("reactor_fluid_valve", ReactorFluidValveBlockEntity::new)
-            .validBlocks(CNBlocks.FISSILE_SALT_INPUT_VALVE, CNBlocks.SPENT_SALT_OUTPUT_VALVE)
+            .validBlocks(CNBlocks.REACTOR_SALT_INPUT_VALVE, CNBlocks.REACTOR_SALT_OUTPUT_VALVE)
             .register();
 
     public static final BlockEntityEntry<ReactorMonitorBlockEntity> REACTOR_MONITOR = REGISTRATE
@@ -126,7 +127,6 @@ public final class CNBlockEntities {
     public static final BlockEntityEntry<IndustrialHeaterBlockEntity> INDUSTRIAL_HEATER = REGISTRATE
             .blockEntity("industrial_heater", IndustrialHeaterBlockEntity::new)
             .validBlock(CNBlocks.INDUSTRIAL_HEATER)
-            .renderer(() -> IndustrialHeaterRenderer::new)
             .register();
 
     public static final BlockEntityEntry<EvaporationBasinBlockEntity> EVAPORATION_BASIN = REGISTRATE
@@ -138,6 +138,12 @@ public final class CNBlockEntities {
     public static final BlockEntityEntry<ExhaustHoodBlockEntity> EXHAUST_HOOD = REGISTRATE
             .blockEntity("exhaust_hood", ExhaustHoodBlockEntity::new)
             .validBlock(CNBlocks.EXHAUST_HOOD)
+            .register();
+
+    public static final BlockEntityEntry<MeteringValveBlockEntity> METERING_VALVE = REGISTRATE
+            .blockEntity("metering_valve", MeteringValveBlockEntity::new)
+            .validBlock(CNBlocks.METERING_VALVE)
+            .renderer(() -> MeteringValveRenderer::new)
             .register();
 
     public static final BlockEntityEntry<SpentSaltBlockEntity> SPENT_SALT = REGISTRATE

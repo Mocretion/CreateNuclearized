@@ -1,0 +1,18 @@
+{
+  "parent": "createnuclearized:main/lots_of_heat",
+  "display": {
+    "icon": { "id": "createnuclearized:evaporation_basin" },
+    "title": { "translate": "advancements.createnuclearized.that_tingles.title" },
+    "description": { "translate": "advancements.createnuclearized.that_tingles.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "stood_in_vapor": {
+      "trigger": "createnuclearized:gas_exposure"
+    }
+  },
+  "requirements": [["stood_in_vapor"]]
+}

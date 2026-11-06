@@ -162,7 +162,7 @@ public final class Metals {
         FluidSet liquid = registerFluid(registers, namespace,
                 new FluidSpec(definition.liquidId().getPath(), definition.color(), definition.radiation(), true, false, 0));
         FluidSet enriched = definition.enriched().orElse(false) ? registerEnriched(registers, namespace, definition) : null;
-        SaltFluids salts = definition.hasSalt() ? registerSalts(registers, namespace, definition, element) : null;
+        SaltFluids salts = definition.hasSalt() ? registerSalts(registers, namespace, definition, element, enriched) : null;
 
         LOADED.add(new LoadedMetal(definition, liquid, enriched, salts == null ? null : salts.salt(),
                 salts == null ? null : salts.spentSalt(), element, salts == null ? null : salts.fuel()));
@@ -181,7 +181,7 @@ public final class Metals {
 
         SaltFluids salts = null;
         if (!builtinHasSalt && element != null && definition.salt().enabled().orElse(false))
-            salts = registerSalts(registers, namespace, definition, element);
+            salts = registerSalts(registers, namespace, definition, element, enriched);
 
         if (enriched == null && salts == null) return;
         SaltElement owner = element != null ? element : SaltElement.URANIUM;
@@ -194,17 +194,19 @@ public final class Metals {
                 new FluidSpec(definition.enrichedLiquidId().getPath(), definition.enrichedColor(), definition.radiation(), true, false, 0));
     }
 
-    private static SaltFluids registerSalts(Registers registers, String namespace, MetalDefinition definition, SaltElement element) {
+    private static SaltFluids registerSalts(Registers registers, String namespace, MetalDefinition definition, SaltElement element,
+            @Nullable FluidSet enriched) {
         MetalDefinition.Salt salt = definition.salt();
-        int baseHeat = Math.round(salt.maxHeatOrDefault() * salt.burnOrDefault() / 100f);
 
         FluidSet saltFluid = registerFluid(registers, namespace,
                 new FluidSpec(definition.saltId().getPath(), definition.saltColor(), definition.radiation(), false, false, 0));
         FluidSet spent = registerFluid(registers, namespace,
-                new FluidSpec(definition.spentSaltId().getPath(), definition.spentSaltColor(), definition.radiation(), false, true, baseHeat));
+                new FluidSpec(definition.spentSaltId().getPath(), definition.spentSaltColor(), definition.radiation(), false, true, 0));
 
+        SaltElement unconsumed = resolve(salt.unconsumed(), element);
+        Supplier<Fluid> unconsumedLiquid = enriched != null && unconsumed == element ? enriched.source() : null;
         ReactorFuel fuel = ReactorFuel.register(salt.maxHeatOrDefault(), salt.burnOrDefault(), salt.purityOrDefault(),
-                resolve(salt.unconsumed(), element), resolveBred(salt.bred()), saltFluid.source(), spent.source());
+                unconsumed, resolveBred(salt.bred()), saltFluid.source(), spent.source(), unconsumedLiquid);
         return new SaltFluids(saltFluid, spent, fuel);
     }
 

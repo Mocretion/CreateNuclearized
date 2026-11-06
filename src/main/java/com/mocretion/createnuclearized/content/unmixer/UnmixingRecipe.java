@@ -12,23 +12,23 @@ import com.mocretion.createnuclearized.content.reactor.SaltStats;
 import com.mocretion.createnuclearized.registry.CNDataComponents;
 import com.mocretion.createnuclearized.registry.CNFluids;
 import com.mocretion.createnuclearized.registry.CNRecipeTypes;
+import com.mocretion.createnuclearized.content.recipe.ResultlessRecipe;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.FluidIngredient;
 
 public record UnmixingRecipe(FluidIngredient input, int amount, List<FluidStack> fluidResults, List<ProcessingOutput> itemResults)
-        implements Recipe<FluidRecipeInput> {
+        implements ResultlessRecipe<FluidRecipeInput> {
 
     public static final MapCodec<UnmixingRecipe> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             FluidIngredient.CODEC_NON_EMPTY.fieldOf("input").forGetter(UnmixingRecipe::input),
@@ -66,8 +66,9 @@ public record UnmixingRecipe(FluidIngredient input, int amount, List<FluidStack>
         SaltElement element = target(fuel, stats);
         if (element == null) return outs;
 
+        Fluid liquid = element == fuel.unconsumed() ? fuel.unconsumedLiquid() : element.liquid();
         outs.add(CNFluids.spentOrMolten(in.getFluid(), stats.withElement(element, 0), amount));
-        outs.add(new FluidStack(element.liquid().builtInRegistryHolder(), stats.amount(element) * amount / 100));
+        outs.add(new FluidStack(liquid.builtInRegistryHolder(), stats.amount(element) * amount / 100));
         return outs;
     }
 
@@ -107,26 +108,6 @@ public record UnmixingRecipe(FluidIngredient input, int amount, List<FluidStack>
     @Override
     public boolean matches(FluidRecipeInput in, Level level) {
         return accepts(in.fluid());
-    }
-
-    @Override
-    public ItemStack assemble(FluidRecipeInput in, HolderLookup.Provider registries) {
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return true;
-    }
-
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider registries) {
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public boolean isSpecial() {
-        return true;
     }
 
     @Override

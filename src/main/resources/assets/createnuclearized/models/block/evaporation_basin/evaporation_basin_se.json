@@ -1,0 +1,192 @@
+{
+	"parent": "block/block",
+	"textures": {
+		"basin": "createnuclearized:block/evaporation_basin",
+		"bars": "minecraft:block/iron_bars",
+		"bottom": "createnuclearized:block/evaporation_basin_bottom_connected",
+		"outer": "createnuclearized:block/evaporation_basin_side_outer_connected",
+		"inner": "createnuclearized:block/evaporation_basin_side_inner_connected",
+		"particle": "createnuclearized:block/evaporation_basin"
+	},
+	"elements": [
+		{
+			"name": "bottom",
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				0,
+				16
+			],
+			"faces": {
+				"down": {
+					"uv": [
+						12,
+						12,
+						16,
+						8
+					],
+					"texture": "#bottom",
+					"cullface": "down"
+				}
+			}
+		},
+		{
+			"name": "coil",
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				14,
+				10,
+				14
+			],
+			"faces": {
+				"up": {
+					"uv": [
+						12,
+						8,
+						15.5,
+						11.5
+					],
+					"texture": "#bottom"
+				}
+			}
+		},
+		{
+			"name": "bars",
+			"from": [
+				0,
+				15,
+				0
+			],
+			"to": [
+				14,
+				15,
+				14
+			],
+			"faces": {
+				"up": {
+					"uv": [
+						0,
+						0,
+						14,
+						14
+					],
+					"texture": "#bars"
+				},
+				"down": {
+					"uv": [
+						9,
+						9,
+						15,
+						15
+					],
+					"texture": "#basin"
+				}
+			}
+		},
+		{
+			"name": "wall_s",
+			"from": [
+				0,
+				0,
+				14
+			],
+			"to": [
+				16,
+				16,
+				16
+			],
+			"faces": {
+				"north": {
+					"uv": [
+						0,
+						0,
+						5.3333,
+						5.3333
+					],
+					"texture": "#inner"
+				},
+				"east": {
+					"uv": [
+						0,
+						0,
+						0.6667,
+						5.3333
+					],
+					"texture": "#outer",
+					"cullface": "east"
+				},
+				"south": {
+					"uv": [
+						10.6667,
+						0,
+						16,
+						5.3333
+					],
+					"texture": "#outer",
+					"cullface": "south"
+				},
+				"up": {
+					"uv": [
+						0,
+						8,
+						8,
+						9
+					],
+					"texture": "#basin"
+				}
+			}
+		},
+		{
+			"name": "wall_e",
+			"from": [
+				14,
+				0,
+				0
+			],
+			"to": [
+				16,
+				16,
+				14
+			],
+			"faces": {
+				"east": {
+					"uv": [
+						0.6667,
+						0,
+						5.3333,
+						5.3333
+					],
+					"texture": "#outer",
+					"cullface": "east"
+				},
+				"west": {
+					"uv": [
+						10.6667,
+						0,
+						15.3333,
+						5.3333
+					],
+					"texture": "#inner"
+				},
+				"up": {
+					"uv": [
+						0,
+						8,
+						7,
+						9
+					],
+					"texture": "#basin",
+					"rotation": 90
+				}
+			}
+		}
+	]
+}

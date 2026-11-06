@@ -6,8 +6,6 @@ import java.util.List;
 import com.mocretion.createnuclearized.content.boiler.HeatGenerationRecipe;
 import com.mocretion.createnuclearized.content.reactor.ReactorFuel;
 import com.mocretion.createnuclearized.registry.CNFluids;
-import com.simibubi.create.compat.jei.category.animations.AnimatedBlazeBurner;
-import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 
 import java.util.Optional;
@@ -35,7 +33,7 @@ public class HeatGenerationCategory extends CNRecipeCategory<HeatGenerationRecip
     private static final int BURNER_Y = BAR_Y - 25 - SCENE_RAISE;
     private static final int LIGHT_Y = BAR_Y + 8 - SCENE_RAISE;
 
-    private final AnimatedBlazeBurner burner = new AnimatedBlazeBurner();
+    private final AnimatedIndustrialHeater heater = new AnimatedIndustrialHeater();
 
     public HeatGenerationCategory(Info<HeatGenerationRecipe> info, IGuiHelper guiHelper) {
         super(info, guiHelper);
@@ -66,7 +64,7 @@ public class HeatGenerationCategory extends CNRecipeCategory<HeatGenerationRecip
         renderMirroredY(graphics, AllGuiTextures.JEI_HEAT_BAR, 4, BAR_Y);
         line(graphics, Component.translatable("createnuclearized.jei.heat_generated", displayedHeat(recipe, slots)),
                 9, BAR_Y + 6, HEATED_COLOR, 0.95f);
-        burner.withHeat(HeatLevel.KINDLED).draw(graphics, sceneX, BURNER_Y);
+        heater.draw(graphics, sceneX, BURNER_Y);
     }
 
     private static boolean hasLiquidOutput(HeatGenerationRecipe recipe) {

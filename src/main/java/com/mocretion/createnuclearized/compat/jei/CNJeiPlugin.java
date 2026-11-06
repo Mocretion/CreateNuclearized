@@ -4,12 +4,14 @@ import com.mocretion.createnuclearized.CreateNuclearized;
 import com.mocretion.createnuclearized.content.boiler.BoilingRecipe;
 import com.mocretion.createnuclearized.content.boiler.DegassingRecipe;
 import com.mocretion.createnuclearized.content.boiler.HeatGenerationRecipe;
+import com.mocretion.createnuclearized.content.gas.GasConversionRecipe;
 import com.mocretion.createnuclearized.content.reconstitution.ReconstitutionRecipe;
 import com.mocretion.createnuclearized.content.unmixer.UnmixingRecipe;
 import com.mocretion.createnuclearized.registry.CNBlocks;
 import com.mocretion.createnuclearized.registry.CNFluids;
 import com.mocretion.createnuclearized.registry.CNRecipeTypes;
 import com.simibubi.create.AllBlocks;
+import com.simibubi.create.AllItems;
 import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
 
 import mezz.jei.api.IModPlugin;
@@ -29,6 +31,7 @@ public class CNJeiPlugin implements IModPlugin {
     private CreateRecipeCategory<DegassingRecipe> degassing;
     private CreateRecipeCategory<UnmixingRecipe> unmixing;
     private CreateRecipeCategory<ReconstitutionRecipe> reconstitution;
+    private CreateRecipeCategory<GasConversionRecipe> gasConversion;
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -44,7 +47,7 @@ public class CNJeiPlugin implements IModPlugin {
                 .catalyst(() -> CNBlocks.EVAPORATION_BASIN.get())
                 .catalyst(() -> CNBlocks.INDUSTRIAL_HEATER.get())
                 .catalyst(() -> CNBlocks.EXHAUST_HOOD.get())
-                .itemIcon(CNBlocks.EVAPORATION_BASIN.get())
+                .doubleItemIcon(CNBlocks.EVAPORATION_BASIN.get(), CNBlocks.INDUSTRIAL_HEATER)
                 .emptyBackground(177, 110)
                 .build(rl("boiling"), info -> new BoilingCategory(info, guiHelper));
 
@@ -77,7 +80,15 @@ public class CNJeiPlugin implements IModPlugin {
                 .emptyBackground(177, 100)
                 .build(rl("reconstitution"), info -> new ReconstitutionCategory(info, guiHelper));
 
-        registration.addRecipeCategories(boiling, heatGeneration, degassing, unmixing, reconstitution);
+        gasConversion = new CreateRecipeCategory.Builder<GasConversionRecipe>(GasConversionRecipe.class)
+                .addTypedRecipes(() -> CNRecipeTypes.GAS_CONVERSION.get())
+                .catalyst(() -> AllBlocks.ENCASED_FAN.get())
+                .catalyst(() -> CNBlocks.EVAPORATION_BASIN.get())
+                .doubleItemIcon(AllItems.PROPELLER.get(), CNBlocks.EVAPORATION_BASIN.get())
+                .emptyBackground(177, 84)
+                .build(rl("gas_conversion"), info -> new GasConversionCategory(info, guiHelper));
+
+        registration.addRecipeCategories(boiling, heatGeneration, degassing, unmixing, reconstitution, gasConversion);
     }
 
     @Override
@@ -87,6 +98,7 @@ public class CNJeiPlugin implements IModPlugin {
         degassing.registerRecipes(registration);
         unmixing.registerRecipes(registration);
         reconstitution.registerRecipes(registration);
+        gasConversion.registerRecipes(registration);
     }
 
     @Override
@@ -96,6 +108,7 @@ public class CNJeiPlugin implements IModPlugin {
         degassing.registerCatalysts(registration);
         unmixing.registerCatalysts(registration);
         reconstitution.registerCatalysts(registration);
+        gasConversion.registerCatalysts(registration);
     }
 
     private static ResourceLocation rl(String path) {

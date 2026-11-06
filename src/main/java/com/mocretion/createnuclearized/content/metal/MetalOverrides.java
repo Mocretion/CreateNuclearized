@@ -3,6 +3,7 @@ package com.mocretion.createnuclearized.content.metal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -53,11 +54,6 @@ public final class MetalOverrides {
         return definition == null ? fallback : definition.radiationSetting().orElse(fallback);
     }
 
-    public static int spentTemperature(@Nullable String slug, int fallback) {
-        ReactorFuel fuel = fuel(slug);
-        return fuel == null ? fallback : fuel.heatFor(fuel.baseBurn());
-    }
-
     static void applyFuelStats() {
         for (MetalDefinition definition : BY_SLUG.values()) {
             ReactorFuel fuel = fuel(definition.slug());
@@ -70,14 +66,19 @@ public final class MetalOverrides {
             salt.maxHeat().ifPresent(fuel::setMaxHeat);
             salt.burn().ifPresent(fuel::setBaseBurn);
             salt.purity().ifPresent(fuel::setBasePurity);
-            salt.unconsumed().ifPresent(id -> fuel.setUnconsumed(element(id)));
-            salt.bred().ifPresent(id -> fuel.setBred(element(id)));
+            salt.unconsumed().ifPresent(id -> applyElement(id, fuel::setUnconsumed));
+            salt.bred().ifPresent(id -> applyElement(id, fuel::setBred));
         }
     }
 
-    @Nullable
-    private static SaltElement element(String text) {
-        return MetalDefinition.NO_ELEMENT.equals(text) ? null : Metals.lookup(text);
+    private static void applyElement(String text, Consumer<SaltElement> setter) {
+        if (MetalDefinition.NO_ELEMENT.equals(text)) {
+            setter.accept(null);
+            return;
+        }
+        SaltElement element = Metals.lookup(text);
+        if (element != null)
+            setter.accept(element);
     }
 
     @Nullable

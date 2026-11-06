@@ -1,0 +1,21 @@
+{
+  "parent": "createnuclearized:main/lots_of_heat",
+  "display": {
+    "icon": { "id": "createnuclearized:precision_unmixer" },
+    "title": { "translate": "advancements.createnuclearized.not_a_centrifuge.title" },
+    "description": { "translate": "advancements.createnuclearized.not_a_centrifuge.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_unmixer": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [{ "items": "createnuclearized:precision_unmixer" }]
+      }
+    }
+  },
+  "requirements": [["has_unmixer"]]
+}

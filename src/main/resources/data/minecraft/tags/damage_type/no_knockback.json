@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "createnuclearized:steam",
-    "createnuclearized:radiation"
+    "createnuclearized:radiation",
+    "createnuclearized:scorching_heat"
   ]
 }

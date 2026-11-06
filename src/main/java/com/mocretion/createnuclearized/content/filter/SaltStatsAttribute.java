@@ -7,6 +7,7 @@ import com.mocretion.createnuclearized.CreateNuclearized;
 import com.mocretion.createnuclearized.content.reactor.ReactorFuel;
 import com.mocretion.createnuclearized.content.reactor.SaltStats;
 import com.mocretion.createnuclearized.registry.CNDataComponents;
+import com.mocretion.createnuclearized.registry.CNFluids;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.simibubi.create.api.registry.CreateRegistries;
@@ -53,7 +54,10 @@ public final class SaltStatsAttribute implements ItemAttribute {
 
     @Override
     public boolean appliesTo(ItemStack stack, Level world) {
-        FluidStack contents = contents(stack);
+        return appliesTo(contents(stack));
+    }
+
+    public boolean appliesTo(FluidStack contents) {
         if (contents.isEmpty()) return false;
         SaltStats stats = contents.get(CNDataComponents.SALT_STATS.get());
         if (stats == null) return false;
@@ -102,7 +106,12 @@ public final class SaltStatsAttribute implements ItemAttribute {
 
         @Override
         public List<ItemAttribute> getAllAttributes(ItemStack stack, Level level) {
-            return attribute.appliesTo(stack, level) ? List.of(attribute) : List.of();
+            FluidStack contents = contents(stack);
+            if (contents.isEmpty()) return List.of();
+            var holder = contents.getFluid().builtInRegistryHolder();
+            if (holder.is(CNFluids.SALTS) || holder.is(CNFluids.RADIOACTIVE_METAL))
+                return List.of(attribute);
+            return List.of();
         }
 
         @Override

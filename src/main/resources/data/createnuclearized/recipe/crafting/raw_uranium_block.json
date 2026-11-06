@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "AAA",
+    "AAA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "tag": "c:raw_materials/uranium"
+    }
+  },
+  "result": {
+    "id": "createnuclearized:raw_uranium_block"
+  }
+}

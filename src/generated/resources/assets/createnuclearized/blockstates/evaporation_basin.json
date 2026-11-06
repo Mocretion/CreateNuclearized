@@ -1,7 +1,46 @@
 {
   "variants": {
-    "": {
+    "slot=c": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_c"
+    },
+    "slot=e": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_e"
+    },
+    "slot=n": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_n"
+    },
+    "slot=ne": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_ne"
+    },
+    "slot=nw": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_nw"
+    },
+    "slot=s": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_s"
+    },
+    "slot=se": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_se"
+    },
+    "slot=single": {
       "model": "createnuclearized:block/evaporation_basin"
+    },
+    "slot=small_ne": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_small_ne"
+    },
+    "slot=small_nw": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_small_nw"
+    },
+    "slot=small_se": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_small_se"
+    },
+    "slot=small_sw": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_small_sw"
+    },
+    "slot=sw": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_sw"
+    },
+    "slot=w": {
+      "model": "createnuclearized:block/evaporation_basin/evaporation_basin_w"
     }
   }
 }

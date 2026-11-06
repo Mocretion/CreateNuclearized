@@ -15,6 +15,7 @@ import com.tterrag.registrate.builders.FluidBuilder;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateItemModelProvider;
 import com.tterrag.registrate.util.entry.FluidEntry;
+import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 
 import java.util.List;
 import java.util.function.IntSupplier;
@@ -25,8 +26,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.client.model.generators.ModelFile;
-import net.neoforged.neoforge.client.model.generators.loaders.DynamicFluidContainerModelBuilder;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -35,10 +34,16 @@ public final class CNFluids {
     private static final ResourceLocation WATER_STILL = ResourceLocation.withDefaultNamespace("block/water_still");
     private static final ResourceLocation WATER_FLOW = ResourceLocation.withDefaultNamespace("block/water_flow");
     private static final ResourceLocation WATER_BUCKET = ResourceLocation.withDefaultNamespace("item/water_bucket");
+    private static final ResourceLocation EMPTY_BUCKET = ResourceLocation.withDefaultNamespace("item/bucket");
     private static final ResourceLocation LIQUID_STILL = ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "block/liquid_still");
     private static final ResourceLocation LIQUID_FLOW = ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "block/liquid_flow");
     private static final ResourceLocation LIQUID_HOT_STILL = ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "block/liquid_hot_still");
     private static final ResourceLocation LIQUID_HOT_FLOW = ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "block/liquid_hot_flow");
+
+    private static final String METAL_BUCKET_LIQUID = "metal";
+    private static final String ENRICHED_METAL_BUCKET_LIQUID = "enriched_metal";
+    private static final String SALT_BUCKET_LIQUID = "salt";
+    private static final String SPENT_SALT_BUCKET_LIQUID = "spent_salt";
 
     public static final TagKey<Fluid> SALTS = fluidTag("salts");
     public static final TagKey<Fluid> SPENT_SALTS = fluidTag("salts/spent");
@@ -46,25 +51,21 @@ public final class CNFluids {
     public static final TagKey<Fluid> ENRICHED_METAL = fluidTag("radioactive_metal/enriched");
     public static final TagKey<Fluid> GAS = fluidTag("gas");
 
-    private static final int HOT_THORIUM_URANIUM_TEMPERATURE = 1400;
-    private static final int HOT_URANIUM_TEMPERATURE = 2489;
-    private static final int HOT_PLUTONIUM_TEMPERATURE = 4480;
-
     private static final int LIQUID_URANIUM_TINT = 0xFF637158;
     private static final int LIQUID_PLUTONIUM_TINT = 0xFF585871;
     private static final int LIQUID_THORIUM_TINT = 0xFF292828;
-    private static final int LIQUID_THORIUM_URANIUM_TINT = 0xFF58716D;
+    private static final int LIQUID_THORIUM_URANIUM_TINT = 0xFF1E241E;
     private static final int LIQUID_AMERICIUM_TINT = 0xFF715858;
 
-    private static final int ENRICHED_LIQUID_URANIUM_TINT = 0xFF78886D;
+    private static final int ENRICHED_LIQUID_URANIUM_TINT = 0xFF84A36D;
 
-    private static final int URANIUM_SALT_TINT = 0xFFFFFFE8;
+    private static final int URANIUM_SALT_TINT = 0xFF738764;
     private static final int LIQUID_PLUTONIUM_SALT_TINT = 0xFFC5C5FA;
-    private static final int THORIUM_URANIUM_SALT_TINT = 0xFFC5FAF0;
+    private static final int THORIUM_URANIUM_SALT_TINT = 0xFF293029;
 
     private static final int SPENT_PLUTONIUM_SALT_TINT = 0xFFE8E0FF;
-    private static final int SPENT_THORIUM_URANIUM_SALT_TINT = 0xFFDBFFFF;
-    private static final int SPENT_URANIUM_SALT_TINT = 0xFFE9FAD0;
+    private static final int SPENT_THORIUM_URANIUM_SALT_TINT = 0xFF192619;
+    private static final int SPENT_URANIUM_SALT_TINT = 0xFF74945C;
     private static final int MOLTEN_SALT_TINT = 0xFFF4F4F4;
 
     private static final int THORIUM_RADIATION = 1;
@@ -77,24 +78,24 @@ public final class CNFluids {
 
     public static final FluidEntry<BaseFlowingFluid.Flowing> SPENT_URANIUM_SALT =
             spentSalt("spent_uranium_salt", "Spent Uranium Salt",
-                    SPENT_URANIUM_SALT_TINT, HOT_URANIUM_TEMPERATURE, URANIUM_RADIATION);
+                    SPENT_URANIUM_SALT_TINT, 0, URANIUM_RADIATION);
 
     public static final FluidEntry<BaseFlowingFluid.Flowing> PLUTONIUM_SALT =
             salt("plutonium_salt", "Plutonium Salt", LIQUID_PLUTONIUM_SALT_TINT, PLUTONIUM_RADIATION);
 
     public static final FluidEntry<BaseFlowingFluid.Flowing> SPENT_PLUTONIUM_SALT =
             spentSalt("spent_plutonium_salt", "Spent Plutonium Salt",
-                    SPENT_PLUTONIUM_SALT_TINT, HOT_PLUTONIUM_TEMPERATURE, PLUTONIUM_RADIATION);
+                    SPENT_PLUTONIUM_SALT_TINT, 0, PLUTONIUM_RADIATION);
 
     public static final FluidEntry<BaseFlowingFluid.Flowing> THORIUM_URANIUM_SALT =
             salt("thorium_uranium_salt", "Thorium-Uranium Salt", THORIUM_URANIUM_SALT_TINT, THORIUM_RADIATION);
 
     public static final FluidEntry<BaseFlowingFluid.Flowing> SPENT_THORIUM_URANIUM_SALT =
             spentSalt("spent_thorium_uranium_salt", "Spent Thorium-Uranium Salt",
-                    SPENT_THORIUM_URANIUM_SALT_TINT, HOT_THORIUM_URANIUM_TEMPERATURE, THORIUM_RADIATION);
+                    SPENT_THORIUM_URANIUM_SALT_TINT, 0, THORIUM_RADIATION);
 
     public static final FluidEntry<BaseFlowingFluid.Flowing> MOLTEN_SALT =
-            withBucket(tintedFluid("molten_salt", () -> MOLTEN_SALT_TINT, () -> 0), "molten_salt", "Molten Salt");
+            withBucket(tintedFluid("molten_salt", () -> MOLTEN_SALT_TINT, () -> 0), "Molten Salt");
 
     public static final FluidEntry<BaseFlowingFluid.Flowing> LIQUID_URANIUM =
             liquidMetal("liquid_uranium", "Liquid Uranium", LIQUID_URANIUM_TINT, URANIUM_RADIATION);
@@ -148,7 +149,8 @@ public final class CNFluids {
                 .build()
             .bucket()
                 .lang("Off-Gas Bucket")
-                .model((c, p) -> p.generated(c, WATER_BUCKET))
+                .model((c, p) -> p.generated(c,
+                        ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "item/offgas_bucket")))
                 .tag(CNTags.BUCKETS)
                 .build()
             .register();
@@ -162,7 +164,7 @@ public final class CNFluids {
     private static FluidEntry<BaseFlowingFluid.Flowing> salt(String name, String lang, int tint, int radiation) {
         String slug = name.substring(0, name.length() - "_salt".length());
         return withBucket(tintedFluid(name, () -> MetalOverrides.saltColor(slug, tint),
-                () -> MetalOverrides.radiation(slug, radiation)).tag(SALTS), name, lang);
+                () -> MetalOverrides.radiation(slug, radiation)).tag(SALTS), lang);
     }
 
     private static FluidEntry<BaseFlowingFluid.Flowing> liquidMetal(String name, String lang, int tint, int radiation) {
@@ -181,7 +183,7 @@ public final class CNFluids {
                     .build()
                 .bucket()
                     .lang(lang + " Bucket")
-                    .model(CNFluids::fluidBucketModel)
+                    .model(bucketModel(enriched ? ENRICHED_METAL_BUCKET_LIQUID : METAL_BUCKET_LIQUID))
                     .tag(CNTags.BUCKETS)
                     .build()
                 .register();
@@ -190,7 +192,7 @@ public final class CNFluids {
     private static FluidEntry<BaseFlowingFluid.Flowing> spentSalt(String name, String lang, int tint, int temperature, int radiation) {
         String slug = name.substring("spent_".length(), name.length() - "_salt".length());
         return hotTintedFluid(name, () -> MetalOverrides.spentColor(slug, tint),
-                () -> MetalOverrides.spentTemperature(slug, temperature), () -> MetalOverrides.radiation(slug, radiation))
+                () -> temperature, () -> MetalOverrides.radiation(slug, radiation))
                 .tag(SPENT_SALTS, SALTS)
                 .lang(lang)
                 .source(BaseFlowingFluid.Source::new)
@@ -199,7 +201,7 @@ public final class CNFluids {
                     .build()
                 .bucket(SpentSaltBucketItem::new)
                     .lang(lang + " Bucket")
-                    .model(CNFluids::fluidBucketModel)
+                    .model(bucketModel(SPENT_SALT_BUCKET_LIQUID))
                     .removeTab(CreateNuclearized.MAIN_TAB_KEY)
                     .tag(CNTags.BUCKETS)
                     .build()
@@ -221,7 +223,7 @@ public final class CNFluids {
     }
 
     private static FluidEntry<BaseFlowingFluid.Flowing> withBucket(FluidBuilder<BaseFlowingFluid.Flowing, CreateRegistrate> fluid,
-                                                                   String name, String lang) {
+                                                                   String lang) {
         return fluid.lang(lang)
                 .source(BaseFlowingFluid.Source::new)
                 .block()
@@ -229,18 +231,19 @@ public final class CNFluids {
                     .build()
                 .bucket()
                     .lang(lang + " Bucket")
-                    .model(CNFluids::fluidBucketModel)
+                    .model(bucketModel(SALT_BUCKET_LIQUID))
                     .tag(CNTags.BUCKETS)
                     .build()
                 .register();
     }
 
-    private static <I extends BucketItem> void fluidBucketModel(DataGenContext<Item, I> context, RegistrateItemModelProvider provider) {
-        provider.getBuilder(context.getName())
-                .parent(new ModelFile.UncheckedModelFile(ResourceLocation.fromNamespaceAndPath("neoforge", "item/bucket")))
-                .customLoader(DynamicFluidContainerModelBuilder::begin)
-                .fluid(context.get().content)
-                .end();
+    private static <I extends BucketItem> NonNullBiConsumer<DataGenContext<Item, I>, RegistrateItemModelProvider> bucketModel(
+            String liquid) {
+        return (context, provider) -> provider.generated(context, EMPTY_BUCKET, bucketLiquidTexture(liquid));
+    }
+
+    private static ResourceLocation bucketLiquidTexture(String liquid) {
+        return ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "item/bucket_liquid_" + liquid);
     }
 
     public static Fluid uraniumSalt() {
@@ -281,6 +284,10 @@ public final class CNFluids {
 
     public static Fluid liquidAmericium() {
         return LIQUID_AMERICIUM.getSource();
+    }
+
+    public static Fluid enrichedLiquidUranium() {
+        return ENRICHED_LIQUID_URANIUM.getSource();
     }
 
     public static Fluid moltenSalt() {

@@ -1,0 +1,18 @@
+{
+  "parent": "createnuclearized:main/lots_of_heat",
+  "display": {
+    "icon": { "id": "createnuclearized:turbine_controller" },
+    "title": { "translate": "advancements.createnuclearized.master_of_pneumatics.title" },
+    "description": { "translate": "advancements.createnuclearized.master_of_pneumatics.description" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "started_turbine": {
+      "trigger": "createnuclearized:turbine_started"
+    }
+  },
+  "requirements": [["started_turbine"]]
+}

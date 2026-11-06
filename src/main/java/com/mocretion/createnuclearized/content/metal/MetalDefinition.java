@@ -131,7 +131,7 @@ public record MetalDefinition(ResourceLocation id, String name, int color, Optio
     private static DataResult<Integer> parseColor(String text) {
         String hex = text.startsWith("#") ? text.substring(1) : text;
         if (hex.length() != 6 && hex.length() != 8)
-            return DataResult.error(() -> "Color must be #RRGGBB or #AARRGGBB, got " + text);
+            return DataResult.error(() -> "Color must be #RRGGBB (an alpha prefix is ignored), got " + text);
         try {
             return DataResult.success(0xFF000000 | (int) Long.parseLong(hex.length() == 8 ? hex.substring(2) : hex, 16));
         } catch (NumberFormatException e) {

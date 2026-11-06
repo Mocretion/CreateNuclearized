@@ -11,9 +11,9 @@ import com.mocretion.createnuclearized.registry.CNDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -38,7 +38,7 @@ public final class ReactorTooltips {
 
         SaltStats stats = stack.get(CNDataComponents.SALT_STATS.get());
         if (stats != null) {
-            SaltStatsTooltip.append(lines, stats, spentBucketFuel(stack));
+            SaltStatsTooltip.appendToItem(lines, stats, spentBucketFuel(stack));
             return;
         }
 
@@ -52,23 +52,16 @@ public final class ReactorTooltips {
         if (stack.getItem() instanceof BlockItem blockItem) {
             BlockState state = blockItem.getBlock().defaultBlockState();
             double moderatorRate = ReactorModerator.rate(state);
-            if (moderatorRate > 0) {
-                appendModerator(lines, moderatorRate);
-                return;
-            }
-            int reflectorPercent = ReactorReflector.percent(state);
-            if (reflectorPercent > 0) {
-                appendReflector(lines, reflectorPercent);
-                return;
-            }
+            int moderatorHeat = ReactorModerator.heat(state);
+            int reflectorHeat = ReactorReflector.heat(state);
             ReactorModifier.Effect effect = ReactorModifier.effect(state);
-            if (effect != null) {
+            if (moderatorRate > 0 || moderatorHeat != 0)
+                appendModerator(lines, moderatorRate, moderatorHeat);
+            if (reflectorHeat > 0)
+                appendReflector(lines, reflectorHeat);
+            if (effect != null)
                 appendModifier(lines, effect);
-                return;
-            }
         }
-        if (stack.is(Items.WATER_BUCKET))
-            appendModifier(lines, ReactorModifier.WATER_SOURCE);
     }
 
     @Nullable
@@ -79,56 +72,51 @@ public final class ReactorTooltips {
         return null;
     }
 
-    private static void appendModerator(List<Component> lines, double rate) {
-        lines.add(Component.translatable("createnuclearized.tooltip.moderator")
-                .withStyle(ChatFormatting.AQUA));
-        lines.add(Component.translatable("createnuclearized.tooltip.moderator.rate", RateFormat.signed(rate))
-                .withStyle(ChatFormatting.GRAY));
-        lines.add(Component.translatable("createnuclearized.tooltip.moderator.hint")
-                .withStyle(ChatFormatting.DARK_GRAY));
+    private static void appendModerator(List<Component> lines, double rate, int heat) {
+        lines.add(title("moderator", ChatFormatting.AQUA));
+        if (!Screen.hasShiftDown()) {
+            lines.add(shiftHint());
+            return;
+        }
+        ModifierStatLines.appendStats(lines, 0, 0, rate, heat);
+        lines.add(hint("moderator"));
     }
 
-    private static void appendReflector(List<Component> lines, int percent) {
-        lines.add(Component.translatable("createnuclearized.tooltip.reflector")
-                .withStyle(ChatFormatting.LIGHT_PURPLE));
-        lines.add(Component.translatable("createnuclearized.tooltip.reflector.heat", signedInt(percent))
-                .withStyle(ChatFormatting.GRAY));
-        lines.add(Component.translatable("createnuclearized.tooltip.reflector.hint")
-                .withStyle(ChatFormatting.DARK_GRAY));
+    private static void appendReflector(List<Component> lines, int heat) {
+        lines.add(title("reflector", ChatFormatting.LIGHT_PURPLE));
+        if (!Screen.hasShiftDown()) {
+            lines.add(shiftHint());
+            return;
+        }
+        ModifierStatLines.appendStats(lines, 0, 0, 0, heat);
+        lines.add(hint("reflector"));
     }
 
     private static void appendModifier(List<Component> lines, ReactorModifier.Effect effect) {
-        lines.add(Component.translatable("createnuclearized.tooltip.modifier")
-                .withStyle(ChatFormatting.GOLD));
-        addDeltaLine(lines, "burn", signedInt(effect.dBurn()), effect.dBurn() != 0);
-        addDeltaLine(lines, "purity", signedInt(effect.dPurity()), effect.dPurity() != 0);
-        if (effect.dRate() != 0) {
-            lines.add(Component.translatable("createnuclearized.tooltip.rate", RateFormat.signed(effect.dRate()))
-                    .withStyle(ChatFormatting.GRAY));
+        lines.add(title("modifier", ChatFormatting.GOLD));
+        if (!Screen.hasShiftDown()) {
+            lines.add(shiftHint());
+            return;
         }
-        lines.add(Component.translatable("createnuclearized.tooltip.modifier.hint")
-                .withStyle(ChatFormatting.DARK_GRAY));
+        ModifierStatLines.appendStats(lines, effect.dBurn(), effect.dPurity(), effect.dRate(), effect.dHeat());
+        lines.add(hint("modifier"));
         appendBurnPurityHelp(lines);
     }
 
     private static void appendFuelBase(List<Component> lines, ReactorFuel fuel) {
         lines.add(Component.translatable("createnuclearized.tooltip.fuel")
                 .withStyle(ChatFormatting.AQUA));
-        lines.add(Component.translatable("createnuclearized.tooltip.fuel.heat", fuel.heatFor(fuel.baseBurn()))
-                .withStyle(ChatFormatting.GRAY));
-        lines.add(Component.translatable("createnuclearized.tooltip.fuel.burn", fuel.baseBurn())
-                .withStyle(ChatFormatting.GRAY));
-        if (fuel.bred() != null) {
-            lines.add(Component.translatable("createnuclearized.tooltip.fuel.purity", fuel.basePurity())
-                    .withStyle(ChatFormatting.GRAY));
-        }
+        lines.add(SaltIcon.HEAT.prefix(fuelStat("heat", fuel.maxHeat())));
+        lines.add(SaltIcon.BURN.prefix(fuelStat("burn", fuel.baseBurn())));
+        if (fuel.bred() != null)
+            lines.add(SaltIcon.PURITY.prefix(fuelStat("purity", fuel.basePurity())));
         addRoleElement(lines, "unconsumed", fuel.unconsumed());
         addRoleElement(lines, "bred", fuel.bred());
         appendBurnPurityHelp(lines);
     }
 
     private static void appendBurnPurityHelp(List<Component> lines) {
-        if (Screen.hasShiftDown()) {
+        if (Screen.hasControlDown()) {
             lines.add(Component.translatable("createnuclearized.tooltip.help.burn")
                     .withStyle(ChatFormatting.GRAY));
             lines.add(Component.translatable("createnuclearized.tooltip.help.burn.desc")
@@ -138,24 +126,33 @@ public final class ReactorTooltips {
             lines.add(Component.translatable("createnuclearized.tooltip.help.purity.desc")
                     .withStyle(ChatFormatting.DARK_GRAY));
         } else {
-            lines.add(Component.translatable("createnuclearized.tooltip.help.hint")
+            lines.add(Component.translatable("createnuclearized.tooltip.ctrl_hint")
                     .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         }
     }
 
+    private static MutableComponent title(String key, ChatFormatting color) {
+        return Component.translatable("createnuclearized.tooltip." + key).withStyle(color);
+    }
+
+    private static MutableComponent hint(String key) {
+        return Component.translatable("createnuclearized.tooltip." + key + ".hint")
+                .withStyle(ChatFormatting.DARK_GRAY);
+    }
+
+    private static MutableComponent shiftHint() {
+        return Component.translatable("createnuclearized.tooltip.shift_hint")
+                .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC);
+    }
+
+    private static MutableComponent fuelStat(String key, int value) {
+        return Component.translatable("createnuclearized.tooltip.fuel." + key, value).withStyle(ChatFormatting.GRAY);
+    }
+
     private static void addRoleElement(List<Component> lines, String roleKey, SaltElement element) {
         if (element == null) return;
-        lines.add(Component.translatable("createnuclearized.tooltip.fuel." + roleKey, element.displayName())
-                .withStyle(ChatFormatting.GRAY));
-    }
-
-    private static void addDeltaLine(List<Component> lines, String stat, String value, boolean show) {
-        if (!show) return;
-        lines.add(Component.translatable("createnuclearized.tooltip.delta." + stat, value)
-                .withStyle(ChatFormatting.GRAY));
-    }
-
-    private static String signedInt(int value) {
-        return (value > 0 ? "+" : "") + value;
+        MutableComponent line = Component.translatable("createnuclearized.tooltip.fuel." + roleKey, element.displayName())
+                .withStyle(ChatFormatting.GRAY);
+        lines.add(SaltIcon.prefix(SaltIcon.forRole(roleKey).tinted(element.color()), line));
     }
 }

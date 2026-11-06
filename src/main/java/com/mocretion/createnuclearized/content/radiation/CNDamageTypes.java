@@ -15,10 +15,18 @@ public final class CNDamageTypes {
     public static final ResourceKey<DamageType> RADIATION = ResourceKey.create(Registries.DAMAGE_TYPE,
             ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "radiation"));
 
+    public static final ResourceKey<DamageType> SCORCHING_HEAT = ResourceKey.create(Registries.DAMAGE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(CreateNuclearized.MODID, "scorching_heat"));
+
     private CNDamageTypes() {}
 
     public static DamageSource radiation(Level level) {
         Holder<DamageType> holder = level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(RADIATION);
+        return new DamageSource(holder);
+    }
+
+    public static DamageSource scorchingHeat(Level level) {
+        Holder<DamageType> holder = level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(SCORCHING_HEAT);
         return new DamageSource(holder);
     }
 }

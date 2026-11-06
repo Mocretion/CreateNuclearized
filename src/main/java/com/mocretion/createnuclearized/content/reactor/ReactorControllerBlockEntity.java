@@ -1,17 +1,21 @@
 package com.mocretion.createnuclearized.content.reactor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.ToIntFunction;
 
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Iterables;
+import com.mocretion.createnuclearized.content.advancement.CNCriteriaTriggers;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodBlockEntity;
 import com.mocretion.createnuclearized.CreateNuclearized;
 import com.mocretion.createnuclearized.content.multiblock.MultiblockController;
@@ -23,9 +27,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -45,11 +52,15 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
     private List<ReactorStats.Channel> channels = List.of();
     private List<ReactorStats.Channel> producing = List.of();
     private Map<Long, List<ReactorStats.ModEntry>> channelMods = Map.of();
+    private Map<Long, List<ReactorStats.ModPosEntry>> channelModPositions = Map.of();
     private final Set<BlockPos> activeValves = new HashSet<>();
     private final Set<BlockPos> fullValves = new HashSet<>();
-    private int reflectorPercent;
     private final Map<ReactorFuel, SaltStats> compositions = new HashMap<>();
-    private ReactorFuel fuel = ReactorFuel.URANIUM;
+    private final Map<StampKey, SaltStats> stamps = new HashMap<>();
+    @Nullable
+    private ReactorFuel fuel;
+    @Nullable
+    private ReactorFuel lastProcessedFuel;
 
     private boolean running;
     private int timer = TICKS_PER_SECOND;
@@ -57,6 +68,12 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
 
     private int activeChannels;
     private long runTicks;
+
+    @Nullable
+    private UUID starterUuid;
+    private final Set<ReactorFuel> triggeredFuels = Collections.newSetFromMap(new IdentityHashMap<>());
+
+    private record StampKey(BlockPos valve, ReactorFuel fuel) {}
 
     public ReactorControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -98,10 +115,12 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         return count;
     }
 
+    @Nullable
     public SaltStats getOutputStats() {
-        return compositionFor(fuel);
+        return fuel == null ? null : compositionFor(fuel);
     }
 
+    @Nullable
     public ReactorFuel getFuel() {
         return fuel;
     }
@@ -115,14 +134,20 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         List<InteriorGrid.Cell> cells = new ArrayList<>();
         for (ReactorStats.Channel channel : channels) {
             BlockPos valve = channel.valve();
+            long column = ReactorMultiblock.column(valve);
             List<InteriorGrid.Mod> mods = new ArrayList<>();
-            for (ReactorStats.ModEntry mod : channelMods.getOrDefault(ReactorMultiblock.column(valve), List.of()))
-                mods.add(new InteriorGrid.Mod(BuiltInRegistries.BLOCK.getKey(mod.block()), mod.count()));
+            for (ReactorStats.ModEntry mod : channelMods.getOrDefault(column, List.of()))
+                mods.add(new InteriorGrid.Mod(BuiltInRegistries.BLOCK.getKey(mod.block()), mod.role(), mod.count()));
+            List<InteriorGrid.ModPos> positions = new ArrayList<>();
+            for (ReactorStats.ModPosEntry pos : channelModPositions.getOrDefault(column, List.of()))
+                positions.add(new InteriorGrid.ModPos(pos.col(), pos.row(),
+                        BuiltInRegistries.BLOCK.getKey(pos.block()), pos.role(), pos.count()));
             cells.add(new InteriorGrid.Cell(valve.getX() - origin.getX(), valve.getZ() - origin.getZ(),
-                    valveState(valve), channel.burnShift(), channel.purityShift(), channel.rate(), mods));
+                    valveState(valve), channel.burnShift(), channel.purityShift(), channel.rate(),
+                    channel.reflectorPercent(), mods, positions));
         }
         return new InteriorGrid(max.getX() - min.getX() - 1, max.getZ() - min.getZ() - 1,
-                origin, fuel.index(), reflectorPercent, cells);
+                origin, fuel == null ? -1 : fuel.index(), cells);
     }
 
     private InteriorGrid.ValveState valveState(BlockPos valve) {
@@ -165,6 +190,8 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
             running = false;
             state = MultiblockState.STOPPED;
             activeChannels = 0;
+            starterUuid = null;
+            triggeredFuels.clear();
             syncStateToBlock();
             setChanged();
             return;
@@ -184,6 +211,13 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         setAllDrainSources(ReactorFluidValveBlockEntity.DrainSource.OUTPUT);
         runTicks = 0;
         running = true;
+        triggeredFuels.clear();
+        if (player instanceof ServerPlayer serverPlayer) {
+            starterUuid = serverPlayer.getUUID();
+            CNCriteriaTriggers.REACTOR_STARTED.get().trigger(serverPlayer);
+        } else {
+            starterUuid = null;
+        }
         setChanged();
     }
 
@@ -263,11 +297,12 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
 
     private void applyStructure(ReactorMultiblock.Structure next) {
         clearValveStatsExcept(next.outputValves());
+        stamps.clear();
         structure = next;
         ReactorStats.Layout layout = ReactorStats.scan(level, next);
         channels = layout.channels();
         channelMods = layout.modifiers();
-        reflectorPercent = layout.reflectorPercent();
+        channelModPositions = layout.modifierPositions();
         updateCompositions(producingChannels(next));
         fuel = detectFuel();
         pushChannelStats();
@@ -277,7 +312,7 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         producing = nowProducing;
         List<ReactorStats.Channel> basis = nowProducing.isEmpty() ? channels : nowProducing;
         for (ReactorFuel candidate : ReactorFuel.values())
-            compositions.put(candidate, ReactorStats.composition(basis, candidate, reflectorPercent));
+            compositions.put(candidate, ReactorStats.composition(basis, candidate));
     }
 
     private List<ReactorStats.Channel> producingChannels(ReactorMultiblock.Structure reactor) {
@@ -295,11 +330,13 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         channels = List.of();
         producing = List.of();
         channelMods = Map.of();
+        channelModPositions = Map.of();
         activeValves.clear();
         fullValves.clear();
-        reflectorPercent = 0;
         compositions.clear();
+        stamps.clear();
         activeChannels = 0;
+        fuel = null;
     }
 
     private void clearValveStatsExcept(List<BlockPos> kept) {
@@ -311,21 +348,30 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
     }
 
     private void pushChannelStats() {
+        ReactorFuel fallback = fuel == null ? ReactorFuel.URANIUM : fuel;
         for (ReactorStats.Channel channel : channels) {
             ReactorFluidValveBlockEntity valve = valveAt(channel.valve());
             if (valve == null) continue;
-            ReactorFuel shown = Objects.requireNonNullElse(valve.displayFuel(), fuel);
+            ReactorFuel shown = Objects.requireNonNullElse(valve.displayFuel(), fallback);
             valve.setStats(channel.burn(shown), channel.purity(shown), channel.rate());
         }
     }
 
+    @Nullable
     private ReactorFuel detectFuel() {
-        for (BlockPos pos : allValves()) {
+        for (BlockPos pos : outputValves()) {
             ReactorFluidValveBlockEntity valve = valveAt(pos);
-            ReactorFuel found = valve == null ? null : valve.moltenFuel();
+            ReactorFuel found = valve == null ? null : valve.displayFuel();
             if (found != null) return found;
         }
-        return ReactorFuel.URANIUM;
+        if (structure != null) {
+            for (BlockPos pos : structure.inputValves()) {
+                ReactorFluidValveBlockEntity valve = valveAt(pos);
+                ReactorFuel found = valve == null ? null : valve.moltenFuel();
+                if (found != null) return found;
+            }
+        }
+        return lastProcessedFuel;
     }
 
     private SaltStats compositionFor(ReactorFuel saltFuel) {
@@ -345,8 +391,8 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
             ReactorFuel valveFuel = valve.moltenFuel();
             if (valveFuel == null) continue;
             valve.advanceRate();
-            convert(valve, valveFuel);
-            if (hasRoomFor(valve, valveFuel)) {
+            convert(valve, channel, valveFuel);
+            if (hasRoomFor(valve, channel, valveFuel)) {
                 active++;
                 activeValves.add(channel.valve());
             } else {
@@ -358,10 +404,10 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         runTicks++;
     }
 
-    private void convert(ReactorFluidValveBlockEntity valve, ReactorFuel valveFuel) {
+    private void convert(ReactorFluidValveBlockEntity valve, ReactorStats.Channel channel, ReactorFuel valveFuel) {
         int want = Math.min(valve.pendingWholeMb(), valve.getMoltenAmount());
         if (want <= 0) return;
-        FluidStack spent = spentSalt(valveFuel, want);
+        FluidStack spent = spentSalt(channel, valveFuel, want);
         int converted = valve.fillHeated(spent, FluidAction.SIMULATE);
         if (converted <= 0) return;
         spent.setAmount(converted);
@@ -369,15 +415,29 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         valve.fillHeated(spent, FluidAction.EXECUTE);
         valve.consumePending(converted);
         valve.notifyContentsChanged();
+        if (lastProcessedFuel != valveFuel) {
+            lastProcessedFuel = valveFuel;
+            setChanged();
+        }
+        notifySaltProduced(valveFuel);
     }
 
-    private boolean hasRoomFor(ReactorFluidValveBlockEntity valve, ReactorFuel valveFuel) {
-        return valve.fillHeated(spentSalt(valveFuel, 1), FluidAction.SIMULATE) > 0;
+    private void notifySaltProduced(ReactorFuel valveFuel) {
+        if (starterUuid == null || !(level instanceof ServerLevel serverLevel)) return;
+        if (!triggeredFuels.add(valveFuel)) return;
+        Player player = serverLevel.getPlayerByUUID(starterUuid);
+        if (player instanceof ServerPlayer serverPlayer)
+            CNCriteriaTriggers.SPENT_SALT_PRODUCED.get().trigger(serverPlayer, valveFuel.outputFluid());
     }
 
-    private FluidStack spentSalt(ReactorFuel saltFuel, int amount) {
+    private boolean hasRoomFor(ReactorFluidValveBlockEntity valve, ReactorStats.Channel channel, ReactorFuel valveFuel) {
+        return valve.fillHeated(spentSalt(channel, valveFuel, 1), FluidAction.SIMULATE) > 0;
+    }
+
+    private FluidStack spentSalt(ReactorStats.Channel channel, ReactorFuel saltFuel, int amount) {
         FluidStack stack = new FluidStack(saltFuel.outputFluid().builtInRegistryHolder(), amount);
-        stack.set(CNDataComponents.SALT_STATS.get(), compositionFor(saltFuel));
+        stack.set(CNDataComponents.SALT_STATS.get(),
+                stamps.computeIfAbsent(new StampKey(channel.valve(), saltFuel), key -> ReactorStats.channelComposition(channel, saltFuel)));
         return stack;
     }
 
@@ -432,6 +492,16 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         super.saveAdditional(tag, registries);
         tag.putBoolean("Running", running);
         tag.putLong("RunTicks", runTicks);
+        if (starterUuid != null)
+            tag.putUUID("Starter", starterUuid);
+        if (lastProcessedFuel != null)
+            tag.putString("LastFuel", BuiltInRegistries.FLUID.getKey(lastProcessedFuel.outputFluid()).toString());
+    }
+
+    @Nullable
+    private static ReactorFuel fuelOf(String outputFluidId) {
+        ResourceLocation id = ResourceLocation.tryParse(outputFluidId);
+        return id == null ? null : BuiltInRegistries.FLUID.getOptional(id).map(ReactorFuel::forOutput).orElse(null);
     }
 
     @Override
@@ -439,5 +509,7 @@ public class ReactorControllerBlockEntity extends BlockEntity implements MenuPro
         super.loadAdditional(tag, registries);
         running = tag.getBoolean("Running");
         runTicks = tag.getLong("RunTicks");
+        starterUuid = tag.hasUUID("Starter") ? tag.getUUID("Starter") : null;
+        lastProcessedFuel = tag.contains("LastFuel", Tag.TAG_STRING) ? fuelOf(tag.getString("LastFuel")) : null;
     }
 }

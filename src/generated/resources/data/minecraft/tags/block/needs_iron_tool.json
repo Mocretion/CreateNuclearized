@@ -24,6 +24,7 @@
     "createnuclearized:turbine_stator",
     "createnuclearized:thorium_ore",
     "createnuclearized:deepslate_thorium_ore",
-    "createnuclearized:sculk_uranium_ore"
+    "createnuclearized:sculk_uranium_ore",
+    "createnuclearized:raw_uranium_block"
   ]
 }

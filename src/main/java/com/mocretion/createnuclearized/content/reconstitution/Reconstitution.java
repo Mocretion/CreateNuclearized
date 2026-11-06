@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.mocretion.createnuclearized.content.recipe.CachedRecipes;
 import com.mocretion.createnuclearized.registry.CNDataComponents;
 import com.mocretion.createnuclearized.registry.CNRecipeTypes;
 import com.simibubi.create.content.processing.basin.BasinBlockEntity;
@@ -21,7 +22,7 @@ public final class Reconstitution {
 
     @Nullable
     public static ReconstitutionRecipe find(Level level, BasinBlockEntity basin) {
-        for (RecipeHolder<ReconstitutionRecipe> holder : level.getRecipeManager().getAllRecipesFor(CNRecipeTypes.RECONSTITUTION.get())) {
+        for (RecipeHolder<ReconstitutionRecipe> holder : CachedRecipes.of(level, CNRecipeTypes.RECONSTITUTION.get())) {
             if (canRun(holder.value(), basin)) return holder.value();
         }
         return null;

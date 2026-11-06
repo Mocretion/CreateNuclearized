@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": { "id": "createnuclearized:reactor_controller" },
+    "title": { "translate": "advancements.createnuclearized.main.title" },
+    "description": { "translate": "advancements.createnuclearized.main.description" },
+    "frame": "task",
+    "background": "createnuclearized:textures/block/raw_uranium_block.png",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "pick_up_mod_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "createnuclearized:raw_thorium",
+              "createnuclearized:raw_uranium",
+              "createnuclearized:monazite_sand",
+              "createnuclearized:reactor_casing"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [["pick_up_mod_item"]]
+}

@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import javax.annotation.Nullable;
 
+import com.mocretion.createnuclearized.content.boiler.GoggleTankPanel;
 import com.mocretion.createnuclearized.content.menu.CNIcons;
 import com.mocretion.createnuclearized.registry.CNDataComponents;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
@@ -259,7 +260,13 @@ public class ReactorFluidValveBlockEntity extends SmartBlockEntity implements IH
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        containedFluidTooltip(tooltip, isPlayerSneaking, fluidHandler);
+        if (isInput()) {
+            containedFluidTooltip(tooltip, isPlayerSneaking, fluidHandler);
+        } else {
+            GoggleTankPanel.header(tooltip);
+            GoggleTankPanel.append(tooltip, "gui.goggles.tank_input", moltenTank.getFluid(), moltenTank.getCapacity());
+            GoggleTankPanel.append(tooltip, "gui.goggles.tank_output", heatedTank.getFluid(), heatedTank.getCapacity());
+        }
 
         ReactorFuel fuel = displayFuel();
         SaltStats stats = heatedFluid().get(CNDataComponents.SALT_STATS.get());

@@ -49,7 +49,7 @@ public class DrainToggleButton extends AbstractButton {
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         boolean running = menu.isRunning();
         this.active = !running;
-        setTooltip(running ? Tooltip.create(label("swap.locked")) : null);
+        setTooltip(running ? Tooltip.create(label("swap.locked")) : Tooltip.create(label("swap.warning")));
 
         int v;
         if (running)

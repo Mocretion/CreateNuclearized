@@ -1,0 +1,35 @@
+{
+  "moderators": [
+    { "block": "createnuclearized:graphite_block", "rate": 0.05 }
+  ],
+  "reflectors": [
+    { "block": "createnuclearized:beryllium_block", "heat": 3 }
+  ],
+  "coolers": [
+    { "block": "minecraft:ancient_debris", "burn": -1 },
+    { "block": "minecraft:obsidian", "burn": -3, "rate": 0.02 },
+    { "block": "minecraft:crying_obsidian", "burn": -5, "rate": 0.02 },
+    { "block": "minecraft:bedrock", "burn": -100, "rate": 5.0 },
+    { "block": "createnuclearized:steel_block", "burn": 1 },
+    { "block": "minecraft:copper_block", "burn": 2 },
+    { "block": "minecraft:exposed_copper", "burn": 2 },
+    { "block": "minecraft:weathered_copper", "burn": 2 },
+    { "block": "minecraft:oxidized_copper", "burn": 2 },
+    { "block": "minecraft:waxed_copper_block", "burn": 2 },
+    { "block": "minecraft:waxed_exposed_copper", "burn": 2 },
+    { "block": "minecraft:waxed_weathered_copper", "burn": 2 },
+    { "block": "minecraft:waxed_oxidized_copper", "burn": 2 },
+    { "block": "create:brass_block", "burn": 3 },
+    { "block": "minecraft:mud_bricks", "purity": -2 },
+    { "block": "minecraft:soul_soil", "purity": -3, "burn": 1 },
+    { "block": "minecraft:soul_sand", "purity": -5 },
+    { "block": "minecraft:sand", "purity": 1, "burn": -1},
+    { "block": "minecraft:red_sand", "purity": 1, "burn": -1},
+    { "block": "minecraft:quartz_block", "purity": 1, "rate": 0.05 },
+    { "block": "createnuclearized:monazite_sand", "purity": 2, "burn": -1 },
+    { "block": "minecraft:sculk", "purity": 3 },
+    { "block": "minecraft:netherite_block", "purity": 25, "rate": 0.1, "burn": -2 },
+    { "block": "createnuclearized:graphite_block", "rate": 0.1, "burn": 1 },
+    { "block": "createnuclearized:xenon_block", "rate": 0.2 }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "source_recipe": "createnuclearized:mixing/liquid_uranium_from_raw",
+  "multiplier": 9,
+  "result": {
+    "id": "createnuclearized:raw_uranium_block"
+  }
+}

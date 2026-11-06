@@ -5,14 +5,12 @@ import com.mocretion.createnuclearized.content.reactor.SaltElement;
 import com.mocretion.createnuclearized.content.reactor.SaltStats;
 import com.mocretion.createnuclearized.registry.CNDataComponents;
 import com.mocretion.createnuclearized.registry.CNRecipeTypes;
+import com.mocretion.createnuclearized.content.recipe.ResultlessRecipe;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
@@ -21,7 +19,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.FluidIngredient;
 
 public record ReconstitutionRecipe(FluidIngredient input, SaltElement element, Fluid liquid, Fluid result, int amount)
-        implements Recipe<FluidRecipeInput> {
+        implements ResultlessRecipe<FluidRecipeInput> {
 
     public static final MapCodec<ReconstitutionRecipe> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             FluidIngredient.CODEC_NON_EMPTY.fieldOf("input").forGetter(ReconstitutionRecipe::input),
@@ -54,26 +52,6 @@ public record ReconstitutionRecipe(FluidIngredient input, SaltElement element, F
     @Override
     public boolean matches(FluidRecipeInput in, Level level) {
         return accepts(in.fluid());
-    }
-
-    @Override
-    public ItemStack assemble(FluidRecipeInput in, HolderLookup.Provider registries) {
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return true;
-    }
-
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider registries) {
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public boolean isSpecial() {
-        return true;
     }
 
     @Override

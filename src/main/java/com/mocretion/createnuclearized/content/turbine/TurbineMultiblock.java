@@ -52,7 +52,16 @@ public final class TurbineMultiblock {
 
     private record Slice(SliceKind kind, int side, boolean shaftOnAxis, float capacity, int depth) {}
 
-    private record SliceReadout(@Nullable Slice slice, @Nullable Component error) {}
+    private record SliceReadout(@Nullable Slice slice, @Nullable Component error, @Nullable BlockPos at) {
+
+        static SliceReadout of(Slice slice) {
+            return new SliceReadout(slice, null, null);
+        }
+
+        static SliceReadout fail(Component error, BlockPos at) {
+            return new SliceReadout(null, error, at);
+        }
+    }
 
     public static boolean isController(BlockState state) {
         return state.is(CNBlocks.TURBINE_CONTROLLER.get());
@@ -209,7 +218,7 @@ public final class TurbineMultiblock {
         List<Slice> slices = new ArrayList<>();
         for (int d : depths) {
             SliceReadout readout = readSlice(level, cursor, o, d, aLo, aHi, bLo, bHi);
-            if (readout.error() != null) return Result.fail(readout.error());
+            if (readout.error() != null) return Result.failAt(readout.error(), readout.at());
             slices.add(readout.slice());
         }
 
@@ -224,7 +233,7 @@ public final class TurbineMultiblock {
                 i++;
                 continue;
             }
-            if (s.kind() == SliceKind.STATOR) return Result.fail(message("stator_without_rotor"));
+            if (s.kind() == SliceKind.STATOR) return Result.failAt(message("stator_without_rotor"), axisPos(o, s.depth()));
             int radius = (s.side() - 1) / 2;
             boolean full = false;
             lastRotorIndex = i;
@@ -242,7 +251,7 @@ public final class TurbineMultiblock {
         if (stages == 0) return Result.fail(message("no_stages"));
 
         for (int k = 0; k <= lastRotorIndex; k++) {
-            if (!slices.get(k).shaftOnAxis()) return Result.fail(message("shaft_broken"));
+            if (!slices.get(k).shaftOnAxis()) return Result.failAt(message("shaft_broken"), axisPos(o, slices.get(k).depth()));
         }
 
         return Result.ok(o.depthAxis, generator, steamValves, stages, bladeCells, rotorCapacity);
@@ -251,6 +260,7 @@ public final class TurbineMultiblock {
     private static SliceReadout readSlice(LevelAccessor level, BlockPos.MutableBlockPos cursor, Orientation o, int d,
                                           int aLo, int aHi, int bLo, int bHi) {
         BlockState center = stateAt(level, cursor, o, d, o.cA, o.cB);
+        BlockPos axisPos = axisPos(o, d);
 
         if (isRotor(center))
             return readRotorSlice(level, o, d, aLo, aHi, bLo, bHi, center);
@@ -259,9 +269,9 @@ public final class TurbineMultiblock {
         boolean shaftOnAxis = shaft && center.hasProperty(BlockStateProperties.AXIS)
                 && center.getValue(BlockStateProperties.AXIS) == o.depthAxis;
         if (shaft && !shaftOnAxis)
-            return new SliceReadout(null, message("shaft_across"));
+            return SliceReadout.fail(message("shaft_across"), axisPos);
         if (!shaft && !center.isAir())
-            return new SliceReadout(null, message("axis_blocked"));
+            return SliceReadout.fail(message("axis_blocked"), axisPos);
 
         boolean hasStator = false;
         for (int a = aLo; a <= aHi; a++) {
@@ -269,13 +279,13 @@ public final class TurbineMultiblock {
                 if (a == o.cA && b == o.cB) continue;
                 BlockState s = stateAt(level, cursor, o, d, a, b);
                 if (s.isAir()) continue;
-                if (!isStator(s)) return new SliceReadout(null, message("around_shaft", cursor.toShortString()));
+                if (!isStator(s)) return SliceReadout.fail(message("around_shaft", cursor.toShortString()), cursor.immutable());
                 hasStator = true;
             }
         }
 
         SliceKind kind = hasStator ? SliceKind.STATOR : SliceKind.EMPTY;
-        return new SliceReadout(new Slice(kind, 0, shaftOnAxis, 0, d), null);
+        return SliceReadout.of(new Slice(kind, 0, shaftOnAxis, 0, d));
     }
 
     private static boolean statorCoversFootprint(LevelAccessor level, BlockPos.MutableBlockPos cursor, Orientation o,
@@ -291,16 +301,16 @@ public final class TurbineMultiblock {
 
     private static SliceReadout readRotorSlice(LevelAccessor level, Orientation o, int d,
                                                int aLo, int aHi, int bLo, int bHi, BlockState center) {
+        BlockPos masterPos = axisPos(o, d);
         if (!center.hasProperty(BlockStateProperties.AXIS) || center.getValue(BlockStateProperties.AXIS) != o.depthAxis)
-            return new SliceReadout(null, message("rotor_axis"));
+            return SliceReadout.fail(message("rotor_axis"), masterPos);
         TurbineRotorBlock rotor = (TurbineRotorBlock) center.getBlock();
         int rotorRadius = rotor.radius();
         int hitboxRadius = rotor.hitboxRadius();
         int side = 2 * rotorRadius + 1;
         if (rotorRadius > (aHi - o.cA) || rotorRadius > (bHi - o.cB))
-            return new SliceReadout(null, message("rotor_too_big"));
+            return SliceReadout.fail(message("rotor_too_big"), masterPos);
 
-        BlockPos masterPos = posAt(o, d, o.cA, o.cB);
         for (int a = aLo; a <= aHi; a++) {
             for (int b = bLo; b <= bHi; b++) {
                 if (a == o.cA && b == o.cB) continue;
@@ -309,14 +319,18 @@ public final class TurbineMultiblock {
                 BlockState s = level.getBlockState(cell);
                 if (r <= hitboxRadius) {
                     if (!isRotorStructural(s) || !TurbineRotorStructuralBlock.getMaster(level, cell, s).equals(masterPos))
-                        return new SliceReadout(null, message("rotor_obstructed", cell.toShortString()));
+                        return SliceReadout.fail(message("rotor_obstructed", cell.toShortString()), cell);
                 } else if (!s.isAir()) {
-                    return new SliceReadout(null, message("rotor_sweep", cell.toShortString()));
+                    return SliceReadout.fail(message("rotor_sweep", cell.toShortString()), cell);
                 }
             }
         }
 
-        return new SliceReadout(new Slice(SliceKind.ROTOR, side, true, (float) rotor.stressCapacity(), d), null);
+        return SliceReadout.of(new Slice(SliceKind.ROTOR, side, true, (float) rotor.stressCapacity(), d));
+    }
+
+    private static BlockPos axisPos(Orientation o, int d) {
+        return posAt(o, d, o.cA, o.cB);
     }
 
     private static BlockPos posAt(Orientation o, int d, int a, int b) {

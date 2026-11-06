@@ -3,13 +3,20 @@
   "package": "com.mocretion.createnuclearized.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "AirCurrentGasMixin",
+    "AttributeFilterFluidMixin",
     "BasinGoggleMixin",
     "BasinReconstitutionMixin",
     "FluidDrainingBehaviourSaltMixin",
     "FluidFillingBehaviourSaltMixin",
     "FluidTankGoggleMixin",
     "HosePulleyFluidHandlerSaltMixin",
+    "LivingEntityGlowingMixin",
     "OpenEndedPipeSaltMixin"
+  ],
+  "client": [
+    "AirFlowParticleColorMixin",
+    "EntityTeamColorClientMixin"
   ],
   "injectors": {
     "defaultRequire": 1

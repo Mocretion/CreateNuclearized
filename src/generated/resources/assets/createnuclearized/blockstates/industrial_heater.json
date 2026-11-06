@@ -1,7 +1,130 @@
 {
   "variants": {
-    "": {
-      "model": "create:block/blaze_burner/block"
+    "slot=c,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_c"
+    },
+    "slot=c,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_c"
+    },
+    "slot=c,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_c"
+    },
+    "slot=e,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_e"
+    },
+    "slot=e,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_e"
+    },
+    "slot=e,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_e"
+    },
+    "slot=n,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_n"
+    },
+    "slot=n,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_n"
+    },
+    "slot=n,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_n"
+    },
+    "slot=ne,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_ne"
+    },
+    "slot=ne,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_ne"
+    },
+    "slot=ne,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_ne"
+    },
+    "slot=nw,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_nw"
+    },
+    "slot=nw,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_nw"
+    },
+    "slot=nw,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_nw"
+    },
+    "slot=s,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_s"
+    },
+    "slot=s,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_s"
+    },
+    "slot=s,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_s"
+    },
+    "slot=se,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_se"
+    },
+    "slot=se,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_se"
+    },
+    "slot=se,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_se"
+    },
+    "slot=single,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater_high"
+    },
+    "slot=single,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater_low"
+    },
+    "slot=single,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater_mid"
+    },
+    "slot=small_ne,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_ne"
+    },
+    "slot=small_ne,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_ne"
+    },
+    "slot=small_ne,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_ne"
+    },
+    "slot=small_nw,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_nw"
+    },
+    "slot=small_nw,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_nw"
+    },
+    "slot=small_nw,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_nw"
+    },
+    "slot=small_se,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_se"
+    },
+    "slot=small_se,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_se"
+    },
+    "slot=small_se,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_se"
+    },
+    "slot=small_sw,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_sw"
+    },
+    "slot=small_sw,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_sw"
+    },
+    "slot=small_sw,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_sw"
+    },
+    "slot=sw,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_sw"
+    },
+    "slot=sw,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_sw"
+    },
+    "slot=sw,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_sw"
+    },
+    "slot=w,temperature=high": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_high_w"
+    },
+    "slot=w,temperature=low": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_low_w"
+    },
+    "slot=w,temperature=mid": {
+      "model": "createnuclearized:block/industrial_heater/industrial_heater_mid_w"
     }
   }
 }

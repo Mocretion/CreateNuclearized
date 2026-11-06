@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.mocretion.createnuclearized.content.recipe.CachedRecipes;
 import com.mocretion.createnuclearized.registry.CNRecipeTypes;
 import com.simibubi.create.content.kinetics.mixer.MechanicalMixerBlockEntity;
 import com.simibubi.create.content.processing.basin.BasinBlockEntity;
@@ -35,7 +36,7 @@ public class PrecisionUnmixerBlockEntity extends MechanicalMixerBlockEntity {
         if (basinOpt.isEmpty()) return list;
         BasinBlockEntity basin = basinOpt.get();
 
-        for (RecipeHolder<UnmixingRecipe> holder : level.getRecipeManager().getAllRecipesFor(CNRecipeTypes.UNMIXING.get())) {
+        for (RecipeHolder<UnmixingRecipe> holder : CachedRecipes.of(level, CNRecipeTypes.UNMIXING.get())) {
             UnmixingRecipe recipe = holder.value();
             FluidStack in = findInput(basin, recipe);
             if (in.isEmpty()) continue;

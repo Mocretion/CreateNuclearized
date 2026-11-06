@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "createnuclearized:item/steel_sheet"
+    "layer0": "createnuclearized:item/turbine_blade"
   }
 }

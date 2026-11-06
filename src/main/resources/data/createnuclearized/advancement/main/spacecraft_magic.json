@@ -1,0 +1,28 @@
+{
+  "parent": "createnuclearized:main/dont_eat_that",
+  "display": {
+    "icon": { "id": "createnuclearized:plutonium_rtg" },
+    "title": { "translate": "advancements.createnuclearized.spacecraft_magic.title" },
+    "description": { "translate": "advancements.createnuclearized.spacecraft_magic.description" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_rtg": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "createnuclearized:plutonium_rtg",
+              "createnuclearized:americium_rtg"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [["has_rtg"]]
+}

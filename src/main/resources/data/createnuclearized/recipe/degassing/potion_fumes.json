@@ -1,0 +1,13 @@
+{
+  "type": "createnuclearized:degassing",
+  "input": { "fluid": "create:potion" },
+  "rate": 0.1,
+  "potion_effects": 1,
+  "particles": {
+    "particle": { "type": "createnuclearized:gas_cloud", "color": -1 },
+    "potion_color": true,
+    "count": 1,
+    "spread": 0.4,
+    "speed": 0.03
+  }
+}

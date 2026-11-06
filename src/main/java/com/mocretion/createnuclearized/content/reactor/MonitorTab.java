@@ -28,9 +28,17 @@ public enum MonitorTab {
     STATS("stats") {
         @Override
         public void renderContent(GuiGraphics g, Font font, ReactorMonitorMenu menu, int x, int y) {
-            SaltStats s = menu.getOutputStats();
             ReactorFuel fuel = menu.getFuel();
             int line = y;
+            if (fuel == null) {
+                String unknown = Component.translatable(KEY + "unknown_value").getString();
+                line = row(g, font, x, line, label("heat"), Component.translatable(KEY + "unknown_liquid").getString());
+                line = row(g, font, x, line, label("unconsumed"), unknown);
+                line = row(g, font, x, line, label("bred"), unknown);
+                row(g, font, x, line, label("off_gas"), unknown);
+                return;
+            }
+            SaltStats s = menu.getOutputStats();
             line = row(g, font, x, line, label("heat"), s.heat() + "°");
             line = elementRow(g, font, x, line, fuel.unconsumed(), s);
             if (fuel.bred() != fuel.unconsumed())

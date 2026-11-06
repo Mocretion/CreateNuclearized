@@ -2,6 +2,7 @@ package com.mocretion.createnuclearized.content.boiler;
 
 import com.mocretion.createnuclearized.registry.CNBlockEntities;
 import com.simibubi.create.AllShapes;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.foundation.block.IBE;
 
 import net.minecraft.core.BlockPos;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class ExhaustHoodBlock extends Block implements IBE<ExhaustHoodBlockEntity> {
+public class ExhaustHoodBlock extends Block implements IBE<ExhaustHoodBlockEntity>, IWrenchable {
 
     private static final VoxelShape SHAPE = new AllShapes.Builder(Block.box(0, 2, 0, 16, 16, 16)).build();
 

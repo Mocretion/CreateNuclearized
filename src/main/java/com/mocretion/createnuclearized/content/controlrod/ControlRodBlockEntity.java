@@ -54,10 +54,11 @@ public class ControlRodBlockEntity extends KineticBlockEntity {
         }
 
         float next;
-        if (engaged) {
-            float speed = getSpeed();
-            if (speed == 0) return;
+        float speed = Math.abs(getSpeed());
+        if (speed > 0) {
             next = Mth.clamp(offset - speed * BLOCKS_PER_TICK_PER_RPM, 0f, maxExtension);
+        } else if (engaged) {
+            return;
         } else {
             if (offset >= maxExtension) return;
             next = Mth.clamp(offset + DROP_PER_TICK, 0f, maxExtension);

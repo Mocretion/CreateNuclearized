@@ -20,6 +20,7 @@ import com.simibubi.create.foundation.gui.AllGuiTextures;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.recipe.RecipeIngredientRole;
@@ -29,11 +30,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -59,6 +63,7 @@ public abstract class CNRecipeCategory<T extends Recipe<? extends RecipeInput>> 
     private static final ResourceLocation HEART_HALF = ResourceLocation.withDefaultNamespace("hud/heart/half");
     private static final ResourceLocation HEART_CONTAINER = ResourceLocation.withDefaultNamespace("hud/heart/container");
     private static final ItemStack LAVA_BUCKET = new ItemStack(Items.LAVA_BUCKET);
+    private static final ItemStack POTION = new ItemStack(Items.POTION);
     private static final int HAZARD_SIZE = 11;
     private static final int HAZARD_STEP = 13;
     private static final int HEART_SIZE = HAZARD_SIZE - 2;
@@ -132,12 +137,19 @@ public abstract class CNRecipeCategory<T extends Recipe<? extends RecipeInput>> 
             cx += HAZARD_STEP;
         }
         if (hazards.ignite() > 0) {
-            graphics.pose().pushPose();
-            graphics.pose().translate(cx, y, 0);
-            graphics.pose().scale(HAZARD_SIZE / 16f, HAZARD_SIZE / 16f, 1);
-            graphics.renderItem(LAVA_BUCKET, 0, 0);
-            graphics.pose().popPose();
+            hazardItem(graphics, LAVA_BUCKET, cx, y);
+            cx += HAZARD_STEP;
         }
+        if (hazards.potionEffects() > 0)
+            hazardItem(graphics, POTION, cx, y);
+    }
+
+    private static void hazardItem(GuiGraphics graphics, ItemStack stack, int x, int y) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0);
+        graphics.pose().scale(HAZARD_SIZE / 16f, HAZARD_SIZE / 16f, 1);
+        graphics.renderItem(stack, 0, 0);
+        graphics.pose().popPose();
     }
 
     protected List<Component> hazardTooltip(GasHazards hazards, int x, int y, double mouseX, double mouseY) {
@@ -151,8 +163,14 @@ public abstract class CNRecipeCategory<T extends Recipe<? extends RecipeInput>> 
                 return List.of(Component.translatable("createnuclearized.jei.hazard_damage", formatFloat(hazards.damage().get().amount())));
             cx += HAZARD_STEP;
         }
-        if (hazards.ignite() > 0 && overIcon(cx, y, mouseX, mouseY))
-            return List.of(Component.translatable("createnuclearized.jei.hazard_ignite", formatFloat(hazards.ignite())));
+        if (hazards.ignite() > 0) {
+            if (overIcon(cx, y, mouseX, mouseY))
+                return List.of(Component.translatable("createnuclearized.jei.hazard_ignite", formatFloat(hazards.ignite())));
+            cx += HAZARD_STEP;
+        }
+        if (hazards.potionEffects() > 0 && overIcon(cx, y, mouseX, mouseY))
+            return List.of(Component.translatable("createnuclearized.jei.hazard_potion",
+                    Math.round(hazards.potionEffects() * 100)));
         return List.of();
     }
 
@@ -187,8 +205,9 @@ public abstract class CNRecipeCategory<T extends Recipe<? extends RecipeInput>> 
         graphics.pose().popPose();
     }
 
-    protected void risingParticles(GuiGraphics graphics, GasParticles particles, int centerX, int topY, int bottomY) {
-        int tint = particleTint(particles.particle());
+    protected void risingParticles(GuiGraphics graphics, GasParticles particles, IRecipeSlotsView slots, int centerX, int topY,
+            int bottomY) {
+        int tint = particleTint(particles.particleFor(displayedInput(slots)));
         float time = AnimationTickHolder.getRenderTime();
         int count = 6;
         graphics.pose().pushPose();
@@ -203,7 +222,16 @@ public abstract class CNRecipeCategory<T extends Recipe<? extends RecipeInput>> 
         graphics.pose().popPose();
     }
 
+    private static FluidStack displayedInput(IRecipeSlotsView slots) {
+        return slots.getSlotViews(RecipeIngredientRole.INPUT).stream()
+                .findFirst()
+                .flatMap(view -> view.getDisplayedIngredient(NeoForgeTypes.FLUID_STACK))
+                .orElse(FluidStack.EMPTY);
+    }
+
     private static int particleTint(ParticleOptions particle) {
+        if (particle instanceof ColorParticleOption color)
+            return FastColor.ARGB32.colorFromFloat(1, color.getRed(), color.getGreen(), color.getBlue());
         if (particle.getType() == ParticleTypes.SMOKE || particle.getType() == ParticleTypes.LARGE_SMOKE)
             return 0x4A4A4A;
         return 0xE6E6E6;
@@ -232,7 +260,7 @@ public abstract class CNRecipeCategory<T extends Recipe<? extends RecipeInput>> 
 
     protected void hideFluidAmount(IRecipeSlotBuilder slot) {
         slot.addTooltipCallback((view, tooltip) -> tooltip.removeIf(c ->
-                c.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc
+                c.getContents() instanceof TranslatableContents tc
                         && tc.getKey().startsWith("jei.tooltip.liquid.amount")));
     }
 

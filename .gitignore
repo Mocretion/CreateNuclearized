@@ -38,6 +38,9 @@ run/
 **/src/generated/**/.cache/
 repo/
 !**/src/**/repo/
+
+### Model Files ###
 *.blend1
-docs/
 *.bbmodel
+
+docs/

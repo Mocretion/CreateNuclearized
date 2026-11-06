@@ -1,6 +1,6 @@
 package com.mocretion.createnuclearized;
 
-import com.mocretion.createnuclearized.content.boiler.IndustrialHeaterPartials;
+import com.mocretion.createnuclearized.content.boiler.GasCloudParticle;
 import com.mocretion.createnuclearized.content.controlrod.ControlRodPartials;
 import com.mocretion.createnuclearized.content.turbine.TurbineRotorPartials;
 import com.mocretion.createnuclearized.content.turbine.TurbineRotorRenderer;
@@ -15,6 +15,7 @@ import com.mocretion.createnuclearized.content.turbine.TurbineControllerScreen;
 import com.mocretion.createnuclearized.content.metal.Metals;
 import com.mocretion.createnuclearized.registry.CNFluids;
 import com.mocretion.createnuclearized.registry.CNMenuTypes;
+import com.mocretion.createnuclearized.registry.CNParticleTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.model.DynamicFluidContainerModel;
 
 @Mod(value = CreateNuclearized.MODID, dist = Dist.CLIENT)
@@ -44,7 +46,6 @@ public class CreateNuclearizedClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         ControlRodPartials.init();
-        IndustrialHeaterPartials.init();
         TurbineRotorPartials.init();
         TurbineRotorRenderer.registerCompartments();
         UnmixerPartials.init();
@@ -79,7 +80,7 @@ public class CreateNuclearizedClient {
 
     @SubscribeEvent
     static void onModifyBakingResult(ModelEvent.ModifyBakingResult event) {
-        wrapShellFacingValve(event, CNBlocks.FISSILE_SALT_INPUT_VALVE.get(), REACTOR_VALVE_CASING_MODEL,
+        wrapShellFacingValve(event, CNBlocks.REACTOR_SALT_INPUT_VALVE.get(), REACTOR_VALVE_CASING_MODEL,
                 ReactorMultiblock::isShellMember);
         wrapShellFacingValve(event, CNBlocks.TURBINE_STEAM_INPUT_VALVE.get(), TURBINE_VALVE_CASING_MODEL,
                 TurbineMultiblock::isShellMember);
@@ -102,5 +103,10 @@ public class CreateNuclearizedClient {
         event.register(CNMenuTypes.REACTOR_CONTROLLER.get(), ReactorControllerScreen::new);
         event.register(CNMenuTypes.REACTOR_MONITOR.get(), ReactorMonitorScreen::new);
         event.register(CNMenuTypes.TURBINE_CONTROLLER.get(), TurbineControllerScreen::new);
+    }
+
+    @SubscribeEvent
+    static void onRegisterParticleProviders(RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(CNParticleTypes.GAS_CLOUD.get(), GasCloudParticle.Provider::new);
     }
 }

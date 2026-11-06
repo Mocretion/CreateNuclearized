@@ -1,0 +1,99 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "createnuclearized:reactor_casing"
+  },
+  "loops": 1,
+  "results": [
+    {
+      "id": "createnuclearized:americium_rtg"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_americium_rtg"
+        },
+        {
+          "item": "create:powdered_obsidian"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_americium_rtg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_americium_rtg"
+        },
+        {
+          "item": "createnuclearized:control_unit"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_americium_rtg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_americium_rtg"
+        },
+        {
+          "item": "create:cogwheel"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_americium_rtg"
+        }
+      ]
+    },
+    {
+      "type": "create:filling",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_americium_rtg"
+        },
+        {
+          "type": "neoforge:single",
+          "amount": 1000,
+          "fluid": "createnuclearized:liquid_americium"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_americium_rtg"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createnuclearized:incomplete_americium_rtg"
+        },
+        {
+          "item": "create:shaft"
+        }
+      ],
+      "results": [
+        {
+          "id": "createnuclearized:incomplete_americium_rtg"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createnuclearized:incomplete_americium_rtg"
+  }
+}

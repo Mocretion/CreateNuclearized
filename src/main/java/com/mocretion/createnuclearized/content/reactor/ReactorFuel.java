@@ -16,11 +16,11 @@ public final class ReactorFuel {
 
     private static final List<ReactorFuel> FUELS = new ArrayList<>();
 
-    public static final ReactorFuel URANIUM = register(4978, 50, 40, SaltElement.URANIUM, SaltElement.PLUTONIUM,
-            CNFluids::uraniumSalt, CNFluids::spentUraniumSalt);
-    public static final ReactorFuel PLUTONIUM = register(7467, 60, 8, SaltElement.PLUTONIUM, SaltElement.AMERICIUM,
+    public static final ReactorFuel URANIUM = register(5000, 50, 40, SaltElement.URANIUM, SaltElement.PLUTONIUM,
+            CNFluids::uraniumSalt, CNFluids::spentUraniumSalt, CNFluids::enrichedLiquidUranium);
+    public static final ReactorFuel PLUTONIUM = register(7500, 60, 8, SaltElement.PLUTONIUM, SaltElement.AMERICIUM,
             CNFluids::plutoniumSalt, CNFluids::spentPlutoniumSalt);
-    public static final ReactorFuel THORIUM_URANIUM = register(3111, 45, 55, SaltElement.THORIUM, SaltElement.URANIUM,
+    public static final ReactorFuel THORIUM_URANIUM = register(3200, 45, 55, SaltElement.THORIUM, SaltElement.URANIUM,
             CNFluids::thoriumUraniumSalt, CNFluids::spentThoriumUraniumSalt);
 
     private final int index;
@@ -34,9 +34,12 @@ public final class ReactorFuel {
     private final Supplier<Fluid> input;
     private boolean disabled;
     private final Supplier<Fluid> output;
+    @Nullable
+    private Supplier<Fluid> unconsumedLiquid;
 
     private ReactorFuel(int index, int maxHeat, int baseBurn, int basePurity, @Nullable SaltElement unconsumed,
-            @Nullable SaltElement bred, Supplier<Fluid> input, Supplier<Fluid> output) {
+            @Nullable SaltElement bred, Supplier<Fluid> input, Supplier<Fluid> output,
+            @Nullable Supplier<Fluid> unconsumedLiquid) {
         this.index = index;
         this.maxHeat = maxHeat;
         this.baseBurn = baseBurn;
@@ -45,11 +48,19 @@ public final class ReactorFuel {
         this.bred = bred;
         this.input = input;
         this.output = output;
+        this.unconsumedLiquid = unconsumedLiquid;
     }
 
     public static synchronized ReactorFuel register(int maxHeat, int baseBurn, int basePurity,
             @Nullable SaltElement unconsumed, @Nullable SaltElement bred, Supplier<Fluid> input, Supplier<Fluid> output) {
-        ReactorFuel fuel = new ReactorFuel(FUELS.size(), maxHeat, baseBurn, basePurity, unconsumed, bred, input, output);
+        return register(maxHeat, baseBurn, basePurity, unconsumed, bred, input, output, null);
+    }
+
+    public static synchronized ReactorFuel register(int maxHeat, int baseBurn, int basePurity,
+            @Nullable SaltElement unconsumed, @Nullable SaltElement bred, Supplier<Fluid> input, Supplier<Fluid> output,
+            @Nullable Supplier<Fluid> unconsumedLiquid) {
+        ReactorFuel fuel = new ReactorFuel(FUELS.size(), maxHeat, baseBurn, basePurity, unconsumed, bred, input, output,
+                unconsumedLiquid);
         FUELS.add(fuel);
         return fuel;
     }
@@ -88,6 +99,15 @@ public final class ReactorFuel {
 
     public void setBred(@Nullable SaltElement bred) {
         this.bred = bred;
+    }
+
+    public void setUnconsumedLiquid(@Nullable Supplier<Fluid> unconsumedLiquid) {
+        this.unconsumedLiquid = unconsumedLiquid;
+    }
+
+    public Fluid unconsumedLiquid() {
+        if (unconsumedLiquid != null) return unconsumedLiquid.get();
+        return unconsumed == null ? null : unconsumed.liquid();
     }
 
     public int maxHeat() {

@@ -70,9 +70,20 @@ public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvid
     }
 
     @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        super.handleUpdateTag(tag, registries);
+        readGrid(tag);
+    }
+
+    @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
         CompoundTag tag = pkt.getTag();
-        if (tag != null && tag.contains("Grid"))
+        if (tag != null)
+            readGrid(tag);
+    }
+
+    private void readGrid(CompoundTag tag) {
+        if (tag.contains("Grid"))
             grid = InteriorGrid.load(tag.getCompound("Grid"));
     }
 
@@ -91,10 +102,8 @@ public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvid
 
     @Nullable
     private BlockPos resolveControllerPos() {
-        ReactorMultiblock.Result result = ReactorMultiblock.validate(level, worldPosition);
-        if (!result.valid()) return null;
-        BlockPos controllerPos = result.structure().controller();
-        return level.getBlockEntity(controllerPos) instanceof ReactorControllerBlockEntity ? controllerPos : null;
+        BlockPos controllerPos = ReactorMultiblock.findController(level, worldPosition);
+        return controllerPos != null && level.getBlockEntity(controllerPos) instanceof ReactorControllerBlockEntity ? controllerPos : null;
     }
 
     public int getHeatedBuffered() {
@@ -142,14 +151,16 @@ public class ReactorMonitorBlockEntity extends BlockEntity implements MenuProvid
         return controller == null ? 0 : controller.getTotalRateMilli();
     }
 
+    @Nullable
     public SaltStats getOutputStats() {
         ReactorControllerBlockEntity controller = getController();
-        return controller == null ? SaltStats.EMPTY : controller.getOutputStats();
+        return controller == null ? null : controller.getOutputStats();
     }
 
+    @Nullable
     public ReactorFuel getFuel() {
         ReactorControllerBlockEntity controller = getController();
-        return controller == null ? ReactorFuel.URANIUM : controller.getFuel();
+        return controller == null ? null : controller.getFuel();
     }
 
     @Override

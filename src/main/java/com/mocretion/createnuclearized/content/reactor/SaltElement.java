@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.mocretion.createnuclearized.CreateNuclearized;
+import com.mocretion.createnuclearized.content.fluid.TexturedFluidType;
 import com.mocretion.createnuclearized.registry.CNFluids;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -21,6 +22,7 @@ import net.minecraft.world.level.material.Fluid;
 public final class SaltElement {
 
     private static final Map<ResourceLocation, SaltElement> BY_ID = new LinkedHashMap<>();
+    private static final int RGB_MASK = 0xFFFFFF;
 
     public static final SaltElement URANIUM = register(builtinId("uranium"), CNFluids::liquidUranium);
     public static final SaltElement PLUTONIUM = register(builtinId("plutonium"), CNFluids::liquidPlutonium);
@@ -59,6 +61,10 @@ public final class SaltElement {
 
     public Fluid liquid() {
         return liquid.get();
+    }
+
+    public int color() {
+        return liquid().getFluidType() instanceof TexturedFluidType textured ? textured.getTint() & RGB_MASK : RGB_MASK;
     }
 
     public Component displayName() {

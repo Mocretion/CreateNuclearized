@@ -47,7 +47,7 @@ public class TurbineRotorBlock extends RotatedPillarKineticBlock implements IBE<
 
     public int steamPerTick() {
         int side = 2 * radius + 1;
-        return (side * side - 1) * TurbineControllerBlockEntity.STEAM_PER_BLADE_CELL;
+        return (int)((side * side - 1) * TurbineControllerBlockEntity.STEAM_PER_BLADE_CELL);
     }
 
     @Override

@@ -1,0 +1,21 @@
+{
+  "parent": "createnuclearized:liquids/root",
+  "display": {
+    "icon": { "id": "createnuclearized:spent_uranium_salt_bucket" },
+    "title": { "translate": "advancements.createnuclearized.salty_uranium.title" },
+    "description": { "translate": "advancements.createnuclearized.salty_uranium.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "spent_uranium": {
+      "trigger": "createnuclearized:spent_salt_produced",
+      "conditions": {
+        "fluid": "createnuclearized:spent_uranium_salt"
+      }
+    }
+  },
+  "requirements": [["spent_uranium"]]
+}
